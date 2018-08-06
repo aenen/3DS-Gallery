@@ -1,0 +1,51 @@
+﻿
+/* SWEET PINK Panel */
+
+.panel-sweet-pink {
+    border-color: #FFCCCC;
+}
+
+    .panel-sweet-pink > .panel-heading {
+        color: #BF6060;
+        background-color: #FFF7F9;
+        border-color: #FFCCCC;
+    }
+
+        .panel-sweet-pink > .panel-heading .badge {
+            color: #FFF5F7;
+            background-color: #BF6060;
+        }
+
+    .panel-sweet-pink > .panel-body {
+        background-color: #FFE5ED;
+    }
+
+/* SWEET PINK Button */
+
+.btn-sweet-pink {
+    color: #fff;
+    background-color: #F2B6C7;
+    border-color: #E6ADBD;
+}
+
+    .btn-sweet-pink:hover {
+        color: #fff;
+        background-color: #E8AEBF;
+        border-color: #D9A3B2;
+    }
+
+    .btn-sweet-pink.active, .btn-sweet-pink:active, .open > .dropdown-toggle.btn-sweet-pink, .btn-sweet-pink.focus, .btn-sweet-pink:focus {
+        color: #fff;
+        background-color: #E8AEBF;
+        border-color: #D9A3B2;
+    }
+
+/* SWEET PINK Other */
+
+.text-sweet-pink {
+    color: #BF6060;
+}
+
+.style-sweet-pink {
+    background-color: #BF6060;
+}

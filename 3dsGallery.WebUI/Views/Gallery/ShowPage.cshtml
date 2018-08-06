@@ -1,0 +1,70 @@
+﻿@model IEnumerable<_3dsGallery.DataLayer.DataBase.Gallery>
+@{
+    int maxPageShowLeft = 1;
+    int maxPageShowRight = 1;
+}
+
+@*<input id="page-current" type="hidden" value="@ViewBag.Page" />
+<input id="page-count" type="hidden" value="@ViewBag.Pages" />*@
+<div class="row">
+    @{ Html.RenderAction("GetElements", "Gallery", new { items = Model }); }
+</div>
+
+@{
+    int pages = (int)ViewBag.Pages;
+    int page = (int)ViewBag.Page;
+    if (pages > 1)
+    {
+        <div class="text-center">
+            <ul class="pagination text-center">
+
+                @if (page > 1) // якщо обрана сторінка не перша
+                {
+                    // додаю кнопку "вліво"
+                    <li><a class="page-prev page" data-page="@(page - 1)"><</a></li>
+                    if (page - maxPageShowLeft > 1) // додаю дропдаун з попередніми сторінками якщо їх забагато
+                    {
+                        <li>
+                            <div class="dropup btn-group" style="display:block">
+                                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">...</button>
+                                <ul class="dropdown-menu">
+                                    @for (int i = 1; i < page - maxPageShowLeft; i++)
+                                    {
+                                        <li><a class="page" data-page="@i">@i</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </li>
+                    }
+                }
+                @{
+                    // додаю кнопки найближчих сторінок
+                    int pageFrom = page - maxPageShowLeft > 0 ? page - maxPageShowLeft : 1;
+                    int pageTo = page + maxPageShowRight < pages ? page + maxPageShowRight : pages;
+                    for (int i = pageFrom; i <= pageTo; i++)
+                    {
+                        <li @(page == i ? "class=active" : "")><a class="page" data-page="@i">@i</a></li>
+                    }
+                    if (page + maxPageShowRight < pages) // додаю дропдаун з наступними сторінками якщо їх забагато
+                    {
+                        <li>
+                            <div class="dropup btn-group" style="display:block">
+                                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">...</button>
+                                <ul class="dropdown-menu">
+                                    @for (int i = page + maxPageShowRight + 1; i <= pages; i++)
+                                    {
+                                        <li><a class="page" data-page="@i">@i</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </li>
+                    }
+                    if (page != pages) // додаю кнопку "вправо", якщо обрана сторінка не остання
+                    {
+                        <li><a class="page-next page" data-page="@(page + 1)">></a></li>
+                    }
+                }
+            </ul>
+        </div>
+                    }
+}

@@ -1,0 +1,32 @@
+﻿@model _3dsGallery.DataLayer.DataBase.Gallery
+
+@{
+    ViewBag.Title = "Delete gallery";
+}
+
+<div class="section-white">
+    <div class="container body-content">
+        <h2>Delete "<span class="text-@Model.Style.value">@Model.name</span>"</h2>
+        <h5>All images will be deleted too!</h5>
+    </div>
+</div>
+
+<div class="section-grey">
+    <div class="container body-content section-separator-bottom section-separator-top">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-actions no-color">
+                <a href="@Url.Action("Details", "Gallery", new { id=Model.id })" class="btn btn-sm btn-default">Скасувати</a>
+                <input type="submit" value="Видалити" class="btn btn-danger" />
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+}

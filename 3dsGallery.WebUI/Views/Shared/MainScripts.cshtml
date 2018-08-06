@@ -1,0 +1,155 @@
+﻿@{
+    string is3ds = Request.UserAgent.Contains("Nintendo 3DS").ToString().ToLower();
+    string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
+}
+
+<script>
+    var showHideCommentInit= function(){
+        if ($(this).parent().css("white-space") == "normal"){
+            $(this).text("▲").prependTo($(this).parent());
+            $(this).parent().css("white-space", "nowrap");
+        }
+        else{
+            $(this).text("▼").appendTo($(this).parent());
+            $(this).parent().css("white-space", "normal");
+        }
+    }
+    function initImg() {
+        $(".rate-like").click(function (e) {
+            var auth=@User.Identity.IsAuthenticated.ToString().ToLower();
+            if (!auth)
+                return;
+
+            var item = $(this).closest(".thumbnail");
+            var id = item.attr("data-id");
+            var self = this;
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Like","Picture")/" + id,
+                success: function (data) {
+                    $(self).closest(".rate-container").toggleClass("liked");
+                    $(self).closest(".rate-container").find(".rate-count").text(data);
+                    if(@isOld3ds == false) {
+                        if ($(self).hasClass("glyphicon-heart"))
+                            $(self).removeClass("glyphicon-heart").addClass("glyphicon-heart-empty");
+                        else
+                            $(self).removeClass("glyphicon-heart-empty").addClass("glyphicon-heart");
+                    }
+                }
+            });
+        });
+
+        $(".img-delete").click(function (e) {
+            var item = $(this).closest(".thumbnail");
+            var id = item.attr("data-id");
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Delete","Picture")/" + id,
+                success: function (data) {
+                    if (data == "ok")
+                        item.parent().fadeOut();
+                }
+            });
+        });
+
+        $(".img-edit").click(function(e){
+            var thumb = $(this).closest(".thumbnail");
+            var id = thumb.attr("data-id");
+            if ($(this).hasClass("active")) {
+                thumb.find(".img-comment-change").css("display", "none").val(thumb.find(".img-comment-text").text());
+                thumb.find(".img-comment").css("display", "block");
+                thumb.find(".img-edit-save").css("display", "none");
+                $(this).removeClass("active");
+            }
+            else {
+                thumb.find(".img-comment-change").css("display", "block");
+                thumb.find(".img-comment").css("display", "none");
+                thumb.find(".img-edit-save").css("display", "inline-block");
+                $(this).addClass("active");
+            }
+        });
+
+        $(".img-edit-save").click(function(e){
+            var thumb = $(this).closest(".thumbnail");
+            var id = thumb.attr("data-id");
+            var comment = thumb.find(".img-comment-change").val();
+            var self=this;
+            thumb.find(".save-icon").hide();
+            thumb.find(".saving-load").show();
+            $.ajax({
+                url: '@Url.Action("EditComment", "Picture")?id=' + id + '&comment=' + comment,
+                type: "POST",
+                success: function (data) {
+                    if (data == "ok"){
+                        thumb.find(".img-comment-change").css("display", "none");
+                        thumb.find(".img-comment").css({"display": "block", "white-space":"nowrap"}).find(".img-comment-text").text(comment);
+                        thumb.find(".img-comment").find(".show-hide-comment").remove();
+                        if (thumb.find(".img-comment")[0].scrollWidth > thumb.find(".img-comment").innerWidth()) {
+                            $(thumb.find(".img-comment")).prepend($('<span class="show-hide-comment pull-right">▲</span>').click(showHideCommentInit));
+                        }
+                        thumb.find(".img-edit-save").css("display", "none");
+                        thumb.find(".img-edit").removeClass("active");
+
+                        thumb.find(".saving-load").hide();
+                        thumb.find(".save-icon").show();
+                    }
+                },
+                error: function(){
+                    thumb.find(".saving-load").hide();
+                    thumb.find(".save-icon").show();
+                    alert("Error occurred.\nMaybe you've entered too many words into description.\nMax length in photo description is 150 symbols.");
+                }
+            });
+        });
+
+        $(".img-comment").each(function(i,e){
+            if ($(e)[0].scrollWidth > $(e).innerWidth()) {
+                $(e).prepend($('<span class="show-hide-comment pull-right">▲</span>'));
+            }
+        })
+        $(".show-hide-comment").click(function(){
+            showHideCommentInit.call(this);
+        });
+
+        $(".qr-btn").click(function (e) {
+            var id = $(this).closest(".thumbnail").attr("data-id");
+            var item = $(this).closest(".thumbnail").find(".qr-container");
+            var itemImg = item.find(".qr-img");
+            if ($(this).hasClass("active")) {
+                item.css("display", "none");
+                $(this).removeClass("active");
+            }
+            else {
+                if (itemImg.attr("data-loaded") == "no") {
+                    $.ajax({
+                        url: '@Url.Action("GetPath", "Picture")/' + id,
+                        type: "POST",
+                        success: function (data) {
+                            itemImg.attr("src", "https://chart.googleapis.com/chart?cht=qr&chs=100x100&chld=L|0&chl=" + data);
+                            itemImg.attr("data-loaded", "ok");
+                        }
+                    });
+                }
+
+                item.css("display", "block");
+                $(this).addClass("active");
+            }
+        });
+
+        if (@is3ds == true) {
+            $(".gallery-name,.gallery-desc,.img-comment-text,.img-comment-change").each(function (i, e) {
+                var thisText = $(this).text();
+                $(this).text(thisText=thisText.replace(/І/g, 'I'));
+                $(this).text(thisText=thisText.replace(/і/g, 'i'));
+                $(this).text(thisText=thisText.replace(/Ї/g, 'Ï'));
+                $(this).text(thisText=thisText.replace(/ї/g, 'ï'));
+                $(this).text(thisText=thisText.replace(/Є/g, 'Σ'));
+                $(this).text(thisText=thisText.replace(/є/g, 'ε'));
+            });
+        }
+    };
+
+    $(function(){
+        initImg();
+    })
+</script>

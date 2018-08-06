@@ -1,0 +1,52 @@
+﻿@model _3dsGallery.DataLayer.DataBase.Gallery
+@{
+    bool is3d = Model.Picture.Any(x => x.type == "3D") ? true : false;
+}
+
+<div class="col-md-4">
+    <div class="panel panel-@Model.Style.value">
+        <div class="panel-heading">
+            <div class="gallery-badges">
+                @if (is3d)
+                {
+                    <span class="badge">3D</span>
+                }
+                <span class="badge">@Model.Picture.Count</span>
+            </div>
+            <div class="one-line">
+                @if (Model.User.login == User.Identity.Name)
+                {
+                    <a href="@Url.Action("AddPicture", "Gallery", new { id = Model.id })" class="btn btn-@Model.Style.value btn-add">+</a>
+                }
+                <a href="@Url.Action("Details", "Gallery", new { id = Model.id })" class="gallery-name">@Model.name</a>
+            </div>
+        </div>
+        <div class="panel-body preview-gallery">
+            @{
+                int counter = 2;
+                var previews = Model.Picture.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).Take(counter);
+                foreach (var pv in previews)
+                {
+                    <div class="preview-container-sm">
+                        <a target="_blank" href="~/@pv.path">
+                            @{
+                                string preview_sm = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{pv.id}-thumb_sm.JPG") ? $"/Picture/{pv.id}-thumb_sm.JPG" : $"/Picture/{pv.id}.JPG";
+                            }
+                            <img class="img-thumbnail preview-img " src="@preview_sm">
+                        </a>
+                    </div>
+                    counter--;
+                }
+                for (int i = 0; i < counter; i++)
+                {
+                    <div class="preview-container-sm">
+                        <img class="img-thumbnail preview-img">
+                    </div>
+                }
+            }
+        </div>
+        <div class="panel-heading gallery-info">
+            <a href="~/User/@Model.User.login"><i>@Model.User.login</i></a>
+        </div>
+    </div>
+</div>

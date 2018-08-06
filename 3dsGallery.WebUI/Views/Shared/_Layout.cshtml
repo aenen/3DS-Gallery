@@ -1,0 +1,62 @@
+﻿@{
+    bool is3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - 3DS Gallery</title>
+    <link rel="shortcut icon" type="image/x-icon" href="~/Content/icon.png" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/GalleryStyle.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/modernizr-2.6.2.js"></script>
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            @{
+                string homeCode = !is3ds ? "<span class=\"glyphicon glyphicon-home\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/home.png\" />";
+                string userCode = !is3ds ? "<span class=\"glyphicon glyphicon-user\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/user.png\" />";
+                string loginCode = !is3ds ? "<span class=\"glyphicon glyphicon-log-in\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/log-in.png\" />";
+                string logoutCode = !is3ds ? "<span class=\"glyphicon glyphicon-log-out text-danger\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/log-out-red.png\" />";
+                string gallCode = !is3ds ? "<span class=\"glyphicon glyphicon-blackboard text-success\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/blackboard.png\" />";
+                string picCode = !is3ds ? "<span class=\"glyphicon glyphicon-picture text-info\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/picture.png\" />";
+            }
+            <a href="/" class="navbar-brand">@Html.Raw(homeCode)<span class="collapsible"> 3DS Gallery</span></a>
+            <ul class="nav navbar-nav">
+                <li><a href="@Url.Action("Index", "Gallery")">@Html.Raw(gallCode)<span class="collapsible"> Galleries</span></a></li>
+                <li><a href="@Url.Action("Index", "Picture")">@Html.Raw(picCode)<span class="collapsible"> Images</span></a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                @{
+                    if (User.Identity.IsAuthenticated)
+                    {
+                        <li><a href="@Url.Action("MyProfile", "User")">@Html.Raw(userCode)<span class="collapsible"> Profile</span></a></li>
+                            <li><a href="@Url.Action("Logout", "User")">@Html.Raw(logoutCode)<span class="collapsible"> Log Out</span></a></li>
+
+                    }
+                    else
+                    {
+                        <li class="collapsible"><a href="@Url.Action("Register", "User")">@Html.Raw(userCode)<span class="collapsible"> Sign Up</span></a></li>
+                        <li><a href="@Url.Action("Login", "User")">@Html.Raw(loginCode)<span class="collapsible"> Log In</span></a></li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+
+    <div>
+        @RenderBody()
+        <footer>
+            <div class="container body-content">
+                <p>&copy; 2017 - @DateTime.Now.Year ♥ Ярославчик Iнкорпорейтед</p>
+                @*<p>Icon made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>*@
+            </div>
+        </footer>
+    </div>
+
+    @RenderSection("scripts")
+</body>
+</html>

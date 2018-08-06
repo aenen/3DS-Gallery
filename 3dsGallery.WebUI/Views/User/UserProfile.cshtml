@@ -1,0 +1,141 @@
+﻿@model _3dsGallery.DataLayer.DataBase.User
+
+@{
+    ViewBag.Title = Model.login;
+    bool this_user = User.Identity.Name == Model.login;
+    bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+    int gallery_count = is3ds ? 3 : 6;
+    int picture_count = is3ds ? 4 : 12;
+}
+
+<div class="section-white">
+    <div class="container body-content">
+        <div class="profile-header">
+            <div class="profile-login text-center">
+                <h2>@Model.login</h2>
+                <span class="profile-rating">+@Model.Gallery.SelectMany(x => x.Picture).SelectMany(x => x.User).Count()</span>
+            </div>
+            <div class="profile-stat text-center">
+                @{
+                string gallCode = !is3ds ? "<span class=\"glyphicon glyphicon-blackboard\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/blackboard.png\" />";
+                string picCode = !is3ds ? "<span class=\"glyphicon glyphicon-picture\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/picture.png\" />";
+                string likeCode = !is3ds ? "<span class=\"glyphicon glyphicon-heart\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/heart.png\" />";
+            }
+                <a href="@Url.Action("Galleries", "User", new { login = Model.login })" class="text-success">
+                    @Html.Raw(gallCode) @Model.Gallery.Count
+                </a>
+                <a href="@Url.Action("Pictures", "User", new { login = Model.login })" class="text-info">
+                    @Html.Raw(picCode) @Model.Gallery.SelectMany(x => x.Picture).Count()
+                </a>
+                <a href="@Url.Action("Likes", "User", new { login = Model.login })" class="text-danger">
+                    @Html.Raw(likeCode) @Model.Picture.Count
+                </a>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs" style="border:none" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="gallery-tab" data-toggle="tab" href="#gallery" role="tab" aria-controls="gallery" aria-expanded="true">Galleries</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="image-tab" data-toggle="tab" href="#image" role="tab" aria-controls="image">Images</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="like-tab" data-toggle="tab" href="#like" role="tab" aria-controls="like">Likes</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<div class="section-grey">
+    <div class="container body-content section-separator-top">
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade active" id="gallery" role="tabpanel" aria-labelledby="gallery-tab">
+                <div class="gallery-data row">
+                    @if (this_user)
+                    {
+                        <div class="container create-new">
+                            <a href="@Url.Action("Create", "Gallery")" class="btn btn-success">Create New</a>
+                        </div>
+                    }
+                    @{ 
+                        Html.RenderAction("GetElements", "Gallery", new { items= Model.Gallery.OrderByDescending(x => x.id).Take(gallery_count) });
+                    }
+                </div>
+                @{
+                    if (gallery_count < Model.Gallery.Count)
+                    {
+                        <div class="create-new">
+                            <a href="@Url.Action("Galleries", "User", new { login = Model.login })" class="btn btn-default">View All</a>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="tab-pane fade" id="image" role="tabpanel" aria-labelledby="image-tab">
+                <div class="picture-data row">
+                    @if (this_user)
+                    {
+                        <div class="container create-new">
+                            <a href="@Url.Action("AddPicture", "Picture")" class="btn btn-success">Add New</a>
+                        </div>
+                    }
+                    @{ 
+                        Html.RenderAction("GetElements", "Picture", new { items= Model.Gallery.SelectMany(x => x.Picture).OrderByDescending(x => x.id).Take(picture_count) });
+                    }
+                </div>
+                @{
+                    if (picture_count < Model.Gallery.SelectMany(x => x.Picture).Count())
+                    {
+                        <div class="create-new">
+                            <a href="@Url.Action("Pictures", "User", new { login = Model.login })" class="btn btn-default">View All</a>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="tab-pane fade" id="like" role="tabpanel" aria-labelledby="like-tab">
+                <div class="like-data row">
+                    @{
+                        Html.RenderAction("GetElements", "Picture", new { items= Model.Picture.Take(picture_count) });
+                    }
+                </div>
+                @{
+                    if (picture_count < Model.Picture.Count)
+                    {
+                        <div class="create-new">
+                            <a href="@Url.Action("Likes", "User", new { login = Model.login })" class="btn btn-default">View All</a>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    @RenderPage("~/Views/Shared/MainScripts.cshtml")
+    <script>
+        $(function () {
+            $('#myTab a:first').tab('show');
+            $('#image-tab').on('shown.bs.tab', function () {
+                $(".picture-data .img-comment").each(function (i, e) {
+                    if ($(e)[0].scrollWidth > $(e).innerWidth()) {
+                        $(e).prepend($('<span class="show-hide-comment pull-right">▲</span>').click(showHideCommentInit));
+                    }
+                });
+                $(this).off('shown.bs.tab');
+            });
+
+            $('#like-tab').on('shown.bs.tab', function () {
+                $(".like-data .img-comment").each(function (i, e) {
+                    if ($(e)[0].scrollWidth > $(e).innerWidth()) {
+                        $(e).prepend($('<span class="show-hide-comment pull-right">▲</span>').click(showHideCommentInit));
+                    }
+                });
+                $(this).off('shown.bs.tab');
+            });
+        });
+    </script>
+}

@@ -1,0 +1,114 @@
+﻿@model _3dsGallery.DataLayer.DataBase.Gallery
+
+@{
+    ViewBag.Title = $"\"{Model.name}\"";
+    string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
+}
+
+<div class="section-white">
+    <div class="container body-content section-separator-bottom">
+        <div class="h2-container">
+            <div class="dropdown btn-group pull-right">
+                <button class="btn btn-@Model.Style.value dropdown-toggle" type="button" data-toggle="dropdown">Filter</button>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li class="active"><a class="filter" value="new" href="#">New</a></li>
+                    <li><a class="filter" value="old" href="#">Old</a></li>
+                    <li><a class="filter" value="best" href="#">Best</a></li>
+                    <li><a class="filter" value="3d" href="#">3D</a></li>
+                    <li><a class="filter" value="2d" href="#">2D</a></li>
+                </ul>
+            </div>
+            <h2 class="text-@Model.Style.value gallery-name">@Model.name <img id="loading" src="~/Content/loading_black.gif" height="25" width="25" hidden /></h2>
+        </div>
+        <p class="gallery-desc">@Model.info</p>
+        @if (Model.User.login == User.Identity.Name)
+        {
+            <hr />
+            <div class="row text-center">
+                <a href="@Url.Action("Delete", "Gallery", new { id = Model.id })" class="btn btn-danger">Delete</a>
+                <a href="@Url.Action("Edit", "Gallery", new { id = Model.id })" class="btn btn-info">Edit</a>
+                <a href="@Url.Action("AddPicture", "Gallery", new { id = Model.id })" class="btn btn-success">Add image</a>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="section-grey">
+    <div class="container body-content section-separator-top">
+        <div id="picture-data">
+            @{ Html.RenderAction("ShowPage", "Picture", new { page = (int)ViewBag.Page, filter = ViewBag.Filter, gallery = Model.id }); }
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    @RenderPage("~/Views/Shared/MainScripts.cshtml")
+    <script>
+        function pageInit(){
+            $(".page").on("click",function(e) {
+                if ($(this).parent().hasClass("active"))
+                    return false;
+            });
+
+            if (@isOld3ds == true) {
+                $(".page").each(function(i,e){
+                    var filter=$(".dropdown-menu").find(".active").find(".filter").attr("value");
+                    $(e).attr("href", '@Url.Action("Details", "Gallery")?id=' + @Model.id + '&page=' + $(e).attr("data-page") + '&filter=' + filter)
+                });
+                return;
+            }
+
+            $(".page").on("click",function(e) {
+                $("#loading").show();
+                $("body").animate({"scrollTop": "0px"}, 500);
+                var pg = $(this).attr("data-page");
+                var filter=$(".dropdown-menu").find(".active").find(".filter").attr("value");
+                $("#picture-data").load('@Url.Action("ShowPage", "Picture")?page=' + pg + '&filter=' + filter + "&gallery=" + '@Model.id', function() {
+                    initImg();
+                    pageInit();
+                    $("#loading").hide();
+                });
+            });
+        };
+
+        $(function () {
+            $(".filter").on("click",function(e) {
+                if ($(this).parent().hasClass("active"))
+                    return false;
+            }).each(function(i,e){
+                if ('@ViewBag.Filter' == $(e).attr("value")) {
+                    $(this).parent().addClass("active");
+                } else {
+                    $(this).parent().removeClass("active");
+                }
+            });
+
+            pageInit();
+
+            if (@isOld3ds == true) {
+                $(".filter").each(function(i,e){
+                    $(e).attr("href", '@Url.Action("Details", "Gallery")?id=' + @Model.id + '&page=1&filter=' + $(e).attr("value"))
+                });
+                return;
+            }
+
+            $(".filter").on("click",function(){
+                $("#loading").show();
+                var self=this;
+                $("#picture-data").load('@Url.Action("ShowPage", "Picture")?page=1&filter=' + $(this).attr("value")+ "&gallery=" + '@Model.id', function() {
+                    $(".filter").each(function(i,e){
+                        $(e).parent().removeClass("active");
+                    });
+                    $(self).parent().addClass("active");
+
+                    initImg();
+                    pageInit();
+                    $("#loading").hide();
+                });
+            });
+        });
+    </script>
+}
