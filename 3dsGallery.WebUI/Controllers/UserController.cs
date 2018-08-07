@@ -1,4 +1,5 @@
 ﻿using _3dsGallery.DataLayer.DataBase;
+using _3dsGallery.WebUI.Code;
 using _3dsGallery.WebUI.Models;
 using Microsoft.AspNet.Identity;
 using System;
@@ -15,13 +16,13 @@ namespace _3dsGallery.WebUI.Controllers
 {
     public class UserController : Controller
     {
-        GalleryContext context = new GalleryContext();
+        readonly GalleryContext context = new GalleryContext();
 
         // GET: User
         [Route("Register")]
         public ActionResult Register()
         {
-            if (!Request.UserAgent.Contains("Nintendo 3DS"))
+            if (Request.UserAgent.Contains("Nintendo 3DS"))
                 return RedirectToAction("Not3ds");
             return View(new RegisterView());
         }
@@ -30,7 +31,7 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("Register")]
         public ActionResult Register(RegisterView model)
         {
-            if (!Request.UserAgent.Contains("Nintendo 3DS"))
+            if (Request.UserAgent.Contains("Nintendo 3DS"))
                 return RedirectToAction("Not3ds");
 
             if (!ModelState.IsValid)
@@ -49,7 +50,16 @@ namespace _3dsGallery.WebUI.Controllers
                 return View(model);
             }
 
-            User user = new User { login = model.Login, password = model.Password.GetHashCode() };
+            var salt = PasswordGenerator.GenerateSalt(16);
+            var pass = PasswordGenerator.GenerateHash(model.Password, salt, 1000, 20);
+
+            User user = new User
+            {
+                login = model.Login,
+                PasswordSalt=salt,
+                PasswordHash=pass,
+                Iterations=1000
+            };
             context.User.Add(user);
             context.SaveChanges();
             FormsAuthentication.RedirectFromLoginPage(model.Login, true);
@@ -73,16 +83,31 @@ namespace _3dsGallery.WebUI.Controllers
                 return View();
             }
 
-            int hash = model.Password.GetHashCode();
-            if (context.User.Any(x => x.login == model.Login && x.password == hash))
+            var user = context.User.FirstOrDefault(x => x.login == model.Login);
+            if (user.PasswordHash == null)
             {
-                FormsAuthentication.RedirectFromLoginPage(model.Login.Trim(), true);
+                int hash = model.Password.GetHashCode();
+                if (user.password == hash)
+                {
+                    FormsAuthentication.RedirectFromLoginPage(user.login, true);
+                }
+            }
+            else
+            {
+                var pass = PasswordGenerator.GenerateHash(model.Password, user.PasswordSalt, user.Iterations, 20);
+                if (user.PasswordHash.SequenceEqual(pass))
+                {
+                    FormsAuthentication.RedirectFromLoginPage(user.login, true);
+                }
             }
 
             ViewBag.Error = "Entered data is not right. Please try again.";
             return View();
         }
 
+
+
+        [Authorize]
         [Route("Logout")]
         public ActionResult Logout()
         {

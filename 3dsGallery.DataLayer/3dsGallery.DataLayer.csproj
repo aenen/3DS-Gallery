@@ -61,6 +61,10 @@
     <Compile Include="Migrations\201804222131291_AddLastPicture.Designer.cs">
       <DependentUpon>201804222131291_AddLastPicture.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201808061632554_AddNewPasswordProps.cs" />
+    <Compile Include="Migrations\201808061632554_AddNewPasswordProps.Designer.cs">
+      <DependentUpon>201808061632554_AddNewPasswordProps.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\PictureTools.cs" />
@@ -72,6 +76,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201804222131291_AddLastPicture.resx">
       <DependentUpon>201804222131291_AddLastPicture.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201808061632554_AddNewPasswordProps.resx">
+      <DependentUpon>201808061632554_AddNewPasswordProps.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

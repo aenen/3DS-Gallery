@@ -24,6 +24,12 @@ namespace _3dsGallery.DataLayer.DataBase
 
         public int password { get; set; }
 
+        public byte[] PasswordSalt { get; set; }
+
+        public byte[] PasswordHash { get; set; }
+
+        public int Iterations { get; set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gallery> Gallery { get; set; }
 
