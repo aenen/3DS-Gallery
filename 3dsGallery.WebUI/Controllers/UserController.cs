@@ -89,6 +89,12 @@ namespace _3dsGallery.WebUI.Controllers
                 int hash = model.Password.GetHashCode();
                 if (user.password == hash)
                 {
+                    var salt = PasswordGenerator.GenerateSalt(16);
+                    var pass = PasswordGenerator.GenerateHash(model.Password, salt, 1000, 20);
+                    user.PasswordSalt = salt;
+                    user.PasswordHash = pass;
+                    user.Iterations = 1000;                    
+                    context.SaveChanges();
                     FormsAuthentication.RedirectFromLoginPage(user.login, true);
                 }
             }
@@ -104,8 +110,6 @@ namespace _3dsGallery.WebUI.Controllers
             ViewBag.Error = "Entered data is not right. Please try again.";
             return View();
         }
-
-
 
         [Authorize]
         [Route("Logout")]
