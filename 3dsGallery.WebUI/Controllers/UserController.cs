@@ -84,27 +84,10 @@ namespace _3dsGallery.WebUI.Controllers
             }
 
             var user = context.User.FirstOrDefault(x => x.login == model.Login);
-            if (user.PasswordHash == null)
+            var pass = PasswordGenerator.GenerateHash(model.Password, user.PasswordSalt, user.Iterations, 20);
+            if (user.PasswordHash.SequenceEqual(pass))
             {
-                int hash = model.Password.GetHashCode();
-                if (user.password == hash)
-                {
-                    var salt = PasswordGenerator.GenerateSalt(16);
-                    var pass = PasswordGenerator.GenerateHash(model.Password, salt, 1000, 20);
-                    user.PasswordSalt = salt;
-                    user.PasswordHash = pass;
-                    user.Iterations = 1000;                    
-                    context.SaveChanges();
-                    FormsAuthentication.RedirectFromLoginPage(user.login, true);
-                }
-            }
-            else
-            {
-                var pass = PasswordGenerator.GenerateHash(model.Password, user.PasswordSalt, user.Iterations, 20);
-                if (user.PasswordHash.SequenceEqual(pass))
-                {
-                    FormsAuthentication.RedirectFromLoginPage(user.login, true);
-                }
+                FormsAuthentication.RedirectFromLoginPage(user.login, true);
             }
 
             ViewBag.Error = "Entered data is not right. Please try again.";

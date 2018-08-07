@@ -21,9 +21,7 @@ namespace _3dsGallery.DataLayer.DataBase
         [Required]
         [StringLength(25)]
         public string login { get; set; }
-
-        public int password { get; set; }
-
+        
         public byte[] PasswordSalt { get; set; }
 
         public byte[] PasswordHash { get; set; }
