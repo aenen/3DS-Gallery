@@ -60,7 +60,11 @@ namespace _3dsGallery.WebUI.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             ViewBag.galleryId = new SelectList(user.Gallery, "id", "name");
+
             if (!ModelState.IsValid || file == null)
+                return View(picture);
+
+            if (file.ContentLength > 750 * 1000)
                 return View(picture);
 
             string file_extention = Path.GetExtension(file.FileName).ToLower();

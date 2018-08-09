@@ -114,6 +114,9 @@ namespace _3dsGallery.WebUI.Controllers
             if (!ModelState.IsValid || file == null)
                 return View(picture);
 
+            if (file.ContentLength > 750 * 1000)
+                return View(picture);
+
             string file_extention = Path.GetExtension(file.FileName).ToLower();
             if (file_extention != ".mpo" && file_extention != ".jpg")
                 return View(picture);
