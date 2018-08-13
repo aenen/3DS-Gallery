@@ -2,7 +2,7 @@
 
 @{
     ViewBag.Title = $"\"{Model.name}\"";
-    string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
+    string isOld3ds = "true";// (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
 }
 
 @section Styles {
@@ -59,9 +59,16 @@
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>
     <script src="~/Scripts/bootstrap.min.js"></script>
     @if (bool.Parse(isOld3ds))
-        {
-        <script src="~/Scripts/pagination.min.js"></script>
+    {
+        <script>
+            (function ($) {
 
+                $.fn.test = function () {
+                    alert("test");
+                }
+            })(jQuery)
+        </script>
+        <script src="~/Scripts/pagination.min.js"></script>
     }
     else
     {
@@ -115,6 +122,7 @@
                 $(".filter").each(function(i,e){
                     $(e).attr("href", '@Url.Action("Details", "Gallery")?page=1&filter=' + $(e).attr("value"))
                 });
+                $().test();
                 $("#pagination").pagination('@Url.Action("Details", "Gallery")', contentPages, {
                     currentPage: @ViewBag.Page,
                     urlParameters: {
