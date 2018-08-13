@@ -95,6 +95,24 @@
             });
         };*@
 
+        function createPagination (currentPage, totalPages) {
+            var thisElement = $("#pagination");
+            $(thisElement).empty();
+            var container = $("<ul/>").addClass("pagination").css("display", "block");
+            var pageElement = $("<a/>").addClass("page").attr('data-page', '1');        
+
+            for (var i = 1; i <= totalPages; i++) {
+                var params = $.extend({ page: i }, {
+                        'filter': '@ViewBag.Filter',
+                    });
+                var clonedPageElement = pageElement.clone(true).attr({ "data-page": i, href: '@Url.Action("Details", "Gallery")' + "?" + $.param(params) }).text(i);
+                container.append($("<li/>").append(clonedPageElement));
+            }
+
+            container.find("a[data-page='" + currentPage + "']").click(function (e) { e.preventDefault(); }).parent("li").addClass("active");
+            $(thisElement).append(container);
+        }
+
         $(function () {
             var contentPages = @ViewBag.Pages;
             $(".filter").on("click",function(e) {
@@ -180,23 +198,6 @@
                 //pageInit();
                 loading(false);
             });
-        }
-        function createPagination (currentPage, totalPages) {
-            var thisElement = $("#pagination");
-            $(thisElement).empty();
-            var container = $("<ul/>", { class: "pagination" }).css("display", "block");
-            var pageElement = $("<a/>", { class: "page", 'data-page': 1 });
-
-            for (var i = 1; i <= totalPages; i++) {
-                var params = $.extend({ page: i }, {
-                        'filter': '@ViewBag.Filter',
-                    });
-                var clonedPageElement = pageElement.clone(true).attr({ "data-page": i, href: '@Url.Action("Details", "Gallery")' + "?" + $.param(params) }).text(i);
-                container.append($("<li/>").append(clonedPageElement));
-            }
-
-            container.find("a[data-page='" + currentPage + "']").click(function (e) { e.preventDefault(); }).parent("li").addClass("active");
-            $(thisElement).append(container);
         }
     </script>
 }
