@@ -474,6 +474,10 @@ footer {
     }
 }
 
+#pagination {
+    margin:0 auto;
+}
+
 @media (min-width: 768px) {
     #pagination {
         max-width: 450px;
