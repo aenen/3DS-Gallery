@@ -132,7 +132,7 @@
                 $(".filter").each(function(i,e){
                     $(e).attr("href", '@Url.Action("Details", "Gallery")?page=1&filter=' + $(e).attr("value"))
                 });
-                createPagination(@ViewBag.Page, contentPages);
+                @*createPagination(@ViewBag.Page, contentPages);*@
                 @*$("#pagination").pagination('@Url.Action("Details", "Gallery")', contentPages, {
                     currentPage: @ViewBag.Page,
                     urlParameters: {
