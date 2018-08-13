@@ -1,4 +1,4 @@
-﻿function createPagination(currentPage, totalPages) {
+﻿function createPagination(currentPage, totalPages, url, filters,) {
   var thisElement = $("#pagination");
   $(thisElement).empty();
   if (totalPages < 2) {
@@ -36,11 +36,9 @@
 
   // Якщо обрана сторінка не перша - створю кнопку "назад"
   if (currentPage > 1) {
-    var params = $.extend({ page: currentPage - 1 }, {
-      'filter': '@ViewBag.Filter',
-    });
+    var params = $.extend({ page: currentPage - 1 }, filters);
     $("<li/>")
-      .append(pageElement.clone(true).attr({ "data-page": currentPage - 1, href: '@Url.Action("Details", "Gallery")' + "?" + $.param(params) }).addClass("page-nav page-prev").text("<"))
+      .append(pageElement.clone(true).attr({ "data-page": currentPage - 1, href: url + "?" + $.param(params) }).addClass("page-nav page-prev").text("<"))
       .appendTo(container);
   }
 
@@ -49,11 +47,9 @@
 
   // Створюю найближчі видимі кнопки сторінок
   for (var i = pageFrom; i <= pageTo; i++) {
-    var params = $.extend({ page: i }, {
-      'filter': '@ViewBag.Filter',
-    });
+    var params = $.extend({ page: i }, filters);
     $("<li/>")
-      .append(pageElement.clone(true).attr({ "data-page": i, href: '@Url.Action("Details", "Gallery")' + "?" + $.param(params) }).text(i))
+      .append(pageElement.clone(true).attr({ "data-page": i, href: url + "?" + $.param(params) }).text(i))
       .appendTo(container);
   }
 
@@ -62,11 +58,9 @@
 
   // Якщо обрана сторінка не остання - створюю кнопку "вперед"
   if (currentPage < totalPages) {
-    var params = $.extend({ page: currentPage + 1 }, {
-      'filter': '@ViewBag.Filter',
-    });
+    var params = $.extend({ page: currentPage + 1 }, filters);
     $("<li/>")
-      .append(pageElement.clone(true).attr({ "data-page": currentPage + 1, href: '@Url.Action("Details", "Gallery")' + "?" + $.param(params) }).addClass("page-nav page-next").text(">"))
+      .append(pageElement.clone(true).attr({ "data-page": currentPage + 1, href: url + "?" + $.param(params) }).addClass("page-nav page-next").text(">"))
       .appendTo(container);
   }
 
@@ -82,7 +76,7 @@
       });
       hiddenElementsList
         .append($("<li/>")
-          .append(pageElement.clone(true).attr({ "data-page": i, href: '@Url.Action("Details", "Gallery")' + "?" + $.param(params) }).text(i)));
+          .append(pageElement.clone(true).attr({ "data-page": i, href: url + "?" + $.param(params) }).text(i)));
     }
 
     var clonedDropdown = dropdown.clone(true);

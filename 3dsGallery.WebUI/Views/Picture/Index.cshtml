@@ -83,7 +83,9 @@
                 $(".filter").each(function(i,e){
                     $(e).attr("href", '@Url.Action("Index", "Picture")?page=1&filter=' + $(e).attr("value"));
                 });
-                createPagination(@ViewBag.Page, contentPages);
+                createPagination(@ViewBag.Page, contentPages,'@Url.Action("Index", "Picture")',{
+                    'filter': '@ViewBag.Filter',
+                });
                 return;
             }
 
