@@ -55,7 +55,7 @@
     <script src="~/Scripts/bootstrap.min.js"></script>
     @if (bool.Parse(isOld3ds))
     {
-        <script src="~/Scripts/pagination.min.js"></script>
+        <script src="~/Scripts/paginationFor3ds.js"></script>
 
     }
     else
@@ -64,33 +64,6 @@
     }
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
     <script>
-        @*function pageInit(){
-            $(".page").on("click",function(e) {
-                if ($(this).parent().hasClass("active"))
-                    return false;
-            });
-
-
-            if (@isOld3ds == true) {
-                $(".page").each(function(i,e){
-                    var filter=$(".dropdown-menu").find(".active").find(".filter").attr("value");
-                    $(e).attr("href", '@Url.Action("Index", "Picture")?page=' + $(e).attr("data-page") + '&filter=' + filter)
-                });
-                return;
-            }
-
-            $(".page").on("click",function(e) {
-                $("#loading").show();
-                $("html,body").animate({"scrollTop": "0px"}, "slow");
-                var pg = $(this).attr("data-page");
-                var filter=$(".dropdown-menu").find(".active").find(".filter").attr("value");
-                $("#picture-data").load('@Url.Action("ShowPage", "Picture")?page=' + pg + '&filter=' + filter, function() {
-                    initImg();
-                    pageInit();
-                    $("#loading").hide();
-                });
-            });
-        };*@
 
         $(function () {
 
@@ -106,19 +79,11 @@
                 }
             });
 
-            //pageInit();
-
-
             if (@isOld3ds == true) {
                 $(".filter").each(function(i,e){
                     $(e).attr("href", '@Url.Action("Index", "Picture")?page=1&filter=' + $(e).attr("value"));
                 });
-                $("#pagination").pagination('@Url.Action("Index", "Picture")', contentPages, {
-                    currentPage: @ViewBag.Page,
-                    urlParameters: getFilterParams(),
-                    paginationStyle: "allPagesShrink",
-                    visiblePagesCount:3
-                });
+                createPagination(@ViewBag.Page, contentPages);
                 return;
             }
 
@@ -157,9 +122,7 @@
 
         function getFilterParams(page) {
             var params = {};
-            //page = typeof page == "undefined" ? 1 : page;
 
-            //params["page"] = page;
             params["filter"] = $(".filter-ul>.active>.filter").attr("value");
             return params;
         }
@@ -173,7 +136,6 @@
             $("#picture-data").load('@Url.Action("ShowPage", "Picture")?page=1&' + urlParams, function () {
                 initImg();
                 $("#pagination").paginationAjax('@Url.Action("ShowPage", "Picture")', contentPages, $.extend(paginationAjaxData, { urlParameters: getFilterParams() }));
-                //pageInit();
                 loading(false);
             });
         }

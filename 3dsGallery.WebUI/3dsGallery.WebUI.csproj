@@ -151,6 +151,7 @@
     <Content Include="Scripts\pagination.js" />
     <Content Include="Scripts\pagination.min.js" />
     <Content Include="Scripts\paginationAjax.min.js" />
+    <Content Include="Scripts\paginationFor3ds.js" />
     <Content Include="Web.config" />
     <Content Include="Views\Home\Index.cshtml" />
   </ItemGroup>
