@@ -474,6 +474,31 @@ footer {
     }
 }
 
+@media (min-width: 768px) {
+    #pagination {
+        max-width: 450px;
+    }
+}
+
+@media (min-width: 992px) {
+    #pagination {
+        max-width: 500px;
+    }
+}
+
+@media (min-width: 1200px) {
+    #pagination {
+        max-width: 550px;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+
+    #pagination {
+        max-width: 450px;
+    }
+}
+
 /*Small (3DS) screen*/
 @media only screen and (max-device-width: 320px) {
 
