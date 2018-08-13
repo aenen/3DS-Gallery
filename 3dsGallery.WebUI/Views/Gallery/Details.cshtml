@@ -2,7 +2,7 @@
 
 @{
     ViewBag.Title = $"\"{Model.name}\"";
-    string isOld3ds = "true";// (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
+    string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
 }
 
 @section Styles {
