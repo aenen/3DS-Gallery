@@ -5,12 +5,16 @@
     string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
 }
 
+@section Styles {
+    <link href="~/Content/pagination.min.css" rel="stylesheet" type="text/css" />
+}
+
 <div class="section-white">
     <div class="container body-content section-separator-bottom">
         <div class="h2-container">
             <div class="dropdown btn-group pull-right">
                 <button class="btn btn-@Model.Style.value dropdown-toggle" type="button" data-toggle="dropdown">Filter</button>
-                <ul class="dropdown-menu dropdown-menu-right">
+                <ul class="filter-ul dropdown-menu dropdown-menu-right">
                     <li class="active"><a class="filter" value="new" href="#">New</a></li>
                     <li><a class="filter" value="old" href="#">Old</a></li>
                     <li><a class="filter" value="best" href="#">Best</a></li>
@@ -38,6 +42,15 @@
         <div id="picture-data">
             @{ Html.RenderAction("ShowPage", "Picture", new { page = (int)ViewBag.Page, filter = ViewBag.Filter, gallery = Model.id }); }
         </div>
+
+        @{
+            int pages = (int)ViewBag.Pages;
+            int page = (int)ViewBag.Page;
+            if (pages > 1)
+            {
+                <div id="pagination" class="t-slate-gray text-center"></div>
+            }
+        }
     </div>
 </div>
 
@@ -45,9 +58,18 @@
 @section scripts {
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>
     <script src="~/Scripts/bootstrap.min.js"></script>
+    @if (bool.Parse(isOld3ds))
+        {
+        <script src="~/Scripts/pagination.min.js"></script>
+
+    }
+    else
+    {
+        <script src="~/Scripts/paginationAjax.min.js"></script>
+    }
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
     <script>
-        function pageInit(){
+        @*function pageInit(){
             $(".page").on("click",function(e) {
                 if ($(this).parent().hasClass("active"))
                     return false;
@@ -72,9 +94,10 @@
                     $("#loading").hide();
                 });
             });
-        };
+        };*@
 
         $(function () {
+            var contentPages = @ViewBag.Pages;
             $(".filter").on("click",function(e) {
                 if ($(this).parent().hasClass("active"))
                     return false;
@@ -86,29 +109,77 @@
                 }
             });
 
-            pageInit();
+            //pageInit();
 
             if (@isOld3ds == true) {
                 $(".filter").each(function(i,e){
-                    $(e).attr("href", '@Url.Action("Details", "Gallery")?id=' + @Model.id + '&page=1&filter=' + $(e).attr("value"))
+                    $(e).attr("href", '@Url.Action("Details", "Gallery")?page=1&filter=' + $(e).attr("value"))
+                });
+                $("#pagination").pagination('@Url.Action("Details", "Gallery")', contentPages, {
+                    currentPage: @ViewBag.Page,
+                    urlParameters: {
+                        'filter': '@ViewBag.Filter',
+                    },
+                    paginationStyle: "allPagesShrink",
+                    visiblePagesCount:3
                 });
                 return;
             }
 
-            $(".filter").on("click",function(){
-                $("#loading").show();
-                var self=this;
-                $("#picture-data").load('@Url.Action("ShowPage", "Picture")?page=1&filter=' + $(this).attr("value")+ "&gallery=" + '@Model.id', function() {
-                    $(".filter").each(function(i,e){
-                        $(e).parent().removeClass("active");
-                    });
-                    $(self).parent().addClass("active");
-
-                    initImg();
-                    pageInit();
-                    $("#loading").hide();
-                });
-            });
+            $("#pagination").paginationAjax('@Url.Action("ShowPage", "Picture")', contentPages, paginationAjaxData);
+            $(".filter").on("click",filterItemEventClick);
         });
+
+        var paginationAjaxData = {
+            dataElementSelector: "#picture-data",
+            urlParameters: getFilterParams(),
+            language: "en-US",
+
+            beforeLoadPage: function () {
+                loading(true);
+                $('html, body').animate({ scrollTop: "0px" });
+            },
+            afterLoadPageSuccess: function () { loading(false); },
+            afterLoadPageError: function () { loading(false); },
+
+            paginationStyle: "allPagesShrink",
+            paginationStyleFlexible: true,
+            visiblePagesCount: 5
+        };
+
+        function loading(isLoading) {
+            if (isLoading) {
+                $("#loading").show();
+                $(".filter-group > a.list-group-item").addClass("disabled");
+                $(".pagination li:not(.active)").addClass("disabled");
+            } else {
+                $("#loading").hide();
+                $(".filter-group > a.list-group-item").removeClass("disabled");
+                $(".pagination li").removeClass("disabled");
+            }
+        }
+
+        function getFilterParams(page) {
+            var params = {};
+            //page = typeof page == "undefined" ? 1 : page;
+
+            params["gallery"] = @Model.id;
+            params["filter"] = $(".filter-ul>.active>.filter").attr("value");
+            return params;
+        }
+
+        function filterItemEventClick(e) {
+            loading(true);
+            var self = this;
+            $(".filter-ul>.active").removeClass("active");
+            $(this).parent().addClass("active");
+            var urlParams = $.param(getFilterParams());
+            $("#picture-data").load('@Url.Action("ShowPage", "Picture")?page=1&' + urlParams, function () {
+                initImg();
+                $("#pagination").paginationAjax('@Url.Action("ShowPage", "Picture")', contentPages, $.extend(paginationAjaxData, { urlParameters: getFilterParams() }));
+                //pageInit();
+                loading(false);
+            });
+        }
     </script>
 }

@@ -18,9 +18,11 @@ namespace _3dsGallery.WebUI.Controllers
     [RoutePrefix("Gallery")]
     public class GalleryController : Controller
     {
-        private GalleryContext db = new GalleryContext();
+        private readonly GalleryContext db = new GalleryContext();
         private const int gallery3ds = 6;
         private const int galleryPc = 12;
+        private const int pictures3ds = 9;
+        private const int picturesPc = 20;
 
         [Route("ShowPage")]
         public ActionResult ShowPage(string user, int page = 1, string filter = "updated")
@@ -51,7 +53,7 @@ namespace _3dsGallery.WebUI.Controllers
                     break;
             }
 
-            int count = result.Count();
+            int count = result.Count;
             int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? gallery3ds : galleryPc;
             int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
 
@@ -83,6 +85,33 @@ namespace _3dsGallery.WebUI.Controllers
 
             ViewBag.Page = page;
             ViewBag.Filter = filter;
+
+            var result = db.Gallery.FirstOrDefault(x=>x.id==id).Picture.ToList();
+            switch (filter)
+            {
+                case "new":
+                    result = result.OrderByDescending(x => x.id).ToList();
+                    break;
+                case "old":
+                    result = result.OrderBy(x => x.id).ToList();
+                    break;
+                case "best":
+                    result = result.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).ToList();
+                    break;
+                case "3d":
+                    result = result.Where(x => x.type == "3D").OrderByDescending(x => x.id).ToList();
+                    break;
+                case "2d":
+                    result = result.Where(x => x.type == "2D").OrderByDescending(x => x.id).ToList();
+                    break;
+                default:
+                    break;
+            }
+            int count = result.Count;
+            int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? pictures3ds : picturesPc;
+            int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
+            ViewBag.Pages = pages;
+
             return View(gallery);
         }
 
