@@ -17,8 +17,8 @@ namespace _3dsGallery.WebUI.Controllers
 {
     public class PictureController : Controller
     {
-        private GalleryContext db = new GalleryContext();
-        private const int pictures3ds = 10;
+        private readonly GalleryContext db = new GalleryContext();
+        private const int pictures3ds = 9;
         private const int picturesPc = 20;
 
         //GET: Pictures
@@ -27,7 +27,32 @@ namespace _3dsGallery.WebUI.Controllers
         {
             ViewBag.Page = page;
             ViewBag.Filter = filter;
-
+            
+            var result = db.Picture.Include(p => p.Gallery).ToList();
+            switch (filter)
+            {
+                case "new":
+                    result = result.OrderByDescending(x => x.id).ToList();
+                    break;
+                case "old":
+                    result = result.OrderBy(x => x.id).ToList();
+                    break;
+                case "best":
+                    result = result.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).ToList();
+                    break;
+                case "3d":
+                    result = result.Where(x => x.type == "3D").OrderByDescending(x => x.id).ToList();
+                    break;
+                case "2d":
+                    result = result.Where(x => x.type == "2D").OrderByDescending(x => x.id).ToList();
+                    break;
+                default:
+                    break;
+            }
+            int count = result.Count;
+            int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? pictures3ds : picturesPc;
+            int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
+            ViewBag.Pages = pages;
             return View();
         }
 
@@ -208,7 +233,7 @@ namespace _3dsGallery.WebUI.Controllers
             return PartialView(items);
         }
 
-        public ActionResult ShowPage(int page, int? gallery, string user, string filter = "new", bool user_likes = false)
+        public ActionResult ShowPage(int? gallery, string user, int page = 1, string filter = "new", bool user_likes = false)
         {
             var result = db.Picture.Include(p => p.Gallery).ToList();
             var userdb = db.User.FirstOrDefault(x => x.login == user);
@@ -241,7 +266,7 @@ namespace _3dsGallery.WebUI.Controllers
                     break;
             }
 
-            int count = result.Count();
+            int count = result.Count;
             int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? pictures3ds : picturesPc;
             int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
             ViewBag.Pages = pages;

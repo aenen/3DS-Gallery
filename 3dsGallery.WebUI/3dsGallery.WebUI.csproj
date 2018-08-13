@@ -123,6 +123,7 @@
     <Content Include="Content\loading.gif" />
     <Content Include="Content\icon.png" />
     <Content Include="Content\loading_black.gif" />
+    <Content Include="Content\pagination.min.css" />
     <Content Include="Content\qr-icon.png" />
     <Content Include="Content\Site.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -147,6 +148,8 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
+    <Content Include="Scripts\pagination.min.js" />
+    <Content Include="Scripts\paginationAjax.min.js" />
     <Content Include="Web.config" />
     <Content Include="Views\Home\Index.cshtml" />
   </ItemGroup>

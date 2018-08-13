@@ -9,8 +9,10 @@
 <div class="row">
     @{ Html.RenderAction("GetElements", "Picture", new { items = Model }); }
 </div>
-
-@{
+<script>
+    var contentPages=@ViewBag.Pages;
+</script>
+@*@{
     int pages = (int)ViewBag.Pages;
     int page = (int)ViewBag.Page;
     if (pages > 1)
@@ -67,4 +69,4 @@
             </ul>
         </div>
                     }
-}
+}*@
