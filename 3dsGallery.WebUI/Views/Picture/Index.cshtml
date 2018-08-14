@@ -55,7 +55,7 @@
     <script src="~/Scripts/bootstrap.min.js"></script>
     @if (bool.Parse(isOld3ds))
     {
-        <script src="~/Scripts/paginationFor3ds.js"></script>
+        <script src="~/Scripts/paginationFor3ds.min.js"></script>
 
     }
     else
@@ -102,7 +102,10 @@
                 loading(true);
                 $('html, body').animate({ scrollTop: "0px" });
             },
-            afterLoadPageSuccess: function () { loading(false); },
+            afterLoadPageSuccess: function () {
+                initImg();
+                loading(false);
+            },
             afterLoadPageError: function () { loading(false); },
 
             paginationStyle: "allPagesShrink",

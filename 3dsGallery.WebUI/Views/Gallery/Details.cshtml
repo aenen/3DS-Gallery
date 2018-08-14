@@ -2,7 +2,7 @@
 
 @{
     ViewBag.Title = $"\"{Model.name}\"";
-    string isOld3ds = "true";//(Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
+    string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
 }
 
 @section Styles {
@@ -60,7 +60,7 @@
     <script src="~/Scripts/bootstrap.min.js"></script>
     @if (bool.Parse(isOld3ds))
     {
-        <script src="~/Scripts/paginationFor3ds.js"></script>
+        <script src="~/Scripts/paginationFor3ds.min.js"></script>
     }
     else
     {
@@ -86,6 +86,7 @@
                 $(".filter").each(function(i,e){
                     $(e).attr("href", '@Url.Action("Details", "Gallery")?page=1&filter=' + $(e).attr("value"))
                 });
+                console.log($(".filter-ul>.active>.filter").attr("value"));
                 createPagination(@ViewBag.Page, contentPages, "@Url.Action("Details", "Gallery")", {
                     filter: $(".filter-ul>.active>.filter").attr("value")
                 });
@@ -106,7 +107,10 @@
                 loading(true);
                 $('html, body').animate({ scrollTop: "0px" });
             },
-            afterLoadPageSuccess: function () { loading(false); },
+            afterLoadPageSuccess: function () {
+                initImg();
+                loading(false);
+            },
             afterLoadPageError: function () { loading(false); },
 
             paginationStyle: "allPagesShrink",
