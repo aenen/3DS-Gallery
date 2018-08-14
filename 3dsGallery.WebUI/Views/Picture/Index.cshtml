@@ -4,7 +4,7 @@
 }
 
 @section Styles {
-    <link href="~/Content/pagination.min.css" rel="stylesheet" type="text/css" />
+    @System.Web.Optimization.Styles.Render("~/Content/pagination")
 }
 
 <div class="section-white">
@@ -51,16 +51,13 @@
 </div>
 
 @section scripts {
-    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
-    <script src="~/Scripts/bootstrap.min.js"></script>
     @if (bool.Parse(isOld3ds))
     {
-        <script src="~/Scripts/paginationFor3ds.min.js"></script>
-
+        @System.Web.Optimization.Scripts.Render("~/bundles/paginationFor3ds")
     }
     else
     {
-        <script src="~/Scripts/paginationAjax.min.js"></script>
+        @System.Web.Optimization.Scripts.Render("~/bundles/paginationAjax")
     }
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
     <script>

@@ -1,4 +1,5 @@
-﻿@{
+﻿@using System.Web.Optimization;
+@{
     bool is3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
 }
 <!DOCTYPE html>
@@ -8,11 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - 3DS Gallery</title>
     <link rel="shortcut icon" type="image/x-icon" href="~/Content/icon.png" />
-    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
-    <link href="~/Content/GalleryStyle.css" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/Content/css", "~/Content/maincss")
+    @Scripts.Render("~/bundles/modernizr")
     @RenderSection("Styles", false)
-    <script src="~/Scripts/modernizr-2.6.2.js"></script>
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -58,6 +57,7 @@
         </footer>
     </div>
 
+    @Scripts.Render("~/bundles/jquery", "~/bundles/bootstrap")
     @RenderSection("scripts")
 </body>
 </html>

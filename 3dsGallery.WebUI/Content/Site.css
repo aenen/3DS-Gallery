@@ -17,32 +17,6 @@ textarea {
     max-width: 280px;
 }
 
-.pagination .page {
-    cursor: pointer;
-}
-
-.pagination > li {
-    display: inline-block;
-}
-
-.pagination .dropdown-toggle {
-    border-radius: 0;
-}
-
-.pagination .dropdown-menu {
-    max-height: 150px;
-    min-width: initial;
-    right: -10px;
-    left: -10px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    text-align: center;
-}
-
-    .pagination .dropdown-menu li a {
-        padding: 3px 0;
-    }
-
 #loading {
     width: 20px;
     height: 20px;

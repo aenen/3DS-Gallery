@@ -18,7 +18,7 @@ namespace _3dsGallery.WebUI.Controllers
     public class PictureController : Controller
     {
         private readonly GalleryContext db = new GalleryContext();
-        private const int pictures3ds = 9;
+        private const int pictures3ds = 10;
         private const int picturesPc = 20;
 
         //GET: Pictures

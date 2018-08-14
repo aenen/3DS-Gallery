@@ -6,7 +6,7 @@
 }
 
 @section Styles {
-    <link href="~/Content/pagination.min.css" rel="stylesheet" type="text/css" />
+    @System.Web.Optimization.Styles.Render("~/Content/pagination")
 }
 
 <div class="section-white">
@@ -22,7 +22,10 @@
                     <li><a class="filter" value="2d" href="#">2D</a></li>
                 </ul>
             </div>
-            <h2 class="text-@Model.Style.value gallery-name">@Model.name <img id="loading" src="~/Content/loading_black.gif" height="25" width="25" hidden /></h2>
+            @if (!bool.Parse(isOld3ds))
+            {
+                <h2 class="text-@Model.Style.value gallery-name">@Model.name <img id="loading" src="~/Content/loading_black.gif" height="25" width="25" hidden /></h2>
+            }
         </div>
         <p class="gallery-desc">@Model.info</p>
         @if (Model.User.login == User.Identity.Name)
@@ -56,15 +59,13 @@
 
 
 @section scripts {
-    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
-    <script src="~/Scripts/bootstrap.min.js"></script>
     @if (bool.Parse(isOld3ds))
     {
-        <script src="~/Scripts/paginationFor3ds.min.js"></script>
+        @System.Web.Optimization.Scripts.Render("~/bundles/paginationFor3ds")
     }
     else
     {
-        <script src="~/Scripts/paginationAjax.min.js"></script>
+        @System.Web.Optimization.Scripts.Render("~/bundles/paginationAjax")
     }
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
     <script>
