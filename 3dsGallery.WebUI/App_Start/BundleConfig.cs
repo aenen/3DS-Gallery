@@ -26,15 +26,17 @@ namespace _3dsGallery.WebUI
                       "~/Scripts/bootstrap.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/paginationFor3ds").Include(
-                      "~/Scripts/paginationFor3ds.js"));
+                      "~/Scripts/paginationFor3ds.js",
+                      "~/Scripts/initPaginationFor3ds.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/paginationAjax").Include(
-                      "~/Scripts/paginationAjax.js"));
+                      "~/Scripts/paginationAjax.js",
+                      "~/Scripts/initPaginationAjax.js"));
 
             bundles.Add(new StyleBundle("~/Content/maincss").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/Site.css",
-                      "~/Content/GalleryStyle"));
+                      "~/Content/GalleryStyle.css"));
 
             bundles.Add(new StyleBundle("~/Content/pagination").Include(
                       "~/Content/pagination.css"));

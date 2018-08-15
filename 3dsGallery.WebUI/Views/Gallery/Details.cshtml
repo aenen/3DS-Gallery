@@ -22,10 +22,13 @@
                     <li><a class="filter" value="2d" href="#">2D</a></li>
                 </ul>
             </div>
-            @if (!bool.Parse(isOld3ds))
-            {
-                <h2 class="text-@Model.Style.value gallery-name">@Model.name <img id="loading" src="~/Content/loading_black.gif" height="25" width="25" hidden /></h2>
-            }
+            <h2 class="text-@Model.Style.value gallery-name">
+                @Model.name
+                @if (!bool.Parse(isOld3ds))
+                {
+                    <img id="loading" src="~/Content/loading_black.gif" height="25" width="25" hidden />
+                }
+            </h2>
         </div>
         <p class="gallery-desc">@Model.info</p>
         @if (Model.User.login == User.Identity.Name)
@@ -71,85 +74,14 @@
     <script>
 
         $(function () {
-            var contentPages = @ViewBag.Pages;
-            $(".filter").on("click",function(e) {
-                if ($(this).parent().hasClass("active"))
-                    return false;
-            }).each(function(i,e){
-                if ('@ViewBag.Filter' == $(e).attr("value")) {
-                    $(this).parent().addClass("active");
-                } else {
-                    $(this).parent().removeClass("active");
-                }
-            });
 
-            if (@isOld3ds == true) {
-                $(".filter").each(function(i,e){
-                    $(e).attr("href", '@Url.Action("Details", "Gallery")?page=1&filter=' + $(e).attr("value"))
-                });
-                console.log($(".filter-ul>.active>.filter").attr("value"));
-                createPagination(@ViewBag.Page, contentPages, "@Url.Action("Details", "Gallery")", {
-                    filter: $(".filter-ul>.active>.filter").attr("value")
-                });
-
-                return;
+            var dataUrl =@isOld3ds?'@Url.Action("Details", "Gallery")' : '@Url.Action("ShowPage", "Picture")';
+            var dataFilters = { filter: '@ViewBag.Filter' };
+            if (!@isOld3ds){
+                dataFilters["gallery"] = @Model.id;
             }
 
-            $("#pagination").paginationAjax('@Url.Action("ShowPage", "Picture")', contentPages, paginationAjaxData);
-            $(".filter").on("click",filterItemEventClick);
-        });
-
-        var paginationAjaxData = {
-            dataElementSelector: "#picture-data",
-            urlParameters: getFilterParams(),
-            language: "en-US",
-
-            beforeLoadPage: function () {
-                loading(true);
-                $('html, body').animate({ scrollTop: "0px" });
-            },
-            afterLoadPageSuccess: function () {
-                initImg();
-                loading(false);
-            },
-            afterLoadPageError: function () { loading(false); },
-
-            paginationStyle: "allPagesShrink",
-            paginationStyleFlexible: true,
-            visiblePagesCount: 5
-        };
-
-        function loading(isLoading) {
-            if (isLoading) {
-                $("#loading").show();
-                $(".filter-group > a.list-group-item").addClass("disabled");
-                $(".pagination li:not(.active)").addClass("disabled");
-            } else {
-                $("#loading").hide();
-                $(".filter-group > a.list-group-item").removeClass("disabled");
-                $(".pagination li").removeClass("disabled");
-            }
-        }
-
-        function getFilterParams(page) {
-            var params = {};
-
-            params["gallery"] = @Model.id;
-            params["filter"] = $(".filter-ul>.active>.filter").attr("value");
-            return params;
-        }
-
-        function filterItemEventClick(e) {
-            loading(true);
-            var self = this;
-            $(".filter-ul>.active").removeClass("active");
-            $(this).parent().addClass("active");
-            var urlParams = $.param(getFilterParams());
-            $("#picture-data").load('@Url.Action("ShowPage", "Picture")?page=1&' + urlParams, function () {
-                initImg();
-                $("#pagination").paginationAjax('@Url.Action("ShowPage", "Picture")', contentPages, $.extend(paginationAjaxData, { urlParameters: getFilterParams() }));
-                loading(false);
-            });
-        }
+            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#picture-data");
+        })
     </script>
 }
