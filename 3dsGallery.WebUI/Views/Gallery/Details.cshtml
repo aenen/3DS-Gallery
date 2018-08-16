@@ -51,7 +51,6 @@
 
         @{
             int pages = (int)ViewBag.Pages;
-            int page = (int)ViewBag.Page;
             if (pages > 1)
             {
                 <div id="pagination" class="t-slate-gray text-center"></div>
@@ -62,6 +61,7 @@
 
 
 @section scripts {
+    @RenderPage("~/Views/Shared/MainScripts.cshtml")
     @if (bool.Parse(isOld3ds))
     {
         @System.Web.Optimization.Scripts.Render("~/bundles/paginationFor3ds")
@@ -70,7 +70,6 @@
     {
         @System.Web.Optimization.Scripts.Render("~/bundles/paginationAjax")
     }
-    @RenderPage("~/Views/Shared/MainScripts.cshtml")
     <script>
 
         $(function () {
@@ -81,7 +80,7 @@
                 dataFilters["gallery"] = @Model.id;
             }
 
-            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#picture-data");
+            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#picture-data", true);
         })
     </script>
 }

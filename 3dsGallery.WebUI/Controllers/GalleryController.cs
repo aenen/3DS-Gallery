@@ -67,8 +67,40 @@ namespace _3dsGallery.WebUI.Controllers
         // GET: Gallery
         public ActionResult Index(int page = 1, string filter = "updated")
         {
+            var result = db.Gallery.Include(g => g.Style).Include(g => g.User).ToList();
+
+            switch (filter)
+            {
+                case "updated":
+                    result = result.Where(x => x.LastPicture != null).OrderByDescending(x => x.LastPicture.id).ToList();
+                    break;
+                case "new":
+                    result = result.OrderByDescending(x => x.id).ToList();
+                    break;
+                case "old":
+                    result = result.OrderBy(x => x.id).ToList();
+                    break;
+                case "best":
+                    result = result.OrderByDescending(x => x.Picture.Sum(xx => xx.User.Count)).ToList();
+                    break;
+                case "big":
+                    result = result.OrderByDescending(x => x.Picture.Count).ToList();
+                    break;
+                case "3d":
+                    result = result.Where(x => x.Picture.Any(xx => xx.type == "3D")).ToList();
+                    break;
+                default:
+                    break;
+            }
+
+            int count = result.Count;
+            int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? gallery3ds : galleryPc;
+            int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
+
+            ViewBag.Pages = pages;
             ViewBag.Page = page;
             ViewBag.Filter = filter;
+
             return View();
         }
 

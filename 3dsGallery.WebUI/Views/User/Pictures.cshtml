@@ -12,7 +12,7 @@
         <div class="h2-container">
             <div class="dropdown btn-group pull-right">
                 <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Filter</button>
-                <ul class="dropdown-menu dropdown-menu-right">
+                <ul class="filter-ul dropdown-menu dropdown-menu-right">
                     <li class="active"><a class="filter" value="new" href="#">New</a></li>
                     <li><a class="filter" value="old" href="#">Old</a></li>
                     <li><a class="filter" value="best" href="#">Best</a></li>
@@ -30,75 +30,37 @@
         <div id="picture-data">
             @{ Html.RenderAction("ShowPage", "Picture", new { user = ViewBag.Login, page = (int)ViewBag.Page, filter = ViewBag.Filter }); }
         </div>
+
+        @{
+            int pages = (int)ViewBag.Pages;
+            if (pages > 1)
+            {
+                <div id="pagination" class="t-slate-gray text-center"></div>
+            }
+        }
     </div>
 </div>
 
 @section scripts {
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
+    @if (bool.Parse(isOld3ds))
+    {
+        @System.Web.Optimization.Scripts.Render("~/bundles/paginationFor3ds")
+    }
+    else
+    {
+        @System.Web.Optimization.Scripts.Render("~/bundles/paginationAjax")
+    }
     <script>
-        function pageInit(){
-            $(".page").on("click",function(e) {
-                if ($(this).parent().hasClass("active"))
-                    return false;
-            });
-
-
-            if (@isOld3ds == true) {
-                $(".page").each(function(i,e){
-                    var filter=$(".dropdown-menu").find(".active").find(".filter").attr("value");
-                    $(e).attr("href", '@Url.Action("Pictures", "User")?user=' + '@ViewBag.Login' + '&page=' + $(e).attr("data-page") + '&filter=' + filter)
-                });
-                return;
-            }
-
-            $(".page").on("click",function(e) {
-                $("#loading").show();
-                $("body").animate({"scrollTop": "0px"}, 500);
-                var pg = $(this).attr("data-page");
-                var filter=$(".dropdown-menu").find(".active").find(".filter").attr("value");
-                $("#picture-data").load('@Url.Action("ShowPage", "Picture")?user=' + '@ViewBag.Login' + '&page=' + pg + '&filter=' + filter, function() {
-                    initImg();
-                    pageInit();
-                    $("#loading").hide();
-                });
-            });
-        };
-
         $(function () {
-            $(".filter").on("click",function(e) {
-                if ($(this).parent().hasClass("active"))
-                    return false;
-            }).each(function(i,e){
-                if ('@ViewBag.Filter' == $(e).attr("value")) {
-                    $(this).parent().addClass("active");
-                } else {
-                    $(this).parent().removeClass("active");
-                }
-            });
 
-            pageInit();
-
-            if (@isOld3ds == true) {
-                $(".filter").each(function(i,e){
-                    $(e).attr("href", '@Url.Action("Pictures", "User")?user=' + '@ViewBag.Login' + '&page=1&filter=' + $(e).attr("value"))
-                });
-                return;
+            var dataUrl =@isOld3ds?'@Url.Action("Likes", "User")' : '@Url.Action("ShowPage", "Picture")';
+            var dataFilters = { filter: '@ViewBag.Filter' };
+            if (!@isOld3ds){
+                dataFilters["user"] = '@ViewBag.Login';
             }
 
-            $(".filter").on("click",function(){
-                $("#loading").show();
-                var self=this;
-                $("#picture-data").load('@Url.Action("ShowPage", "Picture")?user=' + '@ViewBag.Login' + '&page=1&filter=' + $(this).attr("value"), function() {
-                    $(".filter").each(function(i,e){
-                        $(e).parent().removeClass("active");
-                    });
-                    $(self).parent().addClass("active");
-
-                    initImg();
-                    pageInit();
-                    $("#loading").hide();
-                });
-            });
-        });
+            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#picture-data", true);
+        })
     </script>
 }

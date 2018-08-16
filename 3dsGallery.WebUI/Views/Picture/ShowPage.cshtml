@@ -1,7 +1,9 @@
 ﻿@model IEnumerable<_3dsGallery.DataLayer.DataBase.Picture>
+
 <div class="row">
     @{ Html.RenderAction("GetElements", "Picture", new { items = Model }); }
 </div>
+
 <script>
     var contentPages=@ViewBag.Pages;
 </script>

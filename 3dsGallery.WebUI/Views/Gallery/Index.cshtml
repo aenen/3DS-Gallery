@@ -1,7 +1,7 @@
 ﻿@{
     ViewBag.Title = "Galleries";
     string is3ds = Request.UserAgent.Contains("Nintendo 3DS").ToString().ToLower();
-    string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
+    string isOld3ds = "true"; (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
 }
 
 @section Styles {
@@ -13,7 +13,7 @@
         <div class="h2-container">
             <div class="dropdown btn-group pull-right">
                 <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">Filter</button>
-                <ul class="dropdown-menu dropdown-menu-right">
+                <ul class="filter-ul dropdown-menu dropdown-menu-right">
                     <li class="active"><a class="filter" value="updated" href="#">Updated</a></li>
                     <li><a class="filter" value="new" href="#">New</a></li>
                     <li><a class="filter" value="old" href="#">Old</a></li>
@@ -39,12 +39,29 @@
                 Html.RenderAction("ShowPage", "Gallery", new { page = (int)ViewBag.Page, filter = ViewBag.Filter });
             }
         </div>
+
+        @{
+            int pages = (int)ViewBag.Pages;
+            if (pages > 1)
+            {
+                <div id="pagination" class="t-slate-gray text-center"></div>
+            }
+        }
     </div>
 </div>
 
 @section scripts {
+@if (bool.Parse(isOld3ds))
+    {
+    @System.Web.Optimization.Scripts.Render("~/bundles/paginationFor3ds")
+}
+else
+{
+    @System.Web.Optimization.Scripts.Render("~/bundles/paginationAjax")
+}
     <script>
-        function pageInit() {
+        $(function () {
+
             if (@is3ds == true) {
                 $(".gallery-name").each(function (i, e) {
                     var thisText = $(this).text();
@@ -57,67 +74,10 @@
                 });
             }
 
-            $(".page").on("click",function(e) {
-                if ($(this).parent().hasClass("active"))
-                    return false;
-            });
+            var dataUrl =@isOld3ds?'@Url.Action("Index", "Gallery")' : '@Url.Action("ShowPage", "Gallery")';
+            var dataFilters = { filter: '@ViewBag.Filter' };
 
-
-            if (@isOld3ds == true) {
-                $(".page").each(function(i,e){
-                    var filter=$(".dropdown-menu").find(".active").find(".filter").attr("value");
-                    $(e).attr("href", '@Url.Action("Index", "Gallery")?page=' + $(e).attr("data-page") + '&filter=' + filter)
-                });
-                return;
-            }
-
-            $(".page").on("click",function(e) {
-                $("#loading").show();
-                $("html,body").animate({"scrollTop": "0px"}, "slow");
-                var pg = $(this).attr("data-page");
-                var filter=$(".dropdown-menu").find(".active").find(".filter").attr("value");
-                $("#gallery-data").load('@Url.Action("ShowPage", "Gallery")?page=' + pg + '&filter=' + filter, function() {
-                    pageInit();
-                    $("#loading").hide();
-                });
-            });
-        };
-
-        $(function () {
-
-            $(".filter").on("click",function(e) {
-                if ($(this).parent().hasClass("active"))
-                    return false;
-            }).each(function(i,e){
-                if ('@ViewBag.Filter' == $(e).attr("value")) {
-                    $(this).parent().addClass("active");
-                } else {
-                    $(this).parent().removeClass("active");
-                }
-            });
-
-            pageInit();
-
-            if (@isOld3ds == true) {
-                $(".filter").each(function(i,e){
-                    $(e).attr("href", '@Url.Action("Index", "Gallery")?page=1&filter=' + $(e).attr("value"))
-                });
-                return;
-            }
-
-            $(".filter").on("click",function(){
-                $("#loading").show();
-                var self=this;
-                $("#gallery-data").load('@Url.Action("ShowPage", "Gallery")?page=1&filter=' + $(this).attr("value"), function() {
-                    $(".filter").each(function(i,e){
-                        $(e).parent().removeClass("active");
-                    });
-                    $(self).parent().addClass("active");
-
-                    pageInit();
-                    $("#loading").hide();
-                });
-            });
-        });
+            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#gallery-data", false);
+        })
     </script>
 }

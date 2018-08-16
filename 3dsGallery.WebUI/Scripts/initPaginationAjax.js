@@ -1,4 +1,4 @@
-﻿var initPagination = function (page, pages, url, filters, dataSelector) {
+﻿var initPagination = function (page, pages, url, filters, dataSelector,isPicture) {
   
   var paginationAjaxData = {
     dataElementSelector: dataSelector,
@@ -10,7 +10,9 @@
       $('html, body').animate({ scrollTop: "0px" });
     },
     afterLoadPageSuccess: function () {
-      initImg();
+      if (isPicture) {
+        initImg();
+      }
       loading(false);
     },
     afterLoadPageError: function () { loading(false); },
@@ -30,8 +32,10 @@
     filters["filter"] = $(this).attr("value");
     var urlParams = $.param(filters);
 
-    $("#picture-data").load(url+'?page=1&' + urlParams, function () {
-      initImg();
+    $(dataSelector).load(url + '?page=1&' + urlParams, function () {
+      if (isPicture) {
+        initImg();
+      }
       $("#pagination").paginationAjax(url, contentPages, $.extend(paginationAjaxData, { urlParameters: filters }));
       loading(false);
     });
