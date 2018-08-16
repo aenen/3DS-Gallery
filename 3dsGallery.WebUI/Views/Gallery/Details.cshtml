@@ -1,7 +1,7 @@
-﻿@model _3dsGallery.DataLayer.DataBase.Gallery
+﻿@model _3dsGallery.WebUI.Models.GalleryDetailsView
 
 @{
-    ViewBag.Title = $"\"{Model.name}\"";
+    ViewBag.Title = $"\"{Model.Gallery.name}\"";
     string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
 }
 
@@ -13,7 +13,7 @@
     <div class="container body-content section-separator-bottom">
         <div class="h2-container">
             <div class="dropdown btn-group pull-right">
-                <button class="btn btn-@Model.Style.value dropdown-toggle" type="button" data-toggle="dropdown">Filter</button>
+                <button class="btn btn-@Model.Gallery.Style.value dropdown-toggle" type="button" data-toggle="dropdown">Filter</button>
                 <ul class="filter-ul dropdown-menu dropdown-menu-right">
                     <li class="active"><a class="filter" value="new" href="#">New</a></li>
                     <li><a class="filter" value="old" href="#">Old</a></li>
@@ -22,22 +22,22 @@
                     <li><a class="filter" value="2d" href="#">2D</a></li>
                 </ul>
             </div>
-            <h2 class="text-@Model.Style.value gallery-name">
-                @Model.name
+            <h2 class="text-@Model.Gallery.Style.value gallery-name">
+                @Model.Gallery.name
                 @if (!bool.Parse(isOld3ds))
                 {
                     <img id="loading" src="~/Content/loading_black.gif" height="25" width="25" hidden />
                 }
             </h2>
         </div>
-        <p class="gallery-desc">@Model.info</p>
-        @if (Model.User.login == User.Identity.Name)
+        <p class="gallery-desc">@Model.Gallery.info</p>
+        @if (Model.Gallery.User.login == User.Identity.Name)
         {
             <hr />
             <div class="row text-center">
-                <a href="@Url.Action("Delete", "Gallery", new { id = Model.id })" class="btn btn-danger">Delete</a>
-                <a href="@Url.Action("Edit", "Gallery", new { id = Model.id })" class="btn btn-info">Edit</a>
-                <a href="@Url.Action("AddPicture", "Gallery", new { id = Model.id })" class="btn btn-success">Add image</a>
+                <a href="@Url.Action("Delete", "Gallery", new { id = Model.Gallery.id })" class="btn btn-danger">Delete</a>
+                <a href="@Url.Action("Edit", "Gallery", new { id = Model.Gallery.id })" class="btn btn-info">Edit</a>
+                <a href="@Url.Action("AddPicture", "Gallery", new { id = Model.Gallery.id })" class="btn btn-success">Add image</a>
             </div>
         }
     </div>
@@ -46,7 +46,9 @@
 <div class="section-grey">
     <div class="container body-content section-separator-top">
         <div id="picture-data">
-            @{ Html.RenderAction("ShowPage", "Picture", new { page = (int)ViewBag.Page, filter = ViewBag.Filter, gallery = Model.id }); }
+            <div class="row">
+                @{ Html.RenderAction("GetElements", "Picture", new { items = Model.PicturePageData }); }
+            </div>
         </div>
 
         @{
@@ -77,7 +79,7 @@
             var dataUrl =@isOld3ds?'@Url.Action("Details", "Gallery")' : '@Url.Action("ShowPage", "Picture")';
             var dataFilters = { filter: '@ViewBag.Filter' };
             if (!@isOld3ds){
-                dataFilters["gallery"] = @Model.id;
+                dataFilters["gallery"] = @Model.Gallery.id;
             }
 
             initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#picture-data", true);

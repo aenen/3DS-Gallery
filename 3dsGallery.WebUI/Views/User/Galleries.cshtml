@@ -32,9 +32,9 @@
 <div class="section-grey">
     <div class="container body-content section-separator-top">
         <div id="gallery-data">
-            @{
-                Html.RenderAction("ShowPage", "Gallery", new { page = (int)ViewBag.Page, filter = ViewBag.Filter, user = ViewBag.Login });
-            }
+            <div class="row">
+                @{ Html.RenderAction("GetElements", "Gallery", new { items = Model }); }
+            </div>
         </div>
 
         @{

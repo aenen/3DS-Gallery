@@ -1,4 +1,5 @@
-﻿using System;
+﻿using _3dsGallery.DataLayer.DataBase;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -34,5 +35,12 @@ namespace _3dsGallery.WebUI.Models
         [StringLength(50)]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+    }
+
+    public class GalleryDetailsView
+    {
+        public Gallery Gallery { get; set; }
+
+        public IEnumerable<Picture> PicturePageData { get; set; }
     }
 }

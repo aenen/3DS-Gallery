@@ -12,6 +12,7 @@ using System.Drawing;
 using _3dsGallery.DataLayer.Tools;
 using _3dsGallery.WebUI.Models;
 using System.Data.Entity.Migrations;
+using _3dsGallery.WebUI.Code;
 
 namespace _3dsGallery.WebUI.Controllers
 {
@@ -19,89 +20,29 @@ namespace _3dsGallery.WebUI.Controllers
     public class GalleryController : Controller
     {
         private readonly GalleryContext db = new GalleryContext();
-        private const int gallery3ds = 5;
-        private const int galleryPc = 12;
-        private const int pictures3ds = 10;
-        private const int picturesPc = 20;
-
+        
         [Route("ShowPage")]
         public ActionResult ShowPage(string user, int page = 1, string filter = "updated")
         {
-            var result = db.Gallery.Include(g => g.Style).Include(g => g.User).ToList();
-
-            switch (filter)
-            {
-                case "updated":
-                    result = result.Where(x=>x.LastPicture!=null).OrderByDescending(x => x.LastPicture.id).ToList();
-                    break;
-                case "new":
-                    result = result.OrderByDescending(x => x.id).ToList();
-                    break;
-                case "old":
-                    result = result.OrderBy(x => x.id).ToList();
-                    break;
-                case "best":
-                    result = result.OrderByDescending(x => x.Picture.Sum(xx => xx.User.Count)).ToList();
-                    break;
-                case "big":
-                    result = result.OrderByDescending(x => x.Picture.Count).ToList();
-                    break;
-                case "3d":
-                    result = result.Where(x => x.Picture.Any(xx => xx.type == "3D")).ToList();
-                    break;
-                default:
-                    break;
-            }
-
-            int count = result.Count;
-            int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? gallery3ds : galleryPc;
-            int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
-
-            ViewBag.Pages = pages;
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            GalleryPageData pageData = new PageData(page, filter, is3ds).GetGalleriesByPage(user);            
             ViewBag.Page = page;
+            ViewBag.Pages = pageData.TotalPages;
+            ViewBag.Filter = filter;
 
-            return PartialView(result.Skip((page - 1) * show_items).Take(show_items).ToList());
-
+            return PartialView(pageData.Galleries);
         }
 
         // GET: Gallery
         public ActionResult Index(int page = 1, string filter = "updated")
         {
-            var result = db.Gallery.Include(g => g.Style).Include(g => g.User).ToList();
-
-            switch (filter)
-            {
-                case "updated":
-                    result = result.Where(x => x.LastPicture != null).OrderByDescending(x => x.LastPicture.id).ToList();
-                    break;
-                case "new":
-                    result = result.OrderByDescending(x => x.id).ToList();
-                    break;
-                case "old":
-                    result = result.OrderBy(x => x.id).ToList();
-                    break;
-                case "best":
-                    result = result.OrderByDescending(x => x.Picture.Sum(xx => xx.User.Count)).ToList();
-                    break;
-                case "big":
-                    result = result.OrderByDescending(x => x.Picture.Count).ToList();
-                    break;
-                case "3d":
-                    result = result.Where(x => x.Picture.Any(xx => xx.type == "3D")).ToList();
-                    break;
-                default:
-                    break;
-            }
-
-            int count = result.Count;
-            int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? gallery3ds : galleryPc;
-            int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
-
-            ViewBag.Pages = pages;
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            GalleryPageData pageData = new PageData(page, filter, is3ds).GetGalleriesByPage();
             ViewBag.Page = page;
+            ViewBag.Pages = pageData.TotalPages;
             ViewBag.Filter = filter;
 
-            return View();
+            return View(pageData.Galleries);
         }
 
         // GET: Gallery/Details/5
@@ -115,43 +56,26 @@ namespace _3dsGallery.WebUI.Controllers
             if (gallery == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            PicturePageData pageData = new PageData(page, filter, is3ds).GetPictruresByPage(id);
             ViewBag.Page = page;
-            ViewBag.Filter = filter;
+            ViewBag.Filter = filter;            
+            ViewBag.Pages = pageData.TotalPages;
 
-            var result = db.Gallery.FirstOrDefault(x=>x.id==id).Picture.ToList();
-            switch (filter)
+            var modelResult = new GalleryDetailsView
             {
-                case "new":
-                    result = result.OrderByDescending(x => x.id).ToList();
-                    break;
-                case "old":
-                    result = result.OrderBy(x => x.id).ToList();
-                    break;
-                case "best":
-                    result = result.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).ToList();
-                    break;
-                case "3d":
-                    result = result.Where(x => x.type == "3D").OrderByDescending(x => x.id).ToList();
-                    break;
-                case "2d":
-                    result = result.Where(x => x.type == "2D").OrderByDescending(x => x.id).ToList();
-                    break;
-                default:
-                    break;
-            }
-            int count = result.Count;
-            int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? pictures3ds : picturesPc;
-            int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
-            ViewBag.Pages = pages;
-
-            return View(gallery);
+                Gallery = gallery,
+                PicturePageData = pageData.Pictures
+            };
+            return View(modelResult);
         }
 
         [Authorize]
         [Route("{id}/AddPicture")]
         public ActionResult AddPicture(short? id)
         {
-            if (!Request.UserAgent.Contains("Nintendo 3DS"))
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            if (!is3ds)
                 return RedirectToAction("Not3ds", "User");
             if (id == null || !IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -166,7 +90,8 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("{id}/AddPicture")]
         public ActionResult AddPicture([Bind(Include = "id,description,path,galleryId")] Picture picture, short id, HttpPostedFileBase file)
         {
-            if (!Request.UserAgent.Contains("Nintendo 3DS"))
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            if (!is3ds)
                 return RedirectToAction("Not3ds", "User");
             if (!IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -243,7 +168,8 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("Create")]
         public ActionResult Create()
         {
-            if (!Request.UserAgent.Contains("Nintendo 3DS"))
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            if (!is3ds)
                 return RedirectToAction("Not3ds", "User");
 
             ViewBag.styleId = new SelectList(db.Style, "id", "name");
@@ -259,7 +185,8 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("Create")]
         public ActionResult Create([Bind(Include = "id,name,info,styleId")] Gallery gallery)
         {
-            if (!Request.UserAgent.Contains("Nintendo 3DS"))
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            if (!is3ds)
                 return RedirectToAction("Not3ds", "User");
 
             if (ModelState.IsValid)

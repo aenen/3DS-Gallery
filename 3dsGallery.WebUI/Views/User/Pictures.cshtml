@@ -1,4 +1,6 @@
-﻿@{
+﻿@model IEnumerable<_3dsGallery.DataLayer.DataBase.Picture>
+
+@{
     ViewBag.Title = "Images by " + ViewBag.Login;
     string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
 }
@@ -28,7 +30,9 @@
 <div class="section-grey">
     <div class="container body-content section-separator-top">
         <div id="picture-data">
-            @{ Html.RenderAction("ShowPage", "Picture", new { user = ViewBag.Login, page = (int)ViewBag.Page, filter = ViewBag.Filter }); }
+            <div class="row">
+                @{ Html.RenderAction("GetElements", "Picture", new { items = Model }); }
+            </div>
         </div>
 
         @{

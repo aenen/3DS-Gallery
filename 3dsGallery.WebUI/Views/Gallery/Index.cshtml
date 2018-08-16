@@ -1,7 +1,9 @@
-﻿@{
+﻿@model IEnumerable<_3dsGallery.DataLayer.DataBase.Gallery>
+
+@{
     ViewBag.Title = "Galleries";
     string is3ds = Request.UserAgent.Contains("Nintendo 3DS").ToString().ToLower();
-    string isOld3ds = "true"; (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
+    string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
 }
 
 @section Styles {
@@ -35,9 +37,9 @@
             </div>
         }
         <div id="gallery-data">
-            @{
-                Html.RenderAction("ShowPage", "Gallery", new { page = (int)ViewBag.Page, filter = ViewBag.Filter });
-            }
+            <div class="row">
+                @{ Html.RenderAction("GetElements", "Gallery", new { items = Model }); }
+            </div>
         </div>
 
         @{
@@ -51,14 +53,14 @@
 </div>
 
 @section scripts {
-@if (bool.Parse(isOld3ds))
+    @if (bool.Parse(isOld3ds))
+        {
+        @System.Web.Optimization.Scripts.Render("~/bundles/paginationFor3ds")
+    }
+    else
     {
-    @System.Web.Optimization.Scripts.Render("~/bundles/paginationFor3ds")
-}
-else
-{
-    @System.Web.Optimization.Scripts.Render("~/bundles/paginationAjax")
-}
+        @System.Web.Optimization.Scripts.Render("~/bundles/paginationAjax")
+    }
     <script>
         $(function () {
 

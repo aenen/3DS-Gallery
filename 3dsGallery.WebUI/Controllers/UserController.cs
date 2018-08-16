@@ -130,42 +130,14 @@ namespace _3dsGallery.WebUI.Controllers
             if (user == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            var result = user.Gallery.ToList();
-
-            switch (filter)
-            {
-                case "updated":
-                    result = result.Where(x => x.LastPicture != null).OrderByDescending(x => x.LastPicture.id).ToList();
-                    break;
-                case "new":
-                    result = result.OrderByDescending(x => x.id).ToList();
-                    break;
-                case "old":
-                    result = result.OrderBy(x => x.id).ToList();
-                    break;
-                case "best":
-                    result = result.OrderByDescending(x => x.Picture.Sum(xx => xx.User.Count)).ToList();
-                    break;
-                case "big":
-                    result = result.OrderByDescending(x => x.Picture.Count).ToList();
-                    break;
-                case "3d":
-                    result = result.Where(x => x.Picture.Any(xx => xx.type == "3D")).ToList();
-                    break;
-                default:
-                    break;
-            }
-
-            int count = result.Count;
-            int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? gallery3ds : galleryPc;
-            int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
-
-            ViewBag.Pages = pages;
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            GalleryPageData pageData = new PageData(page, filter, is3ds).GetGalleriesByPage(login);
             ViewBag.Page = page;
+            ViewBag.Pages = pageData.TotalPages;
             ViewBag.Filter = filter;
             ViewBag.Login = user.login;
 
-            return View(result);
+            return View(pageData.Galleries);
         }
 
         [Route("User/{login}/Pictures")]
@@ -174,38 +146,15 @@ namespace _3dsGallery.WebUI.Controllers
             var user = db.User.Where(x => x.login == login).FirstOrDefault();
             if (user == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            
+
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            PicturePageData pageData = new PageData(page, filter, is3ds).GetPictruresByPage(user: login);
             ViewBag.Page = page;
             ViewBag.Filter = filter;
-
-            var result = user.Gallery.SelectMany(x => x.Picture).ToList();
-            switch (filter)
-            {
-                case "new":
-                    result = result.OrderByDescending(x => x.id).ToList();
-                    break;
-                case "old":
-                    result = result.OrderBy(x => x.id).ToList();
-                    break;
-                case "best":
-                    result = result.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).ToList();
-                    break;
-                case "3d":
-                    result = result.Where(x => x.type == "3D").OrderByDescending(x => x.id).ToList();
-                    break;
-                case "2d":
-                    result = result.Where(x => x.type == "2D").OrderByDescending(x => x.id).ToList();
-                    break;
-                default:
-                    break;
-            }
-            int count = result.Count;
-            int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? pictures3ds : picturesPc;
-            int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
-            ViewBag.Pages = pages;
-
+            ViewBag.Pages = pageData.TotalPages;
             ViewBag.Login = user.login;
-            return View(result);
+
+            return View(pageData.Pictures);
         }
 
         [Route("User/{login}/Likes")]
@@ -215,37 +164,14 @@ namespace _3dsGallery.WebUI.Controllers
             if (user == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            PicturePageData pageData = new PageData(page, filter, is3ds).GetPictruresByPage(user: login,user_likes: true);
             ViewBag.Page = page;
             ViewBag.Filter = filter;
-
-            var result = user.Picture.ToList();
-            switch (filter)
-            {
-                case "new":
-                    result = result.OrderByDescending(x => x.id).ToList();
-                    break;
-                case "old":
-                    result = result.OrderBy(x => x.id).ToList();
-                    break;
-                case "best":
-                    result = result.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).ToList();
-                    break;
-                case "3d":
-                    result = result.Where(x => x.type == "3D").OrderByDescending(x => x.id).ToList();
-                    break;
-                case "2d":
-                    result = result.Where(x => x.type == "2D").OrderByDescending(x => x.id).ToList();
-                    break;
-                default:
-                    break;
-            }
-            int count = result.Count;
-            int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? pictures3ds : picturesPc;
-            int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
-            ViewBag.Pages = pages;
-
+            ViewBag.Pages = pageData.TotalPages;
             ViewBag.Login = user.login;
-            return View(result);
+
+            return View(pageData.Pictures);
         }
 
         [Route("Not3ds")]

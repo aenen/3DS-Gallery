@@ -12,48 +12,25 @@ using System.Data.Entity.Migrations;
 using _3dsGallery.DataLayer.Tools;
 using _3dsGallery.WebUI.Models;
 using System.Drawing;
+using _3dsGallery.WebUI.Code;
 
 namespace _3dsGallery.WebUI.Controllers
 {
     public class PictureController : Controller
     {
         private readonly GalleryContext db = new GalleryContext();
-        private const int pictures3ds = 10;
-        private const int picturesPc = 20;
 
         //GET: Pictures
         [Route("Pictures")]
         public ActionResult Index(int page = 1, string filter = "new")
         {
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            PicturePageData pageData = new PageData(page, filter, is3ds).GetPictruresByPage();
             ViewBag.Page = page;
             ViewBag.Filter = filter;
-            
-            var result = db.Picture.Include(p => p.Gallery).ToList();
-            switch (filter)
-            {
-                case "new":
-                    result = result.OrderByDescending(x => x.id).ToList();
-                    break;
-                case "old":
-                    result = result.OrderBy(x => x.id).ToList();
-                    break;
-                case "best":
-                    result = result.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).ToList();
-                    break;
-                case "3d":
-                    result = result.Where(x => x.type == "3D").OrderByDescending(x => x.id).ToList();
-                    break;
-                case "2d":
-                    result = result.Where(x => x.type == "2D").OrderByDescending(x => x.id).ToList();
-                    break;
-                default:
-                    break;
-            }
-            int count = result.Count;
-            int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? pictures3ds : picturesPc;
-            int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
-            ViewBag.Pages = pages;
-            return View();
+            ViewBag.Pages = pageData.TotalPages;
+
+            return View(pageData.Pictures);
         }
 
         [Authorize]
@@ -235,43 +212,13 @@ namespace _3dsGallery.WebUI.Controllers
 
         public ActionResult ShowPage(int? gallery, string user, int page = 1, string filter = "new", bool user_likes = false)
         {
-            var result = db.Picture.Include(p => p.Gallery).ToList();
-            var userdb = db.User.FirstOrDefault(x => x.login == user);
-
-            if (gallery != null)
-                result = result.Where(x => x.galleryId == gallery).ToList();
-            if (user_likes && user != null)
-                result = result.Where(x => x.User.Contains(userdb)).ToList();
-            else if (user != null)
-                result = result.Where(x => x.Gallery.User.login == user).ToList();
-
-            switch (filter)
-            {
-                case "new":
-                    result = result.OrderByDescending(x => x.id).ToList();
-                    break;
-                case "old":
-                    result = result.OrderBy(x => x.id).ToList();
-                    break;
-                case "best":
-                    result = result.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).ToList();
-                    break;
-                case "3d":
-                    result = result.Where(x => x.type == "3D").OrderByDescending(x => x.id).ToList();
-                    break;
-                case "2d":
-                    result = result.Where(x => x.type == "2D").OrderByDescending(x => x.id).ToList();
-                    break;
-                default:
-                    break;
-            }
-
-            int count = result.Count;
-            int show_items = (Request.UserAgent.Contains("Nintendo 3DS")) ? pictures3ds : picturesPc;
-            int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
-            ViewBag.Pages = pages;
+            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+            PicturePageData pageData = new PageData(page, filter, is3ds).GetPictruresByPage(gallery,user,user_likes);
             ViewBag.Page = page;
-            return PartialView(result.Skip((page - 1) * show_items).Take(show_items).ToList());
+            ViewBag.Filter = filter;
+            ViewBag.Pages = pageData.TotalPages;
+
+            return PartialView(pageData.Pictures);
         }
 
 
