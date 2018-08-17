@@ -211,6 +211,7 @@ h2 {
 
 .preview-container-md .preview-img {
     max-height: none;
+    width: 100%;
 }
 
 .img-comment {
