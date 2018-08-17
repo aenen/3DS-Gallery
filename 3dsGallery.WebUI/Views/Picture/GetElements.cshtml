@@ -14,10 +14,6 @@
                 <a target="_blank" href="~/@itemPic.path">
                     @{
                         string preview_md = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.id}-thumb_md.JPG") ? $"/Picture/{itemPic.id}-thumb_md.JPG" : $"/Picture/{itemPic.id}.JPG";
-                        if (isOld3ds)
-                        {
-                            preview_md = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.id}-thumb_sm.JPG") ? $"/Picture/{itemPic.id}-thumb_sm.JPG" : preview_md;
-                        }
                     }
                     <img class="preview-img" src="@preview_md" />
                 </a>
@@ -53,7 +49,8 @@
                             <button class="img-edit btn btn-info">@Html.Raw(editBtnCode)</button>
                             <button class="img-edit-save btn btn-success">
                                 @Html.Raw(okBtnCode)
-                                <img class="saving-load" src="~/Content/loading.gif" />
+                                @*<img class="saving-load" src="~/Content/loading.gif" />*@
+                                <b class="saving-load">…</b>
                             </button>
                         </div>
                     }

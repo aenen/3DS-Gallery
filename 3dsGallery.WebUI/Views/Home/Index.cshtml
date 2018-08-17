@@ -1,8 +1,8 @@
 ﻿@model _3dsGallery.DataLayer.DataBase.GalleryContext
 @{
     ViewBag.Title = "Home";
-    int gallery_count = Request.UserAgent.Contains("Nintendo 3DS") ? 3 : 3;
-    int picture_count = Request.UserAgent.Contains("Nintendo 3DS") ? 4 : 12;
+    int gallery_count = Request.UserAgent.Contains("Nintendo 3DS") ? 2 : 3;
+    int picture_count = Request.UserAgent.Contains("Nintendo 3DS") ? 3 : 12;
 }
 
 <div class="section-white">

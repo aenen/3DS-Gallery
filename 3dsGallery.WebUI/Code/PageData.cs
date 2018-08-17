@@ -9,9 +9,9 @@ namespace _3dsGallery.WebUI.Code
     public class PageData
     {
         private readonly GalleryContext db = new GalleryContext();
-        private const int gallery3ds = 5;
+        private const int gallery3ds = 4;
         private const int galleryPc = 12;
-        private const int pictures3ds = 10;
+        private const int pictures3ds = 8;
         private const int picturesPc = 20;
 
         public int Page { get; set; }
