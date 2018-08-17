@@ -23,8 +23,11 @@ namespace _3dsGallery.DataLayer.DataBase
         public string name { get; set; }
 
         [Required]
-        [StringLength(20)]
+        [StringLength(50)]
         public string value { get; set; }
+        
+        [StringLength(50)]
+        public string ValueEx { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gallery> Gallery { get; set; }

@@ -69,6 +69,10 @@
     <Compile Include="Migrations\201808071656093_DeletePasswordColumn.Designer.cs">
       <DependentUpon>201808071656093_DeletePasswordColumn.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201808171158373_AddValueExColumn.cs" />
+    <Compile Include="Migrations\201808171158373_AddValueExColumn.Designer.cs">
+      <DependentUpon>201808171158373_AddValueExColumn.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\PictureTools.cs" />
@@ -86,6 +90,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201808071656093_DeletePasswordColumn.resx">
       <DependentUpon>201808071656093_DeletePasswordColumn.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201808171158373_AddValueExColumn.resx">
+      <DependentUpon>201808171158373_AddValueExColumn.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
