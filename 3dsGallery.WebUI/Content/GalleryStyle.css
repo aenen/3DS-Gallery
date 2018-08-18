@@ -28,13 +28,7 @@
     border-color: #E6ADBD;
 }
 
-    .btn-sweet-pink:hover {
-        color: #fff;
-        background-color: #E8AEBF;
-        border-color: #D9A3B2;
-    }
-
-    .btn-sweet-pink.active, .btn-sweet-pink:active, .open > .dropdown-toggle.btn-sweet-pink, .btn-sweet-pink.focus, .btn-sweet-pink:focus {
+    .btn-sweet-pink.active, .btn-sweet-pink:active, .open > .dropdown-toggle.btn-sweet-pink, .btn-sweet-pink.focus, .btn-sweet-pink:focus, .btn-sweet-pink:hover {
         color: #fff;
         background-color: #E8AEBF;
         border-color: #D9A3B2;
@@ -48,4 +42,61 @@
 
 .style-sweet-pink {
     background-color: #BF6060;
+}
+
+.section-sweet-pink {
+
+}
+
+
+
+
+
+/* NOCTURNAL PURPLE Panel */
+
+.panel-nocturnal-purple {
+    border-color: #dcd6dc;
+}
+
+    .panel-nocturnal-purple > .panel-heading {
+        color: #5c3e5c;
+        background-color: #f5f0f5;
+        border-color: #d8c5d8;
+    }
+
+        .panel-nocturnal-purple > .panel-heading .badge {
+            color: #e8dce8;
+            background-color: #5c3e5c;
+        }
+
+    .panel-nocturnal-purple > .panel-body {
+        background-color: #e8dee8;
+    }
+
+/* NOCTURNAL PURPLE Button */
+
+.btn-nocturnal-purple {
+    color: #e8dce8;
+    background-color: #c1a7c1;
+    border-color: #b195b1;
+}
+
+    .btn-nocturnal-purple.active, .btn-nocturnal-purple:active, .open > .dropdown-toggle.btn-nocturnal-purple, .btn-nocturnal-purple.focus, .btn-nocturnal-purple:focus, .btn-nocturnal-purple:hover {
+        color: #e8dce8;
+        background-color: #B29AB2;
+        border-color: #A891A8;
+    }
+
+/* NOCTURNAL PURPLE Other */
+
+.text-nocturnal-purple {
+    color: #5c3e5c;
+}
+
+.style-nocturnal-purple {
+    background-color: #5c3e5c;
+}
+
+.section-nocturnal-purple {
+
 }
