@@ -65,7 +65,7 @@
     }
 
         .panel-nocturnal-purple > .panel-heading .badge {
-            color: #e8dce8;
+            color: #f5f0f5;
             background-color: #5c3e5c;
         }
 
@@ -76,13 +76,13 @@
 /* NOCTURNAL PURPLE Button */
 
 .btn-nocturnal-purple {
-    color: #e8dce8;
+    color: #fff;
     background-color: #c1a7c1;
     border-color: #b195b1;
 }
 
     .btn-nocturnal-purple.active, .btn-nocturnal-purple:active, .open > .dropdown-toggle.btn-nocturnal-purple, .btn-nocturnal-purple.focus, .btn-nocturnal-purple:focus, .btn-nocturnal-purple:hover {
-        color: #e8dce8;
+        color: #fff;
         background-color: #B29AB2;
         border-color: #A891A8;
     }
