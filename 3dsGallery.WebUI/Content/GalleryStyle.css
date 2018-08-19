@@ -45,7 +45,9 @@
 }
 
 .section-sweet-pink {
-
+    background-color: #FFE5ED;
+    border-top: 1px solid #fcc;
+    border-bottom: 1px solid #fcc;
 }
 
 
@@ -98,5 +100,7 @@
 }
 
 .section-nocturnal-purple {
-
+    background-color: #E8DEE8;
+    border-top: 1px solid #d8c5d8;
+    border-bottom: 1px solid #d8c5d8;
 }

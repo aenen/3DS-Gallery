@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = $"\"{Model.Gallery.name}\"";
     string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
+    string galleryStyleClass= Model.Gallery.Style.ValueEx == null ? Model.Gallery.Style.value : Model.Gallery.Style.ValueEx;
 }
 
 @section Styles {
@@ -43,7 +44,7 @@
     </div>
 </div>
 
-<div class="section-grey">
+<div class="section-@galleryStyleClass">
     <div class="container body-content section-separator-top">
         <div id="picture-data">
             <div class="row">
@@ -55,7 +56,7 @@
             int pages = (int)ViewBag.Pages;
             if (pages > 1)
             {
-                <div id="pagination" class="t-slate-gray text-center"></div>
+                <div id="pagination" class="t-@galleryStyleClass text-center"></div>
             }
         }
     </div>
