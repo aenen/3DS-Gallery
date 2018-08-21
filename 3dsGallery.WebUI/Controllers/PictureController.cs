@@ -33,13 +33,11 @@ namespace _3dsGallery.WebUI.Controllers
             return View(pageData.Pictures);
         }
 
+        [Only3DS]
         [Authorize]
         [Route("AddPicture")]
         public ActionResult AddPicture()
         {
-            if (!Request.UserAgent.Contains("Nintendo 3DS"))
-                return RedirectToAction("Not3ds", "User");
-
             var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
             if (user == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -48,15 +46,13 @@ namespace _3dsGallery.WebUI.Controllers
             return View(new AddPictureModel());
         }
 
+        [Only3DS]
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("AddPicture")]
         public ActionResult AddPicture(AddPictureModel model, HttpPostedFileBase file)
         {
-            if (!Request.UserAgent.Contains("Nintendo 3DS"))
-                return RedirectToAction("Not3ds", "User");
-
             var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
             if (user == null || !IsItMineGallery(model.galleryId))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);

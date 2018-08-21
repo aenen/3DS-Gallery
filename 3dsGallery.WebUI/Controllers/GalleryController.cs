@@ -70,13 +70,11 @@ namespace _3dsGallery.WebUI.Controllers
             return View(modelResult);
         }
 
+        [Only3DS]
         [Authorize]
         [Route("{id}/AddPicture")]
         public ActionResult AddPicture(short? id)
         {
-            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            if (!is3ds)
-                return RedirectToAction("Not3ds", "User");
             if (id == null || !IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
@@ -84,15 +82,13 @@ namespace _3dsGallery.WebUI.Controllers
             return View(picture);
         }
 
+        [Only3DS]
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("{id}/AddPicture")]
         public ActionResult AddPicture(AddPictureModel model, short id, HttpPostedFileBase file)
         {
-            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            if (!is3ds)
-                return RedirectToAction("Not3ds", "User");
             if (!IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
@@ -117,52 +113,6 @@ namespace _3dsGallery.WebUI.Controllers
 
             picture = new PictureSaver(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture")).AnalyzeAndSave(picture, model, file);
 
-            //// зберігаю зображення
-            //string picture_folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture");
-            //string picture_name = picture.id.ToString() + Path.GetExtension(file.FileName);
-            //string picture_folder_name = Path.Combine(picture_folder, picture_name);
-            //file.SaveAs(picture_folder_name);
-
-            //picture.path = Path.Combine("Picture", picture_name); // записую відносний шлях в обєкт бази даних
-
-            //// отримую всі зображення з файлу
-            //var images = MpoParser.GetImageSources(picture_folder_name);
-            //Image img_for_thumb;
-            //if (images.Count() == 0) // якщо 2D
-            //{
-            //    img_for_thumb = Image.FromFile(picture_folder_name);
-            //    picture.type = "2D";
-            //}
-            //else // якщо 3D
-            //{
-            //    img_for_thumb = images.ElementAt(0); // беру перше зображення (з лівої камери)
-            //    img_for_thumb.Save(Path.ChangeExtension(picture_folder_name, ".JPG")); // зберігаю зображення, з якого буду робити превю
-
-            //    // змінюю формат оригіналу на .mpo (на сервер заавжди приходить зображення формату JPG)
-            //    picture_name = Path.ChangeExtension(picture_name, ".MPO");
-            //    file.SaveAs(Path.Combine(picture_folder, picture_name));
-            //    picture.path = Path.Combine("Picture", picture_name);
-            //    picture.type = "3D";
-            //}
-
-            //var original_length = PictureTools.getByteSize(img_for_thumb).LongLength;
-            //// створюю прев'ю
-            //var thumb_sm = PictureTools.MakeThumbnail(img_for_thumb, 155, 97);
-            //var thumb_sm_length = PictureTools.getByteSize(thumb_sm).LongLength;
-            //if (original_length > thumb_sm_length)
-            //{
-            //    thumb_sm.Save($"{picture_folder}/{picture.id}-thumb_sm.JPG");
-            //}
-
-            //var thumb_md = PictureTools.MakeThumbnail(img_for_thumb, 280, 999);
-            //var thumb_md_length = PictureTools.getByteSize(thumb_md).LongLength;
-            //if (original_length > thumb_md_length)
-            //{
-            //    thumb_md.Save($"{picture_folder}/{picture.id}-thumb_md.JPG");
-            //    if (Path.GetExtension(picture.path) == ".MPO")
-            //        System.IO.File.Delete(picture_folder_name); // видаляю непотрібний файл
-            //}
-
             picture.Gallery.LastPicture = picture;
             db.Entry(picture).State = EntityState.Modified;
             db.SaveChanges();
@@ -171,14 +121,11 @@ namespace _3dsGallery.WebUI.Controllers
         }
 
         // GET: Gallery/Create
+        [Only3DS]
         [Authorize]
         [Route("Create")]
         public ActionResult Create()
         {
-            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            if (!is3ds)
-                return RedirectToAction("Not3ds", "User");
-
             ViewBag.styleId = new SelectList(db.Style, "id", "name");
             return View();
         }
@@ -186,16 +133,13 @@ namespace _3dsGallery.WebUI.Controllers
         // POST: Gallery/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Only3DS]
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("Create")]
         public ActionResult Create([Bind(Include = "id,name,info,styleId")] Gallery gallery)
         {
-            bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            if (!is3ds)
-                return RedirectToAction("Not3ds", "User");
-
             if (ModelState.IsValid)
             {
                 gallery.User = db.User.FirstOrDefault(x => x.login == User.Identity.Name);

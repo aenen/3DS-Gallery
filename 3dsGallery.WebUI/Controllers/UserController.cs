@@ -17,27 +17,20 @@ namespace _3dsGallery.WebUI.Controllers
     public class UserController : Controller
     {
         readonly GalleryContext db = new GalleryContext();
-        private const int gallery3ds = 5;
-        private const int galleryPc = 12;
-        private const int pictures3ds = 10;
-        private const int picturesPc = 20;
 
         // GET: User
+        [Only3DS]
         [Route("Register")]
         public ActionResult Register()
         {
-            if (Request.UserAgent.Contains("Nintendo 3DS"))
-                return RedirectToAction("Not3ds");
             return View(new RegisterView());
         }
 
+        [Only3DS]
         [HttpPost]
         [Route("Register")]
         public ActionResult Register(RegisterView model)
         {
-            if (Request.UserAgent.Contains("Nintendo 3DS"))
-                return RedirectToAction("Not3ds");
-
             if (!ModelState.IsValid)
             {
                 ViewBag.Error = "Entered data is not right. Please try again.";
