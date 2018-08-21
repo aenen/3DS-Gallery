@@ -80,7 +80,7 @@ namespace _3dsGallery.WebUI.Controllers
             if (id == null || !IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            Picture picture = new Picture { Gallery = db.Gallery.Find(id) };
+            AddPictureModel picture = new AddPictureModel { Gallery = db.Gallery.Find(id) };
             return View(picture);
         }
 
@@ -88,7 +88,7 @@ namespace _3dsGallery.WebUI.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("{id}/AddPicture")]
-        public ActionResult AddPicture([Bind(Include = "id,description,path,galleryId")] Picture picture, short id, HttpPostedFileBase file)
+        public ActionResult AddPicture(AddPictureModel model, short id, HttpPostedFileBase file)
         {
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
             if (!is3ds)
@@ -96,65 +96,72 @@ namespace _3dsGallery.WebUI.Controllers
             if (!IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            picture.Gallery = db.Gallery.Find(id);
+            model.Gallery = db.Gallery.Find(id);
             if (!ModelState.IsValid || file == null)
-                return View(picture);
+                return View(model);
 
             if (file.ContentLength > 750 * 1000)
-                return View(picture);
+                return View(model);
 
             string file_extention = Path.GetExtension(file.FileName).ToLower();
             if (file_extention != ".mpo" && file_extention != ".jpg")
-                return View(picture);
-
+                return View(model);
+            
+            Picture picture = new Picture
+            {
+                description = model.description,
+                Gallery= model.Gallery
+            };
             db.Picture.Add(picture);
             db.SaveChanges();
 
-            // зберігаю зображення
-            string picture_folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture");
-            string picture_name = picture.id.ToString() + Path.GetExtension(file.FileName);
-            string picture_folder_name = Path.Combine(picture_folder, picture_name);
-            file.SaveAs(picture_folder_name);
+            picture = new PictureSaver(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture")).AnalyzeAndSave(picture, model, file);
 
-            picture.path = Path.Combine("Picture", picture_name); // записую відносний шлях в обєкт бази даних
+            //// зберігаю зображення
+            //string picture_folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture");
+            //string picture_name = picture.id.ToString() + Path.GetExtension(file.FileName);
+            //string picture_folder_name = Path.Combine(picture_folder, picture_name);
+            //file.SaveAs(picture_folder_name);
 
-            // отримую всі зображення з файлу
-            var images = MpoParser.GetImageSources(picture_folder_name);
-            Image img_for_thumb;
-            if (images.Count() == 0) // якщо 2D
-            {
-                img_for_thumb = Image.FromFile(picture_folder_name);
-                picture.type = "2D";
-            }
-            else // якщо 3D
-            {
-                img_for_thumb = images.ElementAt(0); // беру перше зображення (з лівої камери)
-                img_for_thumb.Save(Path.ChangeExtension(picture_folder_name, ".JPG")); // зберігаю зображення, з якого буду робити превю
+            //picture.path = Path.Combine("Picture", picture_name); // записую відносний шлях в обєкт бази даних
 
-                // змінюю формат оригіналу на .mpo (на сервер заавжди приходить зображення формату JPG)
-                picture_name = Path.ChangeExtension(picture_name, ".MPO");
-                file.SaveAs(Path.Combine(picture_folder, picture_name));
-                picture.path = Path.Combine("Picture", picture_name);
-                picture.type = "3D";
-            }
+            //// отримую всі зображення з файлу
+            //var images = MpoParser.GetImageSources(picture_folder_name);
+            //Image img_for_thumb;
+            //if (images.Count() == 0) // якщо 2D
+            //{
+            //    img_for_thumb = Image.FromFile(picture_folder_name);
+            //    picture.type = "2D";
+            //}
+            //else // якщо 3D
+            //{
+            //    img_for_thumb = images.ElementAt(0); // беру перше зображення (з лівої камери)
+            //    img_for_thumb.Save(Path.ChangeExtension(picture_folder_name, ".JPG")); // зберігаю зображення, з якого буду робити превю
 
-            var original_length = PictureTools.getByteSize(img_for_thumb).LongLength;
-            // створюю прев'ю
-            var thumb_sm = PictureTools.MakeThumbnail(img_for_thumb, 155, 97);
-            var thumb_sm_length = PictureTools.getByteSize(thumb_sm).LongLength;
-            if (original_length > thumb_sm_length)
-            {
-                thumb_sm.Save($"{picture_folder}/{picture.id}-thumb_sm.JPG");
-            }
+            //    // змінюю формат оригіналу на .mpo (на сервер заавжди приходить зображення формату JPG)
+            //    picture_name = Path.ChangeExtension(picture_name, ".MPO");
+            //    file.SaveAs(Path.Combine(picture_folder, picture_name));
+            //    picture.path = Path.Combine("Picture", picture_name);
+            //    picture.type = "3D";
+            //}
 
-            var thumb_md = PictureTools.MakeThumbnail(img_for_thumb, 280, 999);
-            var thumb_md_length = PictureTools.getByteSize(thumb_md).LongLength;
-            if (original_length > thumb_md_length)
-            {
-                thumb_md.Save($"{picture_folder}/{picture.id}-thumb_md.JPG");
-                if (Path.GetExtension(picture.path) == ".MPO")
-                    System.IO.File.Delete(picture_folder_name); // видаляю непотрібний файл
-            }
+            //var original_length = PictureTools.getByteSize(img_for_thumb).LongLength;
+            //// створюю прев'ю
+            //var thumb_sm = PictureTools.MakeThumbnail(img_for_thumb, 155, 97);
+            //var thumb_sm_length = PictureTools.getByteSize(thumb_sm).LongLength;
+            //if (original_length > thumb_sm_length)
+            //{
+            //    thumb_sm.Save($"{picture_folder}/{picture.id}-thumb_sm.JPG");
+            //}
+
+            //var thumb_md = PictureTools.MakeThumbnail(img_for_thumb, 280, 999);
+            //var thumb_md_length = PictureTools.getByteSize(thumb_md).LongLength;
+            //if (original_length > thumb_md_length)
+            //{
+            //    thumb_md.Save($"{picture_folder}/{picture.id}-thumb_md.JPG");
+            //    if (Path.GetExtension(picture.path) == ".MPO")
+            //        System.IO.File.Delete(picture_folder_name); // видаляю непотрібний файл
+            //}
 
             picture.Gallery.LastPicture = picture;
             db.Entry(picture).State = EntityState.Modified;

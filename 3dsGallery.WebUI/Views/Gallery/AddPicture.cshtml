@@ -1,4 +1,4 @@
-﻿@model _3dsGallery.DataLayer.DataBase.Picture
+﻿@model _3dsGallery.WebUI.Models.AddPictureModel
 
 @{
     ViewBag.Title = "Add image to the gallery";
@@ -32,6 +32,45 @@
                         @Html.ValidationMessageFor(model => model.description, "", new { @class = "text-danger" })
                     </div>
                 </div>
+
+
+                <div class="form-group">
+                    @Html.LabelFor(x => x.isAdvanced, "Advanced Settings", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="btn-group-toggle" data-toggle="buttons">
+                            <label class="btn btn-default" data-toggle="collapse" data-target="#advanced">
+                                @Html.CheckBoxFor(x => x.isAdvanced) On/Off
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapse" id="advanced">
+                    <div class="form-group">
+                        @Html.LabelFor(x => x.isTo2d, "Save as 2D", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <div class="btn-group-toggle" data-toggle="buttons">
+                                <label class="btn btn-default" data-toggle="collapse" data-target="#save-as-2d">
+                                    @Html.CheckBoxFor(x => x.isTo2d) Yes
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="save-as-2d" class="form-group collapse">
+                        <label class="control-label col-md-2">Which one?</label>
+                        <div class="col-md-10">
+                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                <label class="btn btn-default active">
+                                    @Html.RadioButtonFor(x => x.leftOrRight, 0) Left
+                                </label>
+                                <label class="btn btn-default">
+                                    @Html.RadioButtonFor(x => x.leftOrRight, 1) Right
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
                         <input type="submit" value="Add" class="btn btn-default" />

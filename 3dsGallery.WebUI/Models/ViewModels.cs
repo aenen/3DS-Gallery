@@ -43,4 +43,23 @@ namespace _3dsGallery.WebUI.Models
 
         public IEnumerable<Picture> PicturePageData { get; set; }
     }
+
+    public class AddPictureModel
+    {
+        [StringLength(150)]
+        public string description { get; set; }
+
+        //[StringLength(50)]
+        //public string path { get; set; }
+
+        public short galleryId { get; set; }
+
+        public Gallery Gallery { get; set; }
+
+        public bool isAdvanced { get; set; }
+
+        public bool isTo2d { get; set; }
+
+        public int leftOrRight { get; set; }
+    }
 }
