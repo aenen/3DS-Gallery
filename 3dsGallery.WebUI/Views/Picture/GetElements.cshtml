@@ -9,78 +9,85 @@
     bool isOwner = itemPic.Gallery.User.login == User.Identity.Name;
 
     <div class="col-lg-3 col-md-4 col-sm-6">
-        <div class="thumbnail" data-id="@itemPic.id">
-            <div class="preview-container-md style-@itemPic.Gallery.Style.value">
-                <a target="_blank" href="~/@itemPic.path">
+        <div>
+            <div class="thumbnail" data-id="@itemPic.id">
+                <div class="preview-container-md style-@itemPic.Gallery.Style.value">
+                    <a target="_blank" href="~/@itemPic.path">
+                        @{
+                            string preview_md = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.id}-thumb_md.JPG") ? $"/Picture/{itemPic.id}-thumb_md.JPG" : $"/Picture/{itemPic.id}.JPG";
+                        }
+                        <img class="preview-img" src="@preview_md" />
+                    </a>
                     @{
-                        string preview_md = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.id}-thumb_md.JPG") ? $"/Picture/{itemPic.id}-thumb_md.JPG" : $"/Picture/{itemPic.id}.JPG";
+                        if (isOwner)
+                        {
+                            <input type="text" class="img-comment-change" value="@itemPic.description" />
+                        }
+                        if (itemPic.type == "3D")
+                        {
+                            <div class="type">@itemPic.type</div>
+                        }
                     }
-                    <img class="preview-img" src="@preview_md" />
-                </a>
-                @{
-                    if (isOwner)
-                    {
-                        <input type="text" class="img-comment-change" value="@itemPic.description" />
-                    }
-                    if (itemPic.type == "3D")
-                    {
-                        <div class="type">@itemPic.type</div>
-                    }
-                }
-                <div class="img-comment text-center">
-                    <span class="img-comment-text">@itemPic.description</span>
-                </div>
-                @if (!is3ds)
-                {
-                    <div class="qr-container">
-                        <img src="~/Content/loading.gif" data-loaded="no" class="qr-img">
+                    <div class="img-comment text-center">
+                        <span class="img-comment-text">@itemPic.description</span>
                     </div>
-                }
-            </div>
-            <div class="img-tools text-center">
-                @{
-                    string deleteBtnCode = !isOld3ds ? "<span class=\"glyphicon glyphicon-remove\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/remove.png\" />";
-                    string editBtnCode = !isOld3ds ? "<span class=\"glyphicon glyphicon-pencil\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/pencil.png\" />";
-                    string okBtnCode = !isOld3ds ? "<span class=\"save-icon glyphicon glyphicon-ok\"></span>" : "<img class=\"save-icon img-glyphicon\" src=\"/Content/glyphicon/ok.png\" />";
-                    if (itemPic.Gallery.User.login == User.Identity.Name)
+                    @if (!is3ds)
                     {
-                        <div class="ovner-tools">
-                            <button class="img-delete btn btn-danger">@Html.Raw(deleteBtnCode)</button>
-                            <button class="img-edit btn btn-info">@Html.Raw(editBtnCode)</button>
-                            <button class="img-edit-save btn btn-success">
-                                @Html.Raw(okBtnCode)
-                                @*<img class="saving-load" src="~/Content/loading.gif" />*@
-                                <b class="saving-load">…</b>
-                            </button>
+                        <div class="qr-container">
+                            <img src="~/Content/loading.gif" data-loaded="no" class="qr-img">
                         </div>
                     }
-                    string liked = "";
-                    if (User.Identity.IsAuthenticated)
-                    {
-                        liked = itemPic.User.Any(x => x.login == User.Identity.Name) ? "liked" : "";
-                    }
-                    if (!is3ds)
-                    {
-                        <button class="btn btn-sm qr-btn">
-                            <span class="glyphicon glyphicon-qrcode"></span>
-                        </button>
-                    }
-                    string disabled = User.Identity.IsAuthenticated ? "" : "disabled";
-                }
-                <div class="rate-container @liked">
-                    <span class="rate-count">@itemPic.User.Count</span>
-                    @{
-                        if (isOld3ds)
-                        {
-                            <span class="rate-like">♥</span>
-                        }
-                        else
-                        {
-                            string glyph = liked != "" ? "glyphicon-heart" : "glyphicon-heart-empty";
-                            <span class="rate-like @disabled glyphicon @glyph"></span>
-                        }
-                    }
                 </div>
+                <div class="img-tools text-center">
+                    @{
+                        string deleteBtnCode = !isOld3ds ? "<span class=\"glyphicon glyphicon-remove\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/remove.png\" />";
+                        string editBtnCode = !isOld3ds ? "<span class=\"glyphicon glyphicon-pencil\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/pencil.png\" />";
+                        string okBtnCode = !isOld3ds ? "<span class=\"save-icon glyphicon glyphicon-ok\"></span>" : "<img class=\"save-icon img-glyphicon\" src=\"/Content/glyphicon/ok.png\" />";
+                        if (itemPic.Gallery.User.login == User.Identity.Name)
+                        {
+                            <div class="ovner-tools">
+                                <button class="img-delete btn btn-danger">@Html.Raw(deleteBtnCode)</button>
+                                <button class="img-edit btn btn-info">@Html.Raw(editBtnCode)</button>
+                                <button class="img-edit-save btn btn-success">
+                                    @Html.Raw(okBtnCode)
+                                    @*<img class="saving-load" src="~/Content/loading.gif" />*@
+                                    <b class="saving-load">…</b>
+                                </button>
+                            </div>
+                        }
+                        string liked = "";
+                        if (User.Identity.IsAuthenticated)
+                        {
+                            liked = itemPic.User.Any(x => x.login == User.Identity.Name) ? "liked" : "";
+                        }
+                        if (!is3ds)
+                        {
+                            <button class="btn btn-sm qr-btn">
+                                <span class="glyphicon glyphicon-qrcode"></span>
+                            </button>
+                        }
+                        string disabled = User.Identity.IsAuthenticated ? "" : "disabled";
+                    }
+                    <div class="rate-container @liked">
+                        <span class="rate-count">@itemPic.User.Count</span>
+                        @{
+                            if (isOld3ds)
+                            {
+                                <span class="rate-like">♥</span>
+                            }
+                            else
+                            {
+                                string glyph = liked != "" ? "glyphicon-heart" : "glyphicon-heart-empty";
+                                <span class="rate-like @disabled glyphicon @glyph"></span>
+                            }
+                        }
+                    </div>
+                </div>
+                @{
+                    var creationDate = System.IO.File.Exists($"{Server.MapPath("~")}/{itemPic.path}") ? System.IO.File.GetCreationTime($"{Server.MapPath("~")}/{itemPic.path}").ToShortDateString() : "??.??.????";
+                }
+                <div class="img-date">@creationDate</div>
+                
             </div>
         </div>
     </div>
