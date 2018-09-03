@@ -29,6 +29,30 @@ textarea {
     text-align: center;
 }
 
+    .img-date.date-default {
+        color: #A7A7A7;
+        background-color: #ECECEC;
+        border-top: 1px dotted #A7A7A7;
+    }
+
+    .img-date.date-info {
+        color: #A1B0B7;
+        background-color: #CEE1EA;
+        border-top: 1px dotted #A1B0B7;
+    }
+
+    .img-date.date-warning {
+        color: #BCB9AA;
+        background-color: #EFEBD8;
+        border-top: 1px dotted #BCB9AA;
+    }
+
+    .img-date.date-success {
+        color: #A4B09F;
+        background-color: #D3E3CD;
+        border-top: 1px dotted #A4B09F;
+    }
+
 
 #loading {
     width: 20px;

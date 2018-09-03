@@ -50,6 +50,12 @@
     border-bottom: 1px solid #fcc;
 }
 
+.img-date.date-sweet-pink {
+    color: #BFACB2;
+    background-color: #F2DAE1;
+    border-top: 1px dotted #BFACB2;
+}
+
 
 
 
@@ -103,4 +109,10 @@
     background-color: #E8DEE8;
     border-top: 1px solid #d8c5d8;
     border-bottom: 1px solid #d8c5d8;
+}
+
+.img-date.date-nocturnal-purple {
+    color: #A8A1A8;
+    background-color: #DBD2DB;
+    border-top: 1px dotted #A8A1A8;
 }
