@@ -93,14 +93,23 @@ namespace _3dsGallery.WebUI.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             model.Gallery = db.Gallery.Find(id);
-            if (!ModelState.IsValid || file == null)
+            if (file == null)
+            {
+                ModelState.AddModelError(string.Empty, "You must select an image.");
                 return View(model);
+            }
 
             if (file.ContentLength > 750 * 1000)
-                return View(model);
+                ModelState.AddModelError(string.Empty, "File size must be less than 750 kilobytes.");
 
             string file_extention = Path.GetExtension(file.FileName).ToLower();
             if (file_extention != ".mpo" && file_extention != ".jpg")
+                ModelState.AddModelError(string.Empty, "File extention must be '.mpo' or '.jpg'.");
+
+            if (model.isAdvanced && model.isTo2d && model.leftOrRight < 0 && model.leftOrRight > 1)
+                ModelState.AddModelError(string.Empty, "You must choose which of the images (left or right) should be saved in 2D.");
+
+            if (!ModelState.IsValid)
                 return View(model);
             
             Picture picture = new Picture

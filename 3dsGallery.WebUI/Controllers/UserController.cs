@@ -23,6 +23,11 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("Register")]
         public ActionResult Register()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("MyProfile");
+            }
+
             return View(new RegisterView());
         }
 
@@ -33,17 +38,16 @@ namespace _3dsGallery.WebUI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Error = "Entered data is not right. Please try again.";
                 return View(model);
             }
             if (!IsUsername(model.Login))
             {
-                ViewBag.Error = "Login can only contains ENG/RUS characters, '_' symbol and digits.";
+                ModelState.AddModelError(string.Empty, "Login can only contains ENG/RUS characters, '_' symbol and digits.");
                 return View(model);
             }
             if (db.User.Any(x => x.login == model.Login))
             {
-                ViewBag.Error = "User with this login already exists. Please choose another login.";
+                ModelState.AddModelError(string.Empty, "User with this login already exists. Please choose another login.");
                 return View(model);
             }
 
@@ -67,6 +71,11 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("Login")]
         public ActionResult Login()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("MyProfile");
+            }
+
             return View(new LoginView());
         }
 
@@ -76,19 +85,23 @@ namespace _3dsGallery.WebUI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Error = "Entered data is not right. Please try again.";
-                return View();
+                return View(model);
             }
 
             var user = db.User.FirstOrDefault(x => x.login == model.Login);
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "The entered login or password is incorrect. Please try again.");
+                return View(model);
+            }
             var pass = PasswordGenerator.GenerateHash(model.Password, user.PasswordSalt, user.Iterations, 20);
             if (user.PasswordHash.SequenceEqual(pass))
             {
                 FormsAuthentication.RedirectFromLoginPage(user.login, true);
             }
 
-            ViewBag.Error = "Entered data is not right. Please try again.";
-            return View();
+            ModelState.AddModelError(string.Empty, "The entered login or password is incorrect. Please try again.");
+            return View(model);
         }
 
         [Authorize]
