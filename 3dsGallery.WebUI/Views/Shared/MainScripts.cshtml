@@ -72,12 +72,12 @@
         $(".img-edit-save").click(function(e){
             var thumb = $(this).closest(".thumbnail");
             var id = thumb.attr("data-id");
-            var comment = encodeURIComponent(thumb.find(".img-comment-change").val());
+            var comment = thumb.find(".img-comment-change").val();
             var self=this;
             thumb.find(".save-icon").hide();
             thumb.find(".saving-load").show();
             $.ajax({
-                url: '@Url.Action("EditComment", "Picture")?id=' + id + '&comment=' + comment,
+                url: '@Url.Action("EditComment", "Picture")?id=' + id + '&comment=' + encodeURIComponent(comment),
                 type: "POST",
                 success: function (data) {
                     if (data == "ok"){
