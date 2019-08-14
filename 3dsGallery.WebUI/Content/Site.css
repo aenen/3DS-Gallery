@@ -14,7 +14,7 @@
 input,
 select,
 textarea {
-    max-width: 280px;
+    max-width: 335px;
 }
 
 .thumbnail {
@@ -592,5 +592,11 @@ footer {
     footer {
         font-size: 13px;
         text-align: center;
+    }
+}
+
+@media only screen and (max-device-width: 425px) {
+    .preview-container-md {
+        height: 201px;
     }
 }
