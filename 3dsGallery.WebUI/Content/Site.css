@@ -552,6 +552,12 @@ footer {
     }
 }
 
+@media only screen and (max-device-width: 425px) {
+    .preview-container-md {
+        height: 191px;
+    }
+}
+
 /*Small (3DS) screen*/
 @media only screen and (max-device-width: 320px) {
 
@@ -595,8 +601,3 @@ footer {
     }
 }
 
-@media only screen and (max-device-width: 425px) {
-    .preview-container-md {
-        height: 201px;
-    }
-}
