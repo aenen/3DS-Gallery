@@ -1,6 +1,7 @@
 ﻿@using System.Web.Optimization;
 @{
-    bool is3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
+    bool is3ds = !Request.UserAgent.Contains("Nintendo 3DS");
+    bool isRegular3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
 }
 <!DOCTYPE html>
 <html>
@@ -13,16 +14,16 @@
     @Scripts.Render("~/bundles/modernizr")
     @RenderSection("Styles", false)
 </head>
-<body>
-    <div class="navbar navbar-inverse @(is3ds? "navbar-fixed-bottom" : "navbar-fixed-top")">
+<body class="@(is3ds? "menu-bottom" : "menu-top")">
+    <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
             @{
-                string homeCode = !is3ds ? "<span class=\"glyphicon glyphicon-home\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/home.png\" />";
-                string userCode = !is3ds ? "<span class=\"glyphicon glyphicon-user\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/user.png\" />";
-                string loginCode = !is3ds ? "<span class=\"glyphicon glyphicon-log-in\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/log-in.png\" />";
-                string logoutCode = !is3ds ? "<span class=\"glyphicon glyphicon-log-out text-danger\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/log-out-red.png\" />";
-                string gallCode = !is3ds ? "<span class=\"glyphicon glyphicon-blackboard text-success\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/blackboard.png\" />";
-                string picCode = !is3ds ? "<span class=\"glyphicon glyphicon-picture text-info\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/picture.png\" />";
+                string homeCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-home\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/home.png\" />";
+                string userCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-user\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/user.png\" />";
+                string loginCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-log-in\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/log-in.png\" />";
+                string logoutCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-log-out text-danger\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/log-out-red.png\" />";
+                string gallCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-blackboard text-success\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/blackboard.png\" />";
+                string picCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-picture text-info\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/home.png\" />";
             }
             <a href="/" class="navbar-brand">@Html.Raw(homeCode)<span class="collapsible"> 3DS Gallery</span></a>
             <ul class="nav navbar-nav">
@@ -34,7 +35,7 @@
                     if (User.Identity.IsAuthenticated)
                     {
                         <li><a href="@Url.Action("MyProfile", "User")">@Html.Raw(userCode)<span class="collapsible"> Profile</span></a></li>
-                            <li><a href="@Url.Action("Logout", "User")">@Html.Raw(logoutCode)<span class="collapsible"> Log Out</span></a></li>
+                        <li><a href="@Url.Action("Logout", "User")">@Html.Raw(logoutCode)<span class="collapsible"> Log Out</span></a></li>
 
                     }
                     else
@@ -51,7 +52,7 @@
         @RenderBody()
         <footer>
             <div class="container body-content">
-                <p>&copy; 2017 - @DateTime.Now.Year ♥ Ярославчик Iнкорпорейтед</p>
+                <p>&copy; 2017 - @DateTime.Now.Year <span>♥</span> Ярославчик Iнкорпорейтед</p>
                 @*<p>Icon made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>*@
             </div>
         </footer>
@@ -59,5 +60,15 @@
 
     @Scripts.Render("~/bundles/jquery", "~/bundles/bootstrap")
     @RenderSection("scripts", false)
+
+    <script>
+        $(function () {
+            if ($('body').hasClass('menu-bottom'))
+                $('body > div.navbar')
+                    .appendTo($('footer'))
+                    .removeClass('navbar-fixed-top')
+                    .addClass('navbar-fixed-bottom');
+        });
+    </script>
 </body>
 </html>
