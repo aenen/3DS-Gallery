@@ -1,6 +1,6 @@
 ﻿@using System.Web.Optimization;
 @{
-    bool is3ds = !Request.UserAgent.Contains("Nintendo 3DS");
+    bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
     bool isRegular3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
 }
 <!DOCTYPE html>
