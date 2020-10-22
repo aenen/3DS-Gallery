@@ -14,7 +14,7 @@
     @RenderSection("Styles", false)
 </head>
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar navbar-inverse @(is3ds? "navbar-fixed-bottom" : "navbar-fixed-top")">
         <div class="container">
             @{
                 string homeCode = !is3ds ? "<span class=\"glyphicon glyphicon-home\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/home.png\" />";
