@@ -52,7 +52,7 @@
         @RenderBody()
         <footer>
             <div class="container body-content">
-                <p>&copy; 2017 - @DateTime.Now.Year <span>♥</span> Ярославчик Iнкорпорейтед</p>
+                <p>&copy; 2017 - @DateTime.Now.Year <span class="my-heart">♥</span> Ярославчик Iнкорпорейтед</p>
                 @*<p>Icon made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>*@
             </div>
         </footer>
@@ -68,6 +68,10 @@
                     .appendTo($('footer'))
                     .removeClass('navbar-fixed-top')
                     .addClass('navbar-fixed-bottom');
+
+            $('.my-heart').click(function () {
+                $(this).addClass('happy').off('click');
+            });
         });
     </script>
 </body>

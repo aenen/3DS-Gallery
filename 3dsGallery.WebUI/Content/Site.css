@@ -1,8 +1,9 @@
 ﻿body.menu-top {
     padding-top: 50px;
 }
+
 body.menu-bottom {
-    padding-bottom: 50px;
+    padding-bottom: 30px;
     /*padding-bottom: 20px;*/
     /*background: #7D899B;*/
 }
@@ -10,11 +11,13 @@ body.menu-bottom {
     body.menu-bottom .navbar {
         min-height: 30px !important;
     }
+
     body.menu-bottom .navbar-brand {
         padding-top: 5px !important;
         padding-bottom: 0 !important;
         height: 30px;
     }
+
     body.menu-bottom .navbar .navbar-nav > li > a {
         padding-top: 7px !important;
         padding-bottom: 0 !important;
@@ -39,6 +42,7 @@ textarea {
     margin-left: auto;
     margin-right: auto;
 }
+
 .panel {
     max-width: 400px;
     margin-left: auto;
@@ -500,6 +504,44 @@ footer {
     padding-bottom: 20px;
 }
 
+#pagination {
+    margin: 0 auto;
+    font-size: 14px;
+}
+
+.my-heart {
+    display: inline-block;
+    transition: all .25s linear;
+    cursor: pointer;
+    font-size: 20px;
+    margin-top: -10px;
+}
+
+    .my-heart.happy {
+        color: red !important;
+        animation-name: heart-bump;
+        animation-duration: 1.25s;
+        animation-timing-function: ease;
+        animation-iteration-count: 4;
+    }
+
+@keyframes heart-bump {
+    0% {
+        font-size: 20px;
+        padding: 0 0px;
+    }
+
+    50% {
+        font-size: 10px;
+        padding: 0 2.98px;
+    }
+
+    100% {
+        font-size: 20px;
+        padding: 0 0px;
+    }
+}
+
 @media only screen and (max-width: 767px) {
 
     .navbar .glyphicon {
@@ -538,10 +580,6 @@ footer {
     .collapsible {
         display: none !important;
     }
-}
-
-#pagination {
-    margin:0 auto;
 }
 
 @media (min-width: 768px) {
@@ -617,4 +655,3 @@ footer {
         text-align: center;
     }
 }
-
