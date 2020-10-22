@@ -7,6 +7,20 @@ body.menu-bottom {
     /*background: #7D899B;*/
 }
 
+    body.menu-bottom .navbar {
+        min-height: 30px !important;
+    }
+    body.menu-bottom .navbar-brand {
+        padding-top: 5px !important;
+        padding-bottom: 0 !important;
+        height: 30px;
+    }
+    body.menu-bottom .navbar .navbar-nav > li > a {
+        padding-top: 7px !important;
+        padding-bottom: 0 !important;
+        height: 30px;
+    }
+
 /* Set padding to keep content from hitting the edges */
 .body-content {
     padding-left: 15px;
