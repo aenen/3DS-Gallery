@@ -62,16 +62,14 @@
     @RenderSection("scripts", false)
 
     <script>
-        $(function () {
-            if ($('body').hasClass('menu-bottom'))
-                $('body > div.navbar')
-                    .appendTo($('footer'))
-                    .removeClass('navbar-fixed-top')
-                    .addClass('navbar-fixed-bottom');
+        if ($('body').hasClass('menu-bottom'))
+            $('body > div.navbar')
+                .appendTo($('footer'))
+                .removeClass('navbar-fixed-top')
+                .addClass('navbar-fixed-bottom');
 
-            $('.my-heart').click(function () {
-                $(this).addClass('happy').off('click');
-            });
+        $('.my-heart').click(function () {
+            $(this).addClass('happy').off('click');
         });
     </script>
 </body>
