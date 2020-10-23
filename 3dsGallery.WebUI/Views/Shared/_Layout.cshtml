@@ -15,7 +15,7 @@
     @RenderSection("Styles", false)
 </head>
 <body class="@(is3ds? "menu-bottom" : "menu-top")">
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar navbar-inverse navbar-fixed-top" style="visibility: hidden; opacity: 0">
         <div class="container">
             @{
                 string homeCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-home\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/home.png\" />";
@@ -67,6 +67,11 @@
                 .appendTo($('footer'))
                 .removeClass('navbar-fixed-top')
                 .addClass('navbar-fixed-bottom');
+
+        $('div.navbar').css({
+            'visibility': 'visible',
+            'opacity': 1
+        });
 
         $('.my-heart').click(function () {
             $(this).addClass('happy').off('click');
