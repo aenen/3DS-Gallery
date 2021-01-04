@@ -83,10 +83,7 @@
                         }
                     </div>
                 </div>
-                @{
-                    var creationDate = System.IO.File.Exists($"{Server.MapPath("~")}/{itemPic.path}") ? System.IO.File.GetCreationTime($"{Server.MapPath("~")}/{itemPic.path}").ToShortDateString() : "??.??.????";
-                }
-                <div class="img-date date-@itemPic.Gallery.Style.value">@creationDate</div>
+                <div class="img-date date-@itemPic.Gallery.Style.value" title="@(itemPic.CreationDate?.ToString()?? "")">@(itemPic.CreationDate?.ToShortDateString()?? "??.??.????")</div>
                 
             </div>
         </div>

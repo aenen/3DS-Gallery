@@ -58,17 +58,17 @@ namespace _3dsGallery.WebUI.Code
                 picture.path = Path.Combine("Picture", picture_name);
             }
 
-            var original_length = PictureTools.getByteSize(img_for_thumb).LongLength;
+            var original_length = PictureTools.GetByteSize(img_for_thumb).LongLength;
             // створюю прев'ю
             var thumb_sm = PictureTools.MakeThumbnail(img_for_thumb, 155, 97);
-            var thumb_sm_length = PictureTools.getByteSize(thumb_sm).LongLength;
+            var thumb_sm_length = PictureTools.GetByteSize(thumb_sm).LongLength;
             if (original_length > thumb_sm_length)
             {
                 thumb_sm.Save($"{picture_folder}/{picture.id}-thumb_sm.JPG");
             }
 
             var thumb_md = PictureTools.MakeThumbnail(img_for_thumb, 280, 999);
-            var thumb_md_length = PictureTools.getByteSize(thumb_md).LongLength;
+            var thumb_md_length = PictureTools.GetByteSize(thumb_md).LongLength;
             if (original_length > thumb_md_length)
             {
                 thumb_md.Save($"{picture_folder}/{picture.id}-thumb_md.JPG");

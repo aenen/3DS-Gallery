@@ -28,6 +28,9 @@ namespace _3dsGallery.DataLayer.DataBase
 
         public short galleryId { get; set; }
 
+        [Column("creationDate")]
+        public DateTime? CreationDate { get; set; }
+
         public virtual Gallery Gallery { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

@@ -28,7 +28,8 @@ namespace _3dsGallery.DataLayer.Tools
             //return image.GetThumbnailImage(newWidth, newHeight, () => false, IntPtr.Zero);
             return newImage;
         }
-        public static byte[] getByteSize(Image source)
+
+        public static byte[] GetByteSize(Image source)
         {
             ImageConverter _imageConverter = new ImageConverter();
             byte[] xByte = (byte[])_imageConverter.ConvertTo(source, typeof(byte[]));

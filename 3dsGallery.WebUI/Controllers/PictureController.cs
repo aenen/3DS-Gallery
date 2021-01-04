@@ -80,7 +80,8 @@ namespace _3dsGallery.WebUI.Controllers
             Picture picture = new Picture
             {
                 description = model.description,
-                galleryId = model.galleryId
+                galleryId = model.galleryId,
+                CreationDate = DateTime.Now
             };
             db.Picture.Add(picture);
             db.SaveChanges();

@@ -73,8 +73,13 @@
     <Compile Include="Migrations\201808171158373_AddValueExColumn.Designer.cs">
       <DependentUpon>201808171158373_AddValueExColumn.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202101042009446_AddCreationDateColumn.cs" />
+    <Compile Include="Migrations\202101042009446_AddCreationDateColumn.Designer.cs">
+      <DependentUpon>202101042009446_AddCreationDateColumn.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools\IEnumerableExtensions.cs" />
     <Compile Include="Tools\PictureTools.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -93,6 +98,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201808171158373_AddValueExColumn.resx">
       <DependentUpon>201808171158373_AddValueExColumn.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202101042009446_AddCreationDateColumn.resx">
+      <DependentUpon>202101042009446_AddCreationDateColumn.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
