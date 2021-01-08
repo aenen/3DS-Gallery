@@ -46,7 +46,7 @@ namespace _3dsGallery.WebUI.Jobs
             }
             catch (Exception ex)
             {
-                File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DataBackupLogs.txt"), $"{ex.Message}\n{ex.InnerException?.Message??""}\n{ex.StackTrace}");
+                File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DataBackupLogs.txt"), $"{ConfigurationManager.AppSettings["GoogleDrivePrivateKey"]}\n{ex.Message}\n{ex.InnerException?.Message??""}\n{ex.StackTrace}");
                 throw;
             }
         }
