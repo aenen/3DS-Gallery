@@ -17,6 +17,8 @@ namespace _3dsGallery.DataLayer.DataBase
 
         public int id { get; set; }
 
+        public short galleryId { get; set; }
+
         [StringLength(150)]
         public string description { get; set; }
 
@@ -26,7 +28,8 @@ namespace _3dsGallery.DataLayer.DataBase
         [StringLength(2)]
         public string type { get; set; }
 
-        public short galleryId { get; set; }
+        [Column("isBackupCopySaved")]
+        public bool IsBackupCopySaved { get; set; }
 
         [Column("creationDate")]
         public DateTime? CreationDate { get; set; }
