@@ -16,38 +16,28 @@ namespace _3dsGallery.WebUI.Jobs
     {
         public void Execute(IJobExecutionContext context)
         {
-            try
+            using (var db = new GalleryContext())
             {
-                using (var db = new GalleryContext())
+                var numberOfPicturesToUpload = Convert.ToInt32(ConfigurationManager.AppSettings["NumberOfPicturesToUpload"].ToString());
+                var pictureToProcessList = db.Picture.Where(x => !x.IsBackupCopySaved).OrderBy(x => x.CreationDate).Take(numberOfPicturesToUpload).ToList();
+                if (pictureToProcessList.Count == 0)
+                    return;
+
+                var googleDriveManager = new GoogleDriveManager();
+
+                foreach (var pictureToProcess in pictureToProcessList)
                 {
-                    var numberOfPicturesToUpload = Convert.ToInt32(ConfigurationManager.AppSettings["NumberOfPicturesToUpload"].ToString());
-                    var pictureToProcessList = db.Picture.Where(x => !x.IsBackupCopySaved).OrderBy(x => x.CreationDate).Take(numberOfPicturesToUpload).ToList();
-                    if (pictureToProcessList.Count == 0)
-                        return;
+                    var regex = new Regex($"^{pictureToProcess.id}[.-]");
+                    var picturePathList = Directory.GetFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture"))
+                                         .Where(x => regex.IsMatch(Path.GetFileName(x)))
+                                         .ToList();
 
-                    var googleDriveManager = new GoogleDriveManager();
-
-                    foreach (var pictureToProcess in pictureToProcessList)
-                    {
-                        var regex = new Regex($"^{pictureToProcess.id}[.-]");
-                        var picturePathList = Directory.GetFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture"))
-                                             .Where(x => regex.IsMatch(Path.GetFileName(x)))
-                                             .ToList();
-
-                        picturePathList.ForEach(x => googleDriveManager.Upload(x));
-                        pictureToProcess.IsBackupCopySaved = true;
-                        db.SaveChanges();
-                    }
-
-
-                    UploadDatabaseBackupScript(googleDriveManager);
+                    picturePathList.ForEach(x => googleDriveManager.Upload(x));
+                    pictureToProcess.IsBackupCopySaved = true;
+                    db.SaveChanges();
                 }
 
-            }
-            catch (Exception ex)
-            {
-                File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DataBackupLogs.txt"), $"{ConfigurationManager.AppSettings["GoogleDrivePrivateKey"]}\n{ex.Message}\n{ex.InnerException?.Message??""}\n{ex.StackTrace}");
-                throw;
+                UploadDatabaseBackupScript(googleDriveManager);
             }
         }
 
