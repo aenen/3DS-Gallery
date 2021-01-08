@@ -115,7 +115,8 @@ namespace _3dsGallery.WebUI.Controllers
             Picture picture = new Picture
             {
                 description = model.description,
-                Gallery= model.Gallery
+                Gallery= model.Gallery,
+                CreationDate = DateTime.Now
             };
             db.Picture.Add(picture);
             db.SaveChanges();
@@ -126,7 +127,7 @@ namespace _3dsGallery.WebUI.Controllers
             db.Entry(picture).State = EntityState.Modified;
             db.SaveChanges();
 
-            return RedirectToAction("Details", new { id = id });
+            return RedirectToAction("Details", new { id });
         }
 
         // GET: Gallery/Create
