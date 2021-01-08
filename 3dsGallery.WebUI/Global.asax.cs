@@ -1,4 +1,5 @@
-﻿using System;
+﻿using _3dsGallery.WebUI.Jobs;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity.Migrations;
@@ -24,6 +25,8 @@ namespace _3dsGallery.WebUI
                 var migrator = new DbMigrator(configuration);
                 migrator.Update();
             }
+
+            DataBackupScheduler.Start();
         }
     }
 }

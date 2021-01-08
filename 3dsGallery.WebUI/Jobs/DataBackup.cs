@@ -1,11 +1,14 @@
 ﻿using _3dsGallery.DataLayer.DataBase;
+using _3dsGallery.WebUI.Code;
+using Microsoft.SqlServer.Management.Common;
+using Microsoft.SqlServer.Management.Smo;
 using Quartz;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
-using System.Web;
+using System.Text.RegularExpressions;
 
 namespace _3dsGallery.WebUI.Jobs
 {
@@ -15,31 +18,60 @@ namespace _3dsGallery.WebUI.Jobs
         {
             using (var db = new GalleryContext())
             {
-                //var script = new StringBuilder();
-                //var connectionString = ConfigurationManager.ConnectionStrings["Gallery"].ToString();
+                var numberOfPicturesToUpload = Convert.ToInt32(ConfigurationManager.AppSettings["NumberOfPicturesToUpload"].ToString());
+                var pictureToProcessList = db.Picture.Where(x => !x.IsBackupCopySaved).OrderBy(x => x.CreationDate).Take(numberOfPicturesToUpload).ToList();
+                if (pictureToProcessList.Count == 0)
+                    return;
 
-                //Server server = new Server(new ServerConnection(new SqlConnection(connectionString)));
-                //Database database = server.Databases[SqlConnectionStringBuilder(connectionString).InitialCatalog];
-                //ScriptingOptions options = new ScriptingOptions
-                //{
-                //    ScriptData = true,
-                //    ScriptSchema = true,
-                //    ScriptDrops = false,
-                //    Indexes = true,
-                //    IncludeHeaders = true
-                //};
+                var googleDriveManager = new GoogleDriveManager();
 
-                //foreach (Table table in database.Tables)
-                //{
-                //    foreach (var statement in table.EnumScript(options))
-                //    {
-                //        script.Append(statement);
-                //        script.Append(Environment.NewLine);
-                //    }
-                //}
+                foreach (var pictureToProcess in pictureToProcessList)
+                {
+                    var regex = new Regex($"^{pictureToProcess.id}[.-]");
+                    var picturePathList = Directory.GetFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture"))
+                                         .Where(x => regex.IsMatch(Path.GetFileName(x)))
+                                         .ToList();
 
-                //File.WriteAllText(backupPath + databaseName + ".sql", script.ToString());
+                    picturePathList.ForEach(x => googleDriveManager.Upload(x));
+                    pictureToProcess.IsBackupCopySaved = true;
+                    db.SaveChanges();
+                }
+
+
+                UploadDatabaseBackupScript(googleDriveManager);
             }
+
+        }
+
+        private void UploadDatabaseBackupScript(GoogleDriveManager googleDriveManager)
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["Gallery"].ToString();
+            var server = new Server(new ServerConnection(new SqlConnection(connectionString)));
+            var database = server.Databases[new SqlConnectionStringBuilder(connectionString).InitialCatalog];
+            var options = new ScriptingOptions
+            {
+                ScriptData = true,
+                ScriptSchema = true,
+                ScriptDrops = false,
+                Indexes = true,
+                IncludeHeaders = true
+            };
+
+            byte[] bytes = null;
+            using (var ms = new MemoryStream())
+            {
+                TextWriter tw = new StreamWriter(ms);
+
+                foreach (Table table in database.Tables)
+                    foreach (var statement in table.EnumScript(options))
+                        tw.WriteLine(statement);
+
+                tw.Flush();
+                ms.Position = 0;
+                bytes = ms.ToArray();
+            }
+
+            googleDriveManager.Upload($"#Backup#{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.sql", bytes);
         }
     }
 }
