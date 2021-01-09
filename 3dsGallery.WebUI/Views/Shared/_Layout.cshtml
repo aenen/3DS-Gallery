@@ -15,7 +15,13 @@
     @RenderSection("Styles", false)
 </head>
 <body class="@(is3ds? "menu-bottom" : "menu-top")">
+    <div id="toggleMenuBtn" style="visibility: hidden; opacity: 0">
+    ◄
+    ◄
+    ◄
+    </div>
     <div class="navbar navbar-inverse navbar-fixed-top" style="visibility: hidden; opacity: 0">
+        @* ► *@
         <div class="container">
             @{
                 string homeCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-home\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/home.png\" />";
@@ -52,7 +58,7 @@
         @RenderBody()
         <footer>
             <div class="container body-content">
-                <p>&copy; 2017 - @DateTime.Now.Year <span class="my-heart">♥</span> Ярославчик Iнкорпорейтед</p>
+                <span>&copy; 2017 - @DateTime.Now.Year <span class="my-heart">♥</span> Ярославчик Iнкорпорейтед</span>
                 @*<p>Icon made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>*@
             </div>
         </footer>
@@ -62,11 +68,45 @@
     @RenderSection("scripts", false)
 
     <script>
-        if ($('body').hasClass('menu-bottom'))
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            var expires = "expires=" + d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        if ($('body').hasClass('menu-bottom')) {
             $('body > div.navbar')
                 .appendTo($('footer'))
                 .removeClass('navbar-fixed-top')
                 .addClass('navbar-fixed-bottom');
+
+            if (getCookie('menuHidden') === 'true') {
+                $('.navbar').css({ 'margin-left': -350, 'right': 350 }).addClass('menu-hidden');
+                $('body.menu-bottom').css('padding-bottom', '0px');
+                $('#toggleMenuBtn').text('►\n\►\n►');
+            }
+
+            $('#toggleMenuBtn').css({
+                'visibility': 'visible',
+                'opacity': 1
+            });
+        }
 
         $('div.navbar').css({
             'visibility': 'visible',
@@ -75,6 +115,25 @@
 
         $('.my-heart').click(function () {
             $(this).addClass('happy').off('click');
+        });
+
+        $('#toggleMenuBtn').click(function () {
+            // show menu
+            if ($('.navbar').hasClass('menu-hidden')) {
+                $('.navbar').css({ 'margin-left': 0, 'right': 0 }).removeClass('menu-hidden');
+                $('body.menu-bottom').css('padding-bottom', '30px');
+                $(this).text('◄\n◄\n◄');
+
+                setCookie('menuHidden', 'false', 7);
+            }
+            // hide menu
+            else {
+                $('.navbar').css({ 'margin-left': -350, 'right': 350 }).addClass('menu-hidden');
+                $('body.menu-bottom').css('padding-bottom', '0px');
+                $(this).text('►\n\►\n►');
+
+                setCookie('menuHidden', 'true', 7);
+            }
         });
     </script>
 </body>

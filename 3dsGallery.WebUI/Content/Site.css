@@ -4,8 +4,10 @@
 
 body.menu-bottom {
     padding-bottom: 30px;
-    /*padding-bottom: 20px;*/
-    /*background: #7D899B;*/
+
+    -webkit-transition: padding-bottom .25s linear;
+    -o-transition: padding-bottom .25s linear;
+    transition: padding-bottom .25s linear;
 }
 
     body.menu-bottom .navbar {
@@ -24,6 +26,24 @@ body.menu-bottom {
         height: 30px;
     }
 div.navbar {
+    -webkit-transition: all .25s linear;
+    -o-transition: all .25s linear;
+    transition: all .25s linear;
+}
+
+
+#toggleMenuBtn {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 9px;
+    color: darkgray;
+    font-size: 7px;
+    padding: 1px 1.5px;
+    height: 31px;
+    z-index: 10000;
+    background-color: black;
+
     -webkit-transition: opacity .25s linear;
     -o-transition: opacity .25s linear;
     transition: opacity .25s linear;
@@ -470,7 +490,7 @@ h2 {
 
 footer {
     color: #A9A9A9;
-    height: 50px;
+    height: 47.5px;
     padding-top: 15px;
     text-align: right;
 }
