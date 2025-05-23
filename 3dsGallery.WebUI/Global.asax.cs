@@ -26,7 +26,10 @@ namespace _3dsGallery.WebUI
                 migrator.Update();
             }
 
-            DataBackupScheduler.Start();
+            if (bool.Parse(ConfigurationManager.AppSettings["EnableDataBackup"]))
+            {
+                DataBackupScheduler.Start();
+            }
         }
     }
 }
