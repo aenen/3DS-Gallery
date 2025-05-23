@@ -125,7 +125,7 @@
                         url: '@Url.Action("GetPath", "Picture")/' + id,
                         type: "POST",
                         success: function (data) {
-                            itemImg.attr("src", "https://chart.googleapis.com/chart?cht=qr&chs=100x100&chld=L|0&chl=" + data);
+                            itemImg.attr("src", "https://quickchart.io/chart?cht=qr&chs=100x100&chld=L|0&chl=" + data);
                             itemImg.attr("data-loaded", "ok");
                         }
                     });
