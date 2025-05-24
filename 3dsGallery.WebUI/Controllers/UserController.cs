@@ -42,7 +42,7 @@ namespace _3dsGallery.WebUI.Controllers
             }
             if (!IsUsername(model.Login))
             {
-                ModelState.AddModelError(string.Empty, "Login can only contains ENG/RUS characters, '_' symbol and digits.");
+                ModelState.AddModelError(string.Empty, "Login can only contains ENG characters, '_' symbol and digits.");
                 return View(model);
             }
             if (db.User.Any(x => x.login == model.Login))
