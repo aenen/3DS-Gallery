@@ -24,7 +24,8 @@
             <div class="panel-body preview-gallery">
                 @{
                     int counter = 2;
-                    var previews = itemGal.Picture.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).Take(counter);
+                    //var previews = itemGal.Picture.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).Take(counter);
+                    var previews = itemGal.Picture.OrderByDescending(x => x.id).Take(counter);
                     foreach (var pv in previews)
                     {
                         <div class="preview-container-sm">
