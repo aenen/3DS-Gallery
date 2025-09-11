@@ -257,8 +257,10 @@ namespace _3dsGallery.WebUI.Controllers
                 if (System.IO.File.Exists(Path.Combine(path, $"{item.id}.JPG")))
                     System.IO.File.Delete(Path.Combine(path, $"{item.id}.JPG"));
                 Picture picture = db.Picture.Include(X => X.User).FirstOrDefault(x => x.id == item.id);
+                picture.User.Clear();
                 db.Picture.Remove(picture);
             }
+            db.SaveChanges();
             db.Gallery.Remove(gallery);
             db.SaveChanges();
             return RedirectToAction("MyProfile", "User");

@@ -57,9 +57,9 @@
         @RenderBody()
         <footer>
             <div class="container body-content">
+                <p id="secretFeature" hidden><img class="img-glyphicon" src="/Content/glyphicon/secret.png"/></p>
                 <p>For any issues, suggestions and wishes contact me at <a href="mailto:yaroslav.golyuk@gmail.com">yaroslav.golyuk@gmail.com</a></p>
                 <span>&copy; 2017 - @DateTime.Now.Year <span class="my-heart">♥</span> Ярославчик Iнкорпорейтед</span>
-                <p id="secretFeature" hidden><img class="img-glyphicon" src="/Content/glyphicon/secret.png"/></p>
                 @*<p>Icon made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>*@
             </div>
         </footer>
@@ -119,8 +119,8 @@
 
         $('.my-heart').click(function () {
             $(this).addClass('happy').off('click');
-            //$('#secretFeature').show();
-            //$('html, body').animate({ scrollTop: $(document).height() }, 1000);
+            $('#secretFeature').show();
+            $('html, body').animate({ scrollTop: $(document).height() }, 1000);
         });
 
         $('#secretFeature').click(function () {
@@ -128,8 +128,7 @@
                 type: "POST",
                 url: "@Url.Action("Random","Picture")",
                 success: function (data) {
-                    const newTab = window.open();
-                    newTab.document.write(`<img src="${data}" alt="Image" />`);
+                    window.open(`/${data}`, '_blank');
                 }
             });
         });

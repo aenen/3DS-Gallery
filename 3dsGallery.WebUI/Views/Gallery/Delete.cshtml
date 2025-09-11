@@ -17,8 +17,8 @@
         {
             @Html.AntiForgeryToken()
             <div class="form-actions no-color">
-                <a href="@Url.Action("Details", "Gallery", new { id=Model.id })" class="btn btn-sm btn-default">Скасувати</a>
-                <input type="submit" value="Видалити" class="btn btn-danger" />
+                <a href="@Url.Action("Details", "Gallery", new { id=Model.id })" class="btn btn-sm btn-default">Cancel</a>
+                <input type="submit" value="Delete!" class="btn btn-danger" />
             </div>
         }
     </div>
