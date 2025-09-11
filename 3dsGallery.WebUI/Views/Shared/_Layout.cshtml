@@ -1,6 +1,6 @@
 ﻿@using System.Web.Optimization;
 @{
-    bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+    bool is3ds = !Request.UserAgent.Contains("Nintendo 3DS");
     bool isRegular3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
 }
 <!DOCTYPE html>
@@ -57,7 +57,7 @@
         @RenderBody()
         <footer>
             <div class="container body-content">
-                <p id="secretFeature" hidden><img class="img-glyphicon" src="/Content/glyphicon/secret.png"/></p>
+                <a id="secretFeature" hidden><img class="img-glyphicon" src="/Content/glyphicon/secret.png"/></a>
                 <p>For any issues, suggestions and wishes contact me at <a href="mailto:yaroslav.golyuk@gmail.com">yaroslav.golyuk@gmail.com</a></p>
                 <span>&copy; 2017 - @DateTime.Now.Year <span class="my-heart">♥</span> Ярославчик Iнкорпорейтед</span>
                 @*<p>Icon made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>*@
@@ -103,7 +103,7 @@
                 $('#toggleMenuBtn').text('+\n\+\n+');
             }
             else {
-                $('body.menu-bottom').css('padding-bottom', '74px');
+                $('body.menu-bottom').css('padding-bottom', '90px');
             }
 
             $('#toggleMenuBtn').css({
@@ -117,12 +117,6 @@
             'opacity': 1
         });
 
-        $('.my-heart').click(function () {
-            $(this).addClass('happy').off('click');
-            $('#secretFeature').show();
-            $('html, body').animate({ scrollTop: $(document).height() }, 1000);
-        });
-
         $('#secretFeature').click(function () {
             $.ajax({
                 type: "POST",
@@ -133,11 +127,17 @@
             });
         });
 
+        $('.my-heart').click(function () {
+            $(this).addClass('happy').off('click');
+            $('#secretFeature').show();
+            $('html, body').animate({ scrollTop: $(document).height() }, 1000);
+        });
+
         $('#toggleMenuBtn').click(function () {
             // show menu
             if ($('.navbar').hasClass('menu-hidden')) {
                 $('.navbar').css({ 'margin-left': 0, 'right': 0 }).removeClass('menu-hidden');
-                $('body.menu-bottom').css('padding-bottom', '74px');
+                $('body.menu-bottom').css('padding-bottom', '90px');
                 $(this).text('-\n-\n-');
 
                 setCookie('menuHidden', 'false', 7);
