@@ -117,20 +117,20 @@ namespace _3dsGallery.WebUI.Controllers
             return Json(item.User.Count);
         }
 
-        [HttpPost]
-        public ActionResult Random()
-        {
-            int total = db.Picture.Include(p => p.Gallery).Count();
-            Random rand = new Random();
-            int offset = rand.Next(0, total);
+        //[HttpPost]
+        //public ActionResult Random()
+        //{
+        //    int total = db.Picture.Include(p => p.Gallery).Count();
+        //    Random rand = new Random();
+        //    int offset = rand.Next(0, total);
 
-            var randomRow = db.Picture
-                .Include(p => p.Gallery)
-                .Skip(offset)
-                .FirstOrDefault();
+        //    var randomRow = db.Picture
+        //        .Include(p => p.Gallery)
+        //        .Skip(offset)
+        //        .FirstOrDefault();
 
-            return Json(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, randomRow.path));
-        }
+        //    return Json(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, randomRow.path));
+        //}
 
         // POST: Picture/Delete/5
         [Authorize]
