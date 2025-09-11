@@ -57,7 +57,7 @@
         @RenderBody()
         <footer>
             <div class="container body-content">
-                <img id="secretFeature" hidden class="img-glyphicon" src="/Content/glyphicon/secret.png"/>
+                <img id="secretFeature" width="25" height="25" hidden class="img-glyphicon" src="/Content/glyphicon/secret.png"/>
                 <p>For any issues, suggestions and wishes contact me at <a href="mailto:yaroslav.golyuk@gmail.com">yaroslav.golyuk@gmail.com</a></p>
                 <span>&copy; 2017 - @DateTime.Now.Year <span class="my-heart">♥</span> Ярославчик Iнкорпорейтед</span>
                 @*<p>Icon made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>*@
@@ -122,7 +122,7 @@
                 type: "POST",
                 url: "@Url.Action("Random","Picture")",
                 success: function (data) {
-                    window.open('/' + data, '_blank');
+                    window.open('/' + data);
                 }
             });
         });
