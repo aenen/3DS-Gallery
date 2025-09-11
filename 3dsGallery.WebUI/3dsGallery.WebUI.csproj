@@ -248,6 +248,7 @@
     <Content Include="Content\glyphicon\pencil.png" />
     <Content Include="Content\glyphicon\picture.png" />
     <Content Include="Content\glyphicon\remove.png" />
+    <Content Include="Content\glyphicon\secret.png" />
     <Content Include="Content\glyphicon\user.png" />
     <Content Include="Content\loading.gif" />
     <Content Include="Content\icon.png" />

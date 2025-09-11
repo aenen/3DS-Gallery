@@ -117,6 +117,20 @@ namespace _3dsGallery.WebUI.Controllers
             return Json(item.User.Count);
         }
 
+        [HttpPost]
+        public ActionResult Random()
+        {
+            int total = db.Picture.Count();
+            Random rand = new Random();
+            int offset = rand.Next(0, total);
+
+            var randomRow = db.Picture
+                .Skip(offset)
+                .FirstOrDefault();
+
+            return Json(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, randomRow.path));
+        }
+
         // POST: Picture/Delete/5
         [Authorize]
         [HttpPost]

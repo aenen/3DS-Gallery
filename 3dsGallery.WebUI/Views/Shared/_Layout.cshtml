@@ -59,6 +59,7 @@
             <div class="container body-content">
                 <p>For any issues, suggestions and wishes contact me at <a href="mailto:yaroslav.golyuk@gmail.com">yaroslav.golyuk@gmail.com</a></p>
                 <span>&copy; 2017 - @DateTime.Now.Year <span class="my-heart">♥</span> Ярославчик Iнкорпорейтед</span>
+                <p id="secretFeature" hidden><img class="img-glyphicon" src="/Content/glyphicon/secret.png"/></p>
                 @*<p>Icon made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>*@
             </div>
         </footer>
@@ -67,7 +68,7 @@
     @Scripts.Render("~/bundles/jquery", "~/bundles/bootstrap")
     @RenderSection("scripts", false)
 
-    <script>
+<script>
         function setCookie(cname, cvalue, exdays) {
             var d = new Date();
             d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
@@ -118,6 +119,19 @@
 
         $('.my-heart').click(function () {
             $(this).addClass('happy').off('click');
+            $('#secretFeature').show();
+            $('html, body').animate({ scrollTop: $(document).height() }, 1000);
+        });
+
+        $('#secretFeature').click(function () {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Random","Picture")",
+                success: function (data) {
+                    const newTab = window.open();
+                    newTab.document.write(`<img src="${data}" alt="Image" />`);
+                }
+            });
         });
 
         $('#toggleMenuBtn').click(function () {
@@ -138,6 +152,6 @@
                 setCookie('menuHidden', 'true', 7);
             }
         });
-    </script>
+</script>
 </body>
 </html>
