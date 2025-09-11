@@ -94,13 +94,15 @@
             $('body > div.navbar')
                 .appendTo($('footer'))
                 .removeClass('navbar-fixed-top')
-                .addClass('navbar-fixed-bottom')
-                .css('padding-bottom', '50px');
+                .addClass('navbar-fixed-bottom');
 
             if (getCookie('menuHidden') === 'true') {
                 $('.navbar').css({ 'margin-left': -350, 'right': 350 }).addClass('menu-hidden');
                 $('body.menu-bottom').css('padding-bottom', '0px');
                 $('#toggleMenuBtn').text('+\n\+\n+');
+            }
+            else {
+                $('body.menu-bottom').css('padding-bottom', '50px');
             }
 
             $('#toggleMenuBtn').css({
