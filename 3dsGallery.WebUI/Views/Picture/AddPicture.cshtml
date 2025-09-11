@@ -79,7 +79,7 @@
 
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <input id="submitBtn" type="submit" value="Add" class="btn btn-default" />
+                        <input id="submitBtn" type="submit" value="Upload" class="btn btn-default" />
                     </div>
                 </div>
             </div>
@@ -94,7 +94,13 @@
     <script>
         $(function () {
             $('#mainForm').submit(function () {
-                $('#submitBtn').prop('disabled', true).text('Uploading, please wait...');
+                var form = $(this);
+
+                if (!form.valid()) {
+                    return; // Don't disable the button
+                }
+
+                $('#submitBtn').prop('disabled', true).val('Uploading, please wait...');
             });
         });
     </script>

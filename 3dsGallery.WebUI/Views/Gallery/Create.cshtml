@@ -13,7 +13,7 @@
 
 <div class="section-grey">
     <div class="container body-content section-separator-top">
-        @using (Html.BeginForm())
+        @using (Html.BeginForm("Create", "Gallery", FormMethod.Post, new { @id = "mainForm" }))
         {
             @Html.AntiForgeryToken()
 
@@ -45,7 +45,7 @@
 
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <input type="submit" value="Create" class="btn btn-default" />
+                        <input id="submitBtn" type="submit" value="Create" class="btn btn-default" />
                     </div>
                 </div>
             </div>
@@ -55,6 +55,18 @@
 
 @section scripts {
     @System.Web.Optimization.Scripts.Render("~/bundles/jqueryval")
-    @*<script src="~/Scripts/jquery.validate.min.js"></script>
-    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>*@
+
+    <script>
+        $(function () {
+            $('#mainForm').submit(function () {
+                var form = $(this);
+
+                if (!form.valid()) {
+                    return; // Don't disable the button
+                }
+
+                $('#submitBtn').prop('disabled', true).val('Creating, please wait...');
+            });
+        });
+    </script>
 }

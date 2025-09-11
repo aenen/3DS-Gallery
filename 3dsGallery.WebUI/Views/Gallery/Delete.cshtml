@@ -13,12 +13,12 @@
 
 <div class="section-grey">
     <div class="container body-content section-separator-bottom section-separator-top">
-        @using (Html.BeginForm())
+        @using (Html.BeginForm("Delete", "Gallery", FormMethod.Post, new { @id = "mainForm" }))
         {
             @Html.AntiForgeryToken()
             <div class="form-actions no-color">
                 <a href="@Url.Action("Details", "Gallery", new { id=Model.id })" class="btn btn-sm btn-default">Cancel</a>
-                <input type="submit" value="Delete!" class="btn btn-danger" />
+                <input id="submitBtn" type="submit" value="Delete!" class="btn btn-danger" />
             </div>
         }
     </div>
@@ -26,6 +26,18 @@
 
 @section scripts {
     @System.Web.Optimization.Scripts.Render("~/bundles/jqueryval")
-    @*<script src="~/Scripts/jquery.validate.min.js"></script>
-    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>*@
+
+    <script>
+        $(function () {
+            $('#mainForm').submit(function () {
+                var form = $(this);
+
+                if (!form.valid()) {
+                    return; // Don't disable the button
+                }
+
+                $('#submitBtn').prop('disabled', true).val('Deleting, please wait...');
+            });
+        });
+    </script>
 }

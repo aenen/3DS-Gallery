@@ -33,6 +33,7 @@ namespace _3dsGallery.WebUI.Controllers
 
         [Only3DS]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Route("Register")]
         public ActionResult Register(RegisterView model)
         {
@@ -80,6 +81,7 @@ namespace _3dsGallery.WebUI.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Route("Login")]
         public ActionResult Login(LoginView model)
         {
