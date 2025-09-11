@@ -117,7 +117,7 @@
             'opacity': 1
         });
 
-        $('#secretFeature').click(function () {
+        @*$('#secretFeature').click(function () {
             $.ajax({
                 type: "POST",
                 url: "@Url.Action("Random","Picture")",
@@ -125,11 +125,11 @@
                     window.open(`/${data}`, '_blank');
                 }
             });
-        });
+        });*@
 
         $('.my-heart').click(function () {
             $(this).addClass('happy').off('click');
-            $('#secretFeature').show();
+            //$('#secretFeature').show();
             //$('html, body').animate({ scrollTop: $(document).height() }, 1000);
         });
 
