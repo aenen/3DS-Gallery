@@ -120,11 +120,12 @@ namespace _3dsGallery.WebUI.Controllers
         [HttpPost]
         public ActionResult Random()
         {
-            int total = db.Picture.Count();
+            int total = db.Picture.Include(p => p.Gallery).Count();
             Random rand = new Random();
             int offset = rand.Next(0, total);
 
             var randomRow = db.Picture
+                .Include(p => p.Gallery)
                 .Skip(offset)
                 .FirstOrDefault();
 
