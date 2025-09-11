@@ -634,19 +634,19 @@ footer {
 
 @media (min-width: 768px) {
     #pagination {
-        max-width: 450px;
+        max-width: 600px;
     }
 }
 
 @media (min-width: 992px) {
     #pagination {
-        max-width: 500px;
+        max-width: 800px;
     }
 }
 
 @media (min-width: 1200px) {
     #pagination {
-        max-width: 550px;
+        max-width: 1000px;
     }
 }
 
