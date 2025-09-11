@@ -94,7 +94,8 @@
             $('body > div.navbar')
                 .appendTo($('footer'))
                 .removeClass('navbar-fixed-top')
-                .addClass('navbar-fixed-bottom');
+                .addClass('navbar-fixed-bottom')
+                .css('padding-bottom', '50px');
 
             if (getCookie('menuHidden') === 'true') {
                 $('.navbar').css({ 'margin-left': -350, 'right': 350 }).addClass('menu-hidden');
@@ -121,7 +122,7 @@
             // show menu
             if ($('.navbar').hasClass('menu-hidden')) {
                 $('.navbar').css({ 'margin-left': 0, 'right': 0 }).removeClass('menu-hidden');
-                $('body.menu-bottom').css('padding-bottom', '100px');
+                $('body.menu-bottom').css('padding-bottom', '50px');
                 $(this).text('-\n-\n-');
 
                 setCookie('menuHidden', 'false', 7);
