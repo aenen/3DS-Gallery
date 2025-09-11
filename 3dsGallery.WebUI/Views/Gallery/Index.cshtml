@@ -32,7 +32,7 @@
     <div class="container body-content section-separator-top">
         @if (User.Identity.IsAuthenticated)
         {
-            <div class="container create-new">
+            <div class="create-new">
                 <a href="@Url.Action("Create", "Gallery")" class="btn btn-success">Create New</a>
             </div>
         }
