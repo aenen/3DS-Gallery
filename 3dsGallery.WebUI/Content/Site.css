@@ -39,12 +39,12 @@ div.navbar {
     width: 9px;
     color: darkgray;
     font-size: 7px;
-    padding: 0.5px 1.5px;
+    padding: 2.5px 1.5px 0 1.5px;
     height: 31px;
     z-index: 10000;
     background-color: black;
     font-weight: bold;
-    line-height: 0.94;
+    line-height: 0.96;
     text-align: center;
     -webkit-transition: opacity .25s linear;
     -o-transition: opacity .25s linear;
