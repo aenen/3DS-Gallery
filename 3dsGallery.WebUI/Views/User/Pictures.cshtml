@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "Images by " + ViewBag.Login;
+    string paginationStyle = Request.UserAgent.Contains("New Nintendo 3DS") ? "manualInput" : "allPagesShrink";
     string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
 }
 
@@ -64,7 +65,7 @@
                 dataFilters["user"] = '@ViewBag.Login';
             }
 
-            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#picture-data", true);
+            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#picture-data", true, "@paginationStyle");
         })
     </script>
 }

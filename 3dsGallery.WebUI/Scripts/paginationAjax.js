@@ -65,6 +65,46 @@
     }
 
     /**
+     * @summary Хендлер зміни сторінки для пагінації стилю manualInput
+     *
+     * @param {any} event
+     * @param {number} currentPage Відображається сторінка з цим номером.
+     * @param {number} totalPages  Загальна кількість сторінок.
+     */
+    function onPageSearchInput(event, currentPage, totalPages) {
+      if (event.type === 'blur' || (event.type === 'keydown' && event.key === 'Enter')) {
+        console.log(currentPage)
+        console.log(totalPages)
+        console.log($(event.target).val())
+
+        const inputValue = +$(event.target).val();
+
+        if (inputValue === currentPage || inputValue > totalPages || inputValue < 1) {
+          $(event.target).val(currentPage);
+          return false;
+        }
+
+        settings.beforeLoadPage();
+        loadPage(inputValue, false, function () {
+          style[settings.paginationStyle].afterLoadPage(inputValue);
+          settings.afterLoadPageSuccess();
+        }, settings.afterLoadPageError);
+      }
+    }
+
+    /**
+     * @summary Для вонючих чмоньок яким не сподобалась нова пагінація над якою я пітнів весь вечір
+     * 
+     * @param {any} event
+     * @param {number} currentPage Відображається сторінка з цим номером.
+     * @param {number} totalPages  Загальна кількість сторінок.
+     */
+    function onUseOldPagingClick(event, currentPage, totalPages) {
+      settings.paginationStyle = "allPagesShrink";
+      style[settings.paginationStyle].create(currentPage, totalPages);
+    }
+
+    /**
      * @summary Натиснення на кнопку "Завантажити ще" (#load-more).
      *
      * @param {object} e Об'єкт події
@@ -96,8 +136,8 @@
      * @param {function} onError   Функція, яка виконується при не успішному завантаженні даних.
      */
     function loadPage(page, append, onSuccess, onError) {
-      onSuccess = typeof onSuccess=="undefined"? $.noop : onSuccess;
-      onError = typeof onError =="undefined"? $.noop : onError;
+      onSuccess = typeof onSuccess == "undefined" ? $.noop : onSuccess;
+      onError = typeof onError == "undefined" ? $.noop : onError;
       var params = $.extend({ page: page }, settings.urlParameters);
       $.ajax({
         type: "GET",
@@ -120,9 +160,6 @@
       return {
         "uk-UA": {
           "loadMore": "Завантажити ще"
-        },
-        "ru-RU": {
-          "loadMore": "Загрузить еще"
         },
         "en-US": {
           "loadMore": "Load more"
@@ -271,7 +308,7 @@
             if (totalPages <= 1) {
               return false;
             }
-            
+
             // Шаблони елементів та контейнер:
             var container = $("<ul/>", { class: "pagination" }).css("display", "block");
             var pageElement = $("<a/>", { class: "page", 'data-page': 1 }).on("click", pageClick);
@@ -384,7 +421,7 @@
             var currentElement = $(thisElement).find("> ul.pagination > li.active:visible").last();
             var prevDropDown = $("ul.pagination li:has(div.dropup)").first();
             var nextDropDown = $("ul.pagination li:has(div.dropup)").last();
-            
+
             if (onCreate) {
               pageBigger();
               pageSmaller();
@@ -396,10 +433,10 @@
             } else {
               pageBigger();
             }
-            
+
             style["allPagesShrink"].data.prevWidth = currentWidth;
             settings.visiblePagesCount = liPages.length;
-                        
+
             function pageSmaller() {
 
               if (pages.last().position().top > pages.first().position().top) {
@@ -430,11 +467,11 @@
               while (prevDropDown.find("ul > li").length || nextDropDown.find("ul > li").length) {
                 var prevFromCurrent = currentElement.prevAll("li:has(> a:not(.page-nav))");
                 var nextFromCurrent = currentElement.nextAll("li:has(> a:not(.page-nav))");
-                
+
                 var showFirst = nextFromCurrent.length > prevFromCurrent.length;
                 showFirst = showFirst && !prevDropDown.find("ul > li").length ? false : showFirst;
                 showFirst = !showFirst && !nextDropDown.find("ul > li").length ? true : showFirst;
-                
+
                 if (showFirst) {
                   var liFromDropDown = prevDropDown.find("ul > li").last().insertBefore(liPages.first());
                   pages = $(thisElement).find("> ul.pagination > li:visible");
@@ -522,6 +559,102 @@
             if (settings.paginationStyleFlexible) {
               $(thisElement).trigger("resize", [true]);
             }
+          }
+        },
+
+
+        /**
+        * @summary Стиль відображає кнопки "вперед", "назад" і між ними інпут для введення номеру сторінки.
+        *
+        * @description  Спрощений, але зручний пейджинг для 3ДС, аби досягти меншої ваги html dom й кращої продуктивності.
+        *               Й при цьому залишити користувачу повну свободу вибору для навігації між сторінками.
+        */
+        "manualInput": {
+
+          /**
+           * @summary Створення елементів "пейджингу" (ul.pagination).
+           *
+           * @param {number} currentPage Відображається сторінка з цим номером.
+           * @param {number} totalPages  Загальна кількість сторінок.
+           *
+           * @returns {bool} Повертає false, якщо сторінок <= 1.
+           */
+          "create": function (currentPage, totalPages) {
+
+            $(thisElement).empty();
+            if (totalPages <= 1) {
+              return false;
+            }
+
+            // Шаблони елементів та контейнер:
+            var container = $("<ul/>", { class: "pagination" }).css("display", "block");
+            var pageElement = $("<a/>", { class: "page", 'data-page': 1 }).on("click", pageClick);
+            var searchInput = $("<li/>")
+              .append($("<a/>")
+                .append($("<input/>", { class: "page-search form-control text-box single-line", type: "number" })
+                  .val(currentPage)
+                  .on('focus', function () {
+                    $(this).select();
+                  })
+                  .on('mouseup', function (e) {
+                    e.preventDefault();
+                  })
+                  .on('keydown blur', function (e) { onPageSearchInput(e, currentPage, totalPages); }))
+                .append($("<b/>", { text: " of " + totalPages })));
+
+            // Якщо обрана сторінка не перша - створю кнопку "назад"
+            if (currentPage > 1) {
+              $("<li/>")
+                .append(pageElement.clone(true).attr("data-page", currentPage - 1).addClass("page-nav page-prev").text("<"))
+                .appendTo(container);
+            }
+
+            // Якщо обрана сторінка не перша - створю кнопку "перша"
+            if (currentPage > 2) {
+              $("<li/>")
+                .append(pageElement.clone(true).attr("data-page", 1).addClass("page-nav page-prev").text("<<"))
+                .appendTo(container);
+            }
+
+            // Створюю дропдаун для попередніх сторінок, яких забагато
+            searchInput.clone(true).appendTo(container);
+
+            // Якщо обрана сторінка не остання - створюю кнопку "остання"
+            if (currentPage < totalPages - 1) {
+              $("<li/>")
+                .append(pageElement.clone(true).attr("data-page", totalPages).addClass("page-nav page-next").text(">>"))
+                .appendTo(container);
+            }
+
+            // Якщо обрана сторінка не остання - створюю кнопку "вперед"
+            if (currentPage < totalPages) {
+              $("<li/>")
+                .append(pageElement.clone(true).attr("data-page", currentPage + 1).addClass("page-nav page-next").text(">"))
+                .appendTo(container);
+            }
+
+            // Виділяю обрану сторінку як активну та додаю контейнер в елемент пейджингу
+            container.find("a[data-page='" + currentPage + "']").parent("li").addClass("active");
+            container.appendTo(thisElement);
+
+            $("<button/>", {
+              id: "load-more",
+              class: "btn btn-sm btn-primary",
+              style: "margin-bottom: 20px",
+              text: "Switch back to the old pagination"
+            })
+              .on("click", function (e) { onUseOldPagingClick(e, currentPage, totalPages); })
+              .insertAfter($(thisElement).children("ul.pagination"))
+          },
+
+          /**
+           * @summary Метод виконується після успішного завантаження обраної сторінки.
+           *
+           * @param {number} loadedPage Завантажена сторінка.
+           */
+          "afterLoadPage": function (loadedPage) {
+
+            style[settings.paginationStyle].create(loadedPage, totalPages);
           }
         }
       };

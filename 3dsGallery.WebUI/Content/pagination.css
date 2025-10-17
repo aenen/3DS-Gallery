@@ -47,7 +47,8 @@ ul.pagination .dropdown-menu {
 }
 
 .t-slate-gray ul.pagination li:not(.active) > a,
-.t-slate-gray ul.pagination .dropdown-toggle {
+.t-slate-gray ul.pagination .dropdown-toggle,
+.t-slate-gray ul.pagination .page-search {
     color: #A6A6A6;
 }
 
@@ -76,7 +77,8 @@ ul.pagination .dropdown-menu {
 }
 
 .t-sky-blue ul.pagination li:not(.active) > a,
-.t-sky-blue ul.pagination .dropdown-toggle {
+.t-sky-blue ul.pagination .dropdown-toggle,
+.t-sky-blue ul.pagination .page-search {
     color: #5BC0DE;
 }
 
@@ -105,7 +107,8 @@ ul.pagination .dropdown-menu {
 }
 
 .t-grass-green ul.pagination li:not(.active) > a,
-.t-grass-green ul.pagination .dropdown-toggle {
+.t-grass-green ul.pagination .dropdown-toggle,
+.t-grass-green ul.pagination .page-search {
     color: #5CB85C;
 }
 
@@ -134,7 +137,8 @@ ul.pagination .dropdown-menu {
 }
 
 .t-nocturnal-purple ul.pagination li:not(.active) > a,
-.t-nocturnal-purple ul.pagination .dropdown-toggle {
+.t-nocturnal-purple ul.pagination .dropdown-toggle,
+.t-nocturnal-purple ul.pagination .page-search {
     color: #5c3e5c;
 }
 
@@ -163,7 +167,8 @@ ul.pagination .dropdown-menu {
 }
 
 .t-rusty-orange ul.pagination li:not(.active) > a,
-.t-rusty-orange ul.pagination .dropdown-toggle {
+.t-rusty-orange ul.pagination .dropdown-toggle,
+.t-rusty-orange ul.pagination .page-search {
     color: #F09E2A;
 }
 
@@ -192,7 +197,8 @@ ul.pagination .dropdown-menu {
 }
 
 .t-sweet-pink ul.pagination li:not(.active) > a,
-.t-sweet-pink ul.pagination .dropdown-toggle {
+.t-sweet-pink ul.pagination .dropdown-toggle,
+.t-sweet-pink ul.pagination .page-search {
     color: #F292AD;
 }
 

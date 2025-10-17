@@ -2,8 +2,9 @@
 
 @{
     ViewBag.Title = $"\"{Model.Gallery.name}\"";
+    string paginationStyle = Request.UserAgent.Contains("New Nintendo 3DS")? "manualInput" : "allPagesShrink";
     string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
-    string galleryStyleClass= Model.Gallery.Style.ValueEx == null ? Model.Gallery.Style.value : Model.Gallery.Style.ValueEx;
+    string galleryStyleClass = Model.Gallery.Style.ValueEx == null ? Model.Gallery.Style.value : Model.Gallery.Style.ValueEx;
 }
 
 @section Styles {
@@ -83,7 +84,7 @@
                 dataFilters["gallery"] = @Model.Gallery.id;
             }
 
-            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#picture-data", true);
+            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#picture-data", true, "@paginationStyle");
         })
     </script>
 }

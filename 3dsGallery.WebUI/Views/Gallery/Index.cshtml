@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "Galleries";
     string is3ds = Request.UserAgent.Contains("Nintendo 3DS").ToString().ToLower();
+    string paginationStyle = Request.UserAgent.Contains("New Nintendo 3DS") ? "manualInput" : "allPagesShrink";
     string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
 }
 
@@ -79,7 +80,7 @@
             var dataUrl =@isOld3ds?'@Url.Action("Index", "Gallery")' : '@Url.Action("ShowPage", "Gallery")';
             var dataFilters = { filter: '@ViewBag.Filter' };
 
-            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#gallery-data", false);
+            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#gallery-data", false, "@paginationStyle");
         })
     </script>
 }

@@ -1,4 +1,4 @@
-﻿var initPagination = function (page, pages, url, filters, dataSelector, isPicture) {
+﻿var initPagination = function (page, pages, url, filters, dataSelector, isPicture, paginationStyle) {
   var contentPages = pages;
 
   $(".filter").on("click", function (e) {

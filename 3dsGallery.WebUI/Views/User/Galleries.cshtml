@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "Galleries by " + ViewBag.Login;
+    string paginationStyle = Request.UserAgent.Contains("New Nintendo 3DS") ? "manualInput" : "allPagesShrink";
     string is3ds = Request.UserAgent.Contains("Nintendo 3DS").ToString().ToLower();
     string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
 }
@@ -77,7 +78,7 @@ else
                 dataFilters["user"] = '@ViewBag.Login';
             }
 
-            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#gallery-data", false);
+            initPagination(@ViewBag.Page, @ViewBag.Pages, dataUrl, dataFilters, "#gallery-data", false, "@paginationStyle");
         })
     </script>
 }

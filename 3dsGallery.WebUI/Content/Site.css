@@ -536,6 +536,24 @@ footer {
     font-size: 14px;
 }
 
+.page-search {
+    height: 20px;
+    display: inline-block;
+    width: 50px;
+    padding: 0 0 0 5px;
+    font-weight: bold;
+}
+
+input[type=number].page-search::-webkit-inner-spin-button,
+input[type=number].page-search::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+/* Firefox */
+input[type=number].page-search {
+    -moz-appearance: textfield;
+}
+
 .my-heart {
     display: inline-block;
     -webkit-transition: all .25s linear;
@@ -557,6 +575,10 @@ footer {
         -webkit-animation-iteration-count: 4;
         animation-iteration-count: 4;
     }
+
+#toggleMenuBtn {
+    width: 20px;
+}
 
 @-webkit-keyframes heart-bump {
     0% {

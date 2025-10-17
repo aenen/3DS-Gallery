@@ -1,4 +1,4 @@
-﻿var initPagination = function (page, pages, url, filters, dataSelector,isPicture) {
+﻿var initPagination = function (page, pages, url, filters, dataSelector, isPicture, paginationStyle) {
   
   var paginationAjaxData = {
     dataElementSelector: dataSelector,
@@ -17,7 +17,7 @@
     },
     afterLoadPageError: function () { loading(false); },
 
-    paginationStyle: "allPagesShrink",
+    paginationStyle: paginationStyle,
     paginationStyleFlexible: true,
     visiblePagesCount: 5
   };

@@ -136,15 +136,22 @@
             }
         });
 
+        // 3ds не відображає укр символи, тому довелось викручуватись з грецькою абеткою
         if (@is3ds == true) {
             $(".gallery-name,.gallery-desc,.img-comment-text,.img-comment-change").each(function (i, e) {
                 var thisText = $(this).text();
-                $(this).text(thisText=thisText.replace(/І/g, 'I'));
-                $(this).text(thisText=thisText.replace(/і/g, 'i'));
-                $(this).text(thisText=thisText.replace(/Ї/g, 'Ï'));
-                $(this).text(thisText=thisText.replace(/ї/g, 'ï'));
-                $(this).text(thisText=thisText.replace(/Є/g, 'Σ'));
-                $(this).text(thisText=thisText.replace(/є/g, 'ε'));
+                if (thisText.includes('І'))
+                    $(this).text(thisText=thisText.replace(/І/g, 'I'));
+                if (thisText.includes('і'))
+                    $(this).text(thisText=thisText.replace(/і/g, 'i'));
+                if (thisText.includes('Ї'))
+                    $(this).text(thisText=thisText.replace(/Ї/g, 'Ï'));
+                if (thisText.includes('ї'))
+                    $(this).text(thisText=thisText.replace(/ї/g, 'ï'));
+                if (thisText.includes('Є'))
+                    $(this).text(thisText=thisText.replace(/Є/g, 'Σ'));
+                if (thisText.includes('є'))
+                    $(this).text(thisText=thisText.replace(/є/g, 'ε'));
             });
         }
     };
