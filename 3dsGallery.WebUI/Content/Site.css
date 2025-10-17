@@ -4,7 +4,6 @@
 
 body.menu-bottom {
     padding-bottom: 30px;
-
     -webkit-transition: padding-bottom .25s linear;
     -o-transition: padding-bottom .25s linear;
     transition: padding-bottom .25s linear;
@@ -25,6 +24,7 @@ body.menu-bottom {
         padding-bottom: 0 !important;
         height: 30px;
     }
+
 div.navbar {
     -webkit-transition: all .25s linear;
     -o-transition: all .25s linear;
@@ -43,7 +43,9 @@ div.navbar {
     height: 31px;
     z-index: 10000;
     background-color: black;
-
+    font-weight: bold;
+    line-height: normal;
+    text-align: center;
     -webkit-transition: opacity .25s linear;
     -o-transition: opacity .25s linear;
     transition: opacity .25s linear;
@@ -575,10 +577,6 @@ input[type=number].page-search {
         -webkit-animation-iteration-count: 4;
         animation-iteration-count: 4;
     }
-
-#toggleMenuBtn {
-    width: 20px;
-}
 
 @-webkit-keyframes heart-bump {
     0% {
