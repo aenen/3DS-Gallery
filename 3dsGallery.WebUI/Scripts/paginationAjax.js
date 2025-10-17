@@ -73,9 +73,8 @@
      */
     function onPageSearchInput(event, currentPage, totalPages) {
       if (event.type === 'blur' || (event.type === 'keydown' && event.key === 'Enter')) {
-        console.log(currentPage)
-        console.log(totalPages)
-        console.log($(event.target).val())
+
+        $("ul.pagination").append($('<span/>', { text: event.key }));
 
         const inputValue = +$(event.target).val();
 
