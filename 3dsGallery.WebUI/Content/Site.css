@@ -44,7 +44,7 @@ div.navbar {
     z-index: 10000;
     background-color: black;
     font-weight: bold;
-    line-height: 0;
+    line-height: 0.9;
     text-align: center;
     -webkit-transition: opacity .25s linear;
     -o-transition: opacity .25s linear;
