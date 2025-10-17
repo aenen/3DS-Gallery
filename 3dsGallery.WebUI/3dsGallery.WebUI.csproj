@@ -256,7 +256,6 @@
     <Content Include="Content\pagination.css" />
     <Content Include="Content\pagination.min.css" />
     <Content Include="Content\qr-icon.png" />
-    <Content Include="Content\Site.min.css" />
     <Content Include="Content\Site.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -274,9 +273,7 @@
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <Content Include="Scripts\initPaginationAjax.min.js" />
     <Content Include="Scripts\initPaginationAjax.js" />
-    <Content Include="Scripts\initPaginationFor3ds.min.js" />
     <Content Include="Scripts\initPaginationFor3ds.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -290,7 +287,6 @@
     <Content Include="Scripts\pagination.min.js" />
     <Content Include="Scripts\paginationAjax.js" />
     <Content Include="Scripts\paginationAjax.min.js" />
-    <Content Include="Scripts\paginationFor3ds.min.js" />
     <Content Include="Scripts\paginationFor3ds.js" />
     <Content Include="Web.config" />
     <Content Include="Views\Home\Index.cshtml" />
