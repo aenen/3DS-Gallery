@@ -72,7 +72,8 @@
      * @param {number} totalPages  Загальна кількість сторінок.
      */
     function onPageSearchInput(event, currentPage, totalPages) {
-      $("ul.pagination").append($('<span/>', { text: event.type }));
+      $("ul.pagination").append($('<span/>', { text: event.type + " " + event.keyCode + " " }));
+      console.log(event)
       if (event.type === 'blur' || (event.type === 'keydown' && event.key === 'Enter')) {
 
 
