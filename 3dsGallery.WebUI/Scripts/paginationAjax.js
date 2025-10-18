@@ -79,7 +79,7 @@
           if (event.type === 'blur')
             $(event.target).val(currentPage);
 
-          $('.page-load-btn').css({ 'margin-top': '-49px'});
+          $('.page-load-btn').css({ 'margin-top': '-48px'});
           return false;
         }
 

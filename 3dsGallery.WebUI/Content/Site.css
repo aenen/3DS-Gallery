@@ -579,7 +579,7 @@ input[type=number].page-search {
     }
 
 .page-load-btn {
-    margin-top: -49px;
+    margin-top: -48px;
     -webkit-transition: margin-top .25s linear;
     -o-transition: margin-top .25s linear;
     transition: margin-top .25s linear;
