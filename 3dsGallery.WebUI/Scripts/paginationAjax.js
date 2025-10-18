@@ -72,19 +72,18 @@
      * @param {number} totalPages  Загальна кількість сторінок.
      */
     function onPageSearchInput(event, currentPage, totalPages) {
-      if (event.type === 'blur' || (event.type === 'keydown' && event.keyCode === 13)) {
+      if (event.type === 'blur' || (event.type === 'keyup')) {
         const inputValue = +$(event.target).val();
 
-        if (inputValue === currentPage || inputValue > totalPages || inputValue < 1) {
-          $(event.target).val(currentPage);
+        if (isNaN(inputValue) || inputValue === currentPage || inputValue > totalPages || inputValue < 1) {
+          if (event.type === 'blur')
+            $(event.target).val(currentPage);
+
+          $('.page-load-btn').css({ 'margin-top': '-49px'});
           return false;
         }
 
-        settings.beforeLoadPage();
-        loadPage(inputValue, false, function () {
-          style[settings.paginationStyle].afterLoadPage(inputValue);
-          settings.afterLoadPageSuccess();
-        }, settings.afterLoadPageError);
+        $('.page-load-btn').css({ 'margin-top': '0' }).data('page', inputValue);
       }
     }
 
@@ -583,7 +582,7 @@
             }
 
             // Шаблони елементів та контейнер:
-            var container = $("<ul/>", { class: "pagination" }).css("display", "block");
+            var container = $("<ul/>", { class: "pagination" }).css({ "display": "block", "margin-bottom": "0", height: "30px" });
             var pageElement = $("<a/>", { class: "page", 'data-page': 1 }).on("click", pageClick);
             var searchInput = $("<li/>")
               .append($("<a/>")
@@ -595,7 +594,7 @@
                   .on('mouseup', function (e) {
                     e.preventDefault();
                   })
-                  .on('keydown blur', function (e) { onPageSearchInput(e, currentPage, totalPages); }))
+                  .on('keyup blur', function (e) { onPageSearchInput(e, currentPage, totalPages); }))
                 .append($("<b/>", { text: " of " + totalPages })));
 
             // Якщо обрана сторінка не перша - створю кнопку "назад"
@@ -635,12 +634,20 @@
 
             $("<button/>", {
               id: "load-more",
-              class: "btn btn-sm btn-primary",
-              style: "margin-bottom: 20px",
-              text: "Switch back to the old pagination"
+              class: "btn btn-md btn-primary page-load-btn",
+              text: "Load"
             })
-              .on("click", function (e) { onUseOldPagingClick(e, currentPage, totalPages); })
+              .click(pageClick)
               .insertAfter($(thisElement).children("ul.pagination"))
+              .after($("<button/>", {
+                id: "load-more",
+                class: "btn btn-sm btn-primary",
+                style: "margin-bottom: 20px; margin-top: 5px; ",
+                text: "Switch back to the old pagination"
+              })
+                .on("click", function (e) { onUseOldPagingClick(e, currentPage, totalPages); }))
+              .after($("<br/>"));
+
           },
 
           /**

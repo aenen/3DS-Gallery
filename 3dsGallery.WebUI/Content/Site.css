@@ -578,6 +578,14 @@ input[type=number].page-search {
         animation-iteration-count: 4;
     }
 
+.page-load-btn {
+    margin-top: -49px;
+    -webkit-transition: margin-top .25s linear;
+    -o-transition: margin-top .25s linear;
+    transition: margin-top .25s linear;
+    border-radius: 0 0 50% 50%;
+}
+
 @-webkit-keyframes heart-bump {
     0% {
         font-size: 20px;
