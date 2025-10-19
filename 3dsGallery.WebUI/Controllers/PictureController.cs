@@ -21,7 +21,7 @@ namespace _3dsGallery.WebUI.Controllers
         private readonly GalleryContext db = new GalleryContext();
 
         //GET: Pictures
-        [Route("Pictures")]
+        [Route("Pictures")] 
         public ActionResult Index(int page = 1, string filter = "new")
         {
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
@@ -42,6 +42,7 @@ namespace _3dsGallery.WebUI.Controllers
             if (user == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
+            ViewBag.hasGalleries = user.Gallery.Any();
             ViewBag.galleryId = new SelectList(user.Gallery, "id", "name");
             return View(new AddPictureModel());
         }
@@ -57,6 +58,7 @@ namespace _3dsGallery.WebUI.Controllers
             if (user == null || !IsItMineGallery(model.galleryId))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
+            ViewBag.hasGalleries = user.Gallery.Any();
             ViewBag.galleryId = new SelectList(user.Gallery, "id", "name");
             if (file == null)
             {

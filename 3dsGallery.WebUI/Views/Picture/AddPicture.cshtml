@@ -12,6 +12,13 @@
 
 <div class="section-grey">
     <div class="container body-content section-separator-top">
+        @{
+            if (!ViewBag.hasGalleries)
+            {
+                <p class="text-danger">Important! You must have at least one <span class="text-success">Gallery</span> before uploading <span class="text-info">Images</span></p>
+                <p><a href="@Url.Action("Create", "Gallery")">Click here to create a new <span class="text-success">Gallery</span>.</a></p>
+            }
+        }
         @using (Html.BeginForm("AddPicture", "Picture", FormMethod.Post, new { enctype = "multipart/form-data", @id = "mainForm" }))
         {
             @Html.AntiForgeryToken()
