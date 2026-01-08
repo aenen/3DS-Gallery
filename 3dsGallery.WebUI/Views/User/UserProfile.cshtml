@@ -60,7 +60,7 @@
                         </div>
                     }
                     @{ 
-                        Html.RenderAction("GetElements", "Gallery", new { items= Model.Gallery.Where(x => x.LastPicture != null && (!x.IsPrivate || (x.IsPrivate && x.User.login == User.Identity.Name))).OrderByDescending(x => x.id).Take(gallery_count) });
+                        Html.RenderAction("GetElements", "Gallery", new { items= Model.Gallery.Where(x => !x.IsPrivate || (x.IsPrivate && x.User.login == User.Identity.Name)).OrderByDescending(x => x.id).Take(gallery_count) });
                     }
                 </div>
                 @{
