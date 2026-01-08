@@ -60,7 +60,7 @@
                         </div>
                     }
                     @{ 
-                        Html.RenderAction("GetElements", "Gallery", new { items= Model.Gallery.OrderByDescending(x => x.id).Take(gallery_count) });
+                        Html.RenderAction("GetElements", "Gallery", new { items= Model.Gallery.Where(x => x.LastPicture != null && !x.IsPrivate || (x.IsPrivate && x.User.login == User.Identity.Name)).OrderByDescending(x => x.id).Take(gallery_count) });
                     }
                 </div>
                 @{
@@ -81,7 +81,7 @@
                         </div>
                     }
                     @{ 
-                        Html.RenderAction("GetElements", "Picture", new { items= Model.Gallery.SelectMany(x => x.Picture).OrderByDescending(x => x.id).Take(picture_count) });
+                        Html.RenderAction("GetElements", "Picture", new { items= Model.Gallery.Where(x => x.LastPicture != null && !x.IsPrivate || (x.IsPrivate && x.User.login == User.Identity.Name)).SelectMany(x => x.Picture).OrderByDescending(x => x.id).Take(picture_count) });
                     }
                 </div>
                 @{
@@ -96,7 +96,7 @@
             <div class="tab-pane fade" id="like" role="tabpanel" aria-labelledby="like-tab">
                 <div class="like-data row">
                     @{
-                        Html.RenderAction("GetElements", "Picture", new { items= Model.Picture.Take(picture_count) });
+                        Html.RenderAction("GetElements", "Picture", new { items= Model.Picture.Where(x => !x.Gallery.IsPrivate || (x.Gallery.IsPrivate && x.Gallery.User.login == User.Identity.Name)).Take(picture_count) });
                     }
                 </div>
                 @{
