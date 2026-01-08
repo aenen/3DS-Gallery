@@ -14,32 +14,32 @@
         <div class="row">
 
             @*<div class="col-md-4">
-                <div class="panel panel-nocturnal-purple">
-                    <div class="panel-heading">
-                        <div class="gallery-badges">
-                            <span class="badge">3D</span>
-                            <span class="badge">99</span>
+                    <div class="panel panel-nocturnal-purple">
+                        <div class="panel-heading">
+                            <div class="gallery-badges">
+                                <span class="badge">3D</span>
+                                <span class="badge">99</span>
+                            </div>
+                            <div class="one-line">
+                                <a href="" class="btn btn-nocturnal-purple btn-add">+</a>
+                                <a href="" class="gallery-name">Test gallery element</a>
+                            </div>
                         </div>
-                        <div class="one-line">
-                            <a href="" class="btn btn-nocturnal-purple btn-add">+</a>
-                            <a href="" class="gallery-name">Test gallery element</a>
+                        <div class="panel-body preview-gallery">
+                            <div class="preview-container-sm">
+                                <img class="img-thumbnail preview-img">
+                            </div>
+                            <div class="preview-container-sm">
+                                <img class="img-thumbnail preview-img">
+                            </div>
+                        </div>
+                        <div class="panel-heading gallery-info">
+                            <a href=""><i>Username</i></a>
                         </div>
                     </div>
-                    <div class="panel-body preview-gallery">
-                        <div class="preview-container-sm">
-                            <img class="img-thumbnail preview-img">
-                        </div>
-                        <div class="preview-container-sm">
-                            <img class="img-thumbnail preview-img">
-                        </div>
-                    </div>
-                    <div class="panel-heading gallery-info">
-                        <a href=""><i>Username</i></a>
-                    </div>
-                </div>
-            </div>*@
+                </div>*@
 
-            @{ Html.RenderAction("GetElements", "Gallery", new { items = Model.Gallery.Where(x => x.LastPicture != null).OrderByDescending(x => x.LastPicture.id).Take(gallery_count).ToList() }); }
+            @{ Html.RenderAction("GetElements", "Gallery", new { items = Model.Gallery.Where(x => x.LastPicture != null && !x.IsPrivate || (x.IsPrivate && x.User.login == User.Identity.Name)).OrderByDescending(x => x.LastPicture.id).Take(gallery_count).ToList() }); }
         </div>
     </div>
 </div>
@@ -51,7 +51,7 @@
             <h2 class="text-info">Latest Images</h2>
         </div>
         <div class="row">
-            @{ Html.RenderAction("GetElements", "Picture", new { items = Model.Picture.OrderByDescending(x => x.id).Take(picture_count).ToList() }); }
+            @{ Html.RenderAction("GetElements", "Picture", new { items = Model.Picture.Where(x => !x.Gallery.IsPrivate || (x.Gallery.IsPrivate && x.Gallery.User.login == User.Identity.Name)).OrderByDescending(x => x.id).Take(picture_count).ToList() }); }
         </div>
     </div>
 </div>

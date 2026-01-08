@@ -2,13 +2,24 @@
 
 @{
     ViewBag.Title = $"\"{Model.Gallery.name}\"";
-    string paginationStyle = Request.UserAgent.Contains("New Nintendo 3DS")? "manualInput" : "allPagesShrink";
+    string paginationStyle = Request.UserAgent.Contains("New Nintendo 3DS") ? "manualInput" : "allPagesShrink";
     string isOld3ds = (Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS")).ToString().ToLower();
     string galleryStyleClass = Model.Gallery.Style.ValueEx == null ? Model.Gallery.Style.value : Model.Gallery.Style.ValueEx;
 }
 
 @section Styles {
     @System.Web.Optimization.Styles.Render("~/Content/pagination")
+}
+
+@if (Model.Gallery.IsPrivate)
+{
+    <div class="section-grey">
+        <div class="container body-content">
+            <div class="h2-container text-center">
+                <b>Private Gallery. For your eyes only, <i class="text-@Model.Gallery.Style.value">@(User.Identity.Name)</i>.</b>
+            </div>
+        </div>
+    </div>
 }
 
 <div class="section-white">

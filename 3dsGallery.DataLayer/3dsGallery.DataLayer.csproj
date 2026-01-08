@@ -81,6 +81,10 @@
     <Compile Include="Migrations\202101080713538_AddIsBackupCopySavedColumn.Designer.cs">
       <DependentUpon>202101080713538_AddIsBackupCopySavedColumn.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202601080751432_AddIsPrivateToGallery.cs" />
+    <Compile Include="Migrations\202601080751432_AddIsPrivateToGallery.Designer.cs">
+      <DependentUpon>202601080751432_AddIsPrivateToGallery.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\IEnumerableExtensions.cs" />
@@ -108,6 +112,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202101080713538_AddIsBackupCopySavedColumn.resx">
       <DependentUpon>202101080713538_AddIsBackupCopySavedColumn.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202601080751432_AddIsPrivateToGallery.resx">
+      <DependentUpon>202601080751432_AddIsPrivateToGallery.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

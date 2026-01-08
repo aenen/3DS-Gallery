@@ -139,7 +139,7 @@ namespace _3dsGallery.WebUI.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            GalleryPageData pageData = new PageData(page, filter, is3ds).GetGalleriesByPage(login);
+            GalleryPageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetGalleriesByPage(login);
             ViewBag.Page = page;
             ViewBag.Pages = pageData.TotalPages;
             ViewBag.Filter = filter;
@@ -156,7 +156,7 @@ namespace _3dsGallery.WebUI.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            PicturePageData pageData = new PageData(page, filter, is3ds).GetPictruresByPage(user: login);
+            PicturePageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetPictruresByPage(user: login);
             ViewBag.Page = page;
             ViewBag.Filter = filter;
             ViewBag.Pages = pageData.TotalPages;
@@ -173,7 +173,7 @@ namespace _3dsGallery.WebUI.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            PicturePageData pageData = new PageData(page, filter, is3ds).GetPictruresByPage(user: login,user_likes: true);
+            PicturePageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetPictruresByPage(user: login,user_likes: true);
             ViewBag.Page = page;
             ViewBag.Filter = filter;
             ViewBag.Pages = pageData.TotalPages;

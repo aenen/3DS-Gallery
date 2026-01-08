@@ -25,7 +25,7 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult Index(int page = 1, string filter = "new")
         {
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            PicturePageData pageData = new PageData(page, filter, is3ds).GetPictruresByPage();
+            PicturePageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetPictruresByPage();
             ViewBag.Page = page;
             ViewBag.Filter = filter;
             ViewBag.Pages = pageData.TotalPages;
@@ -122,11 +122,12 @@ namespace _3dsGallery.WebUI.Controllers
         [HttpPost]
         public ActionResult Random()
         {
-            int total = db.Picture.Count();
+            int total = db.Picture.Where(x => !x.Gallery.IsPrivate).Count();
             Random rand = new Random();
             int offset = rand.Next(0, total);
 
             var randomRow = db.Picture
+                .Where(x=>!x.Gallery.IsPrivate)
                 .OrderBy(x=>x.id)
                 .Skip(offset)
                 .FirstOrDefault();
@@ -196,7 +197,7 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult ShowPage(int? gallery, string user, int page = 1, string filter = "new", bool user_likes = false)
         {
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            PicturePageData pageData = new PageData(page, filter, is3ds).GetPictruresByPage(gallery,user,user_likes);
+            PicturePageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetPictruresByPage(gallery,user,user_likes);
             ViewBag.Page = page;
             ViewBag.Filter = filter;
             ViewBag.Pages = pageData.TotalPages;

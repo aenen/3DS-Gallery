@@ -17,12 +17,14 @@ namespace _3dsGallery.WebUI.Code
         public int Page { get; set; }
         public string Filter { get; set; }
         public bool Is3ds { get; set; }
+        public string LoggedUserName { get; set; }
 
-        public PageData(int page, string filter, bool is3ds)
+        public PageData(int page, string filter, bool is3ds, string loggedUserName)
         {
             Page = page;
             Filter = filter;
             Is3ds = is3ds;
+            LoggedUserName = loggedUserName;
         }
 
         public PicturePageData GetPictruresByPage(int? gallery=null, string user=null, bool user_likes = false)
@@ -36,6 +38,8 @@ namespace _3dsGallery.WebUI.Code
                 picturesList = picturesList.Where(x => x.User.Contains(userdb));
             else if (user != null)
                 picturesList = picturesList.Where(x => x.Gallery.User.login == user);
+
+            picturesList = picturesList.Where(x => !x.Gallery.IsPrivate || (x.Gallery.IsPrivate && x.Gallery.User.login == LoggedUserName));
 
             switch (Filter)
             {
@@ -76,6 +80,8 @@ namespace _3dsGallery.WebUI.Code
             IEnumerable<Gallery> galleriesList = db.Gallery.AsEnumerable();
             if (user != null)
                 galleriesList = galleriesList.Where(x => x.User.login == user);
+
+            galleriesList = galleriesList.Where(x => !x.IsPrivate || (x.IsPrivate && x.User.login == LoggedUserName));
 
             switch (Filter)
             {

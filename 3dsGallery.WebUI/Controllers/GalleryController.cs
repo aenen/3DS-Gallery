@@ -25,7 +25,7 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult ShowPage(string user, int page = 1, string filter = "updated")
         {
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            GalleryPageData pageData = new PageData(page, filter, is3ds).GetGalleriesByPage(user);            
+            GalleryPageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetGalleriesByPage(user);            
             ViewBag.Page = page;
             ViewBag.Pages = pageData.TotalPages;
             ViewBag.Filter = filter;
@@ -37,7 +37,7 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult Index(int page = 1, string filter = "updated")
         {
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            GalleryPageData pageData = new PageData(page, filter, is3ds).GetGalleriesByPage();
+            GalleryPageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetGalleriesByPage();
             ViewBag.Page = page;
             ViewBag.Pages = pageData.TotalPages;
             ViewBag.Filter = filter;
@@ -56,8 +56,11 @@ namespace _3dsGallery.WebUI.Controllers
             if (gallery == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
+            if(gallery.IsPrivate && gallery.User.login != User.Identity.Name)
+                return RedirectToAction("Index", "Home");
+
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            PicturePageData pageData = new PageData(page, filter, is3ds).GetPictruresByPage(id);
+            PicturePageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetPictruresByPage(id);
             ViewBag.Page = page;
             ViewBag.Filter = filter;            
             ViewBag.Pages = pageData.TotalPages;
@@ -148,14 +151,14 @@ namespace _3dsGallery.WebUI.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("Create")]
-        public ActionResult Create([Bind(Include = "id,name,info,styleId")] Gallery gallery)
+        public ActionResult Create([Bind(Include = "id,name,info,styleId,IsPrivate")] Gallery gallery)
         {
             if (ModelState.IsValid)
             {
                 gallery.User = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
                 db.Gallery.Add(gallery);
                 db.SaveChanges();
-                return RedirectToAction("MyProfile", "User");
+                return RedirectToAction("Details", new { id = gallery.id});
             }
 
             ViewBag.styleId = new SelectList(db.Style, "id", "name", gallery.styleId);
@@ -185,7 +188,7 @@ namespace _3dsGallery.WebUI.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("{id}/Edit")]
-        public ActionResult Edit([Bind(Include = "id,name,info,styleId")] Gallery gallery, short id)
+        public ActionResult Edit([Bind(Include = "id,name,info,styleId,IsPrivate")] Gallery gallery, short id)
         {
             if (!IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);

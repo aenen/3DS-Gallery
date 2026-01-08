@@ -28,6 +28,9 @@ namespace _3dsGallery.DataLayer.DataBase
 
         public byte? styleId { get; set; }
 
+        [Column("isPrivate")]
+        public bool IsPrivate { get; set; }
+
         public virtual User User { get; set; }
 
         public virtual Picture LastPicture { get; set; }
