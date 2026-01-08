@@ -69,7 +69,7 @@
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
 
     <script>
-        const styles = [
+        var styles = [
             { name: 'Slate Grey', code: 'default', codeEx: 'slate-gray' },
             { name: 'Sky Blue', code: 'info', codeEx: 'sky-blue' },
             { name: 'Grass Green', code: 'success', codeEx: 'grass-green' },
@@ -78,7 +78,7 @@
             { name: 'Nocturnal Purple', code: 'nocturnal-purple' }
         ];
 
-        const messages = {
+        var messages = {
             common: ["Share your pics straight from a Nintendo 3DS Internet Browser!",
                 "Publish your lo-fi 0.3MP photos using a Nintendo 3DS Internet Browser",
                 "Feel free to share what you draw in Colors3D, ArtAcademy, or any other apps",
@@ -89,44 +89,89 @@
                 "You can use the Filter feature on the top-right corner where there's pics or galleries. Even I forget that such feature exists",
                 "3DS Gallery does not have any ads or tracking scripts that steals your data. That's cool, huh?",
                 "You can type up to 150 symbols for a pic/gallery description. You can also do it later from ur phone"],
-            rare: ["This message changes every time the page is reloaded. Msgs are also categorized by rarity. Is one is rare btw (9% chance), you're kinda lucky"],
+            rare: ["This message changes every time the page is reloaded. Msgs are also categorized by rarity. Is one is rare btw (9% chance), you're kinda lucky",
+                "Nintendo 3DS was released //2011-02-26// ago. Feeling old yet?",
+                "EShop was closed //2023-03-27// ago",
+                "I didn't feed my Nintendog for //2021-12-22//",
+                "Shiggy was born //1952-11-16// ago"],
             legendary: ["WOW! You got the rarest message! Chances were 1 in 1000 (0.1%). It could be you lucky day, maybe get a lotto?"]
         };
 
+        function replaceDateWithDiff(str) {
+            // Extract the date between //...//
+            const match = str.match(/\/\/(\d{4}-\d{2}-\d{2})\/\//);
+            if (!match) return str;
+
+            const releaseDate = new Date(match[1]);
+            const today = new Date();
+
+            // Calculate difference in milliseconds
+            let diffMs = today - releaseDate;
+
+            // Convert to days
+            let diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+            // Break down into years, months, days
+            const years = Math.floor(diffDays / 365);
+            diffDays -= years * 365;
+
+            const months = Math.floor(diffDays / 30); // approximate months
+            diffDays -= months * 30;
+
+            // Build result parts
+            let parts = [];
+            if (years > 0) parts.push(`${years}y`);
+            if (months > 0) parts.push(`${months}m`);
+            if (diffDays > 0) parts.push(`${diffDays}d`);
+
+            // Format with commas and "and"
+            let result;
+            if (parts.length === 1) {
+                result = parts[0];
+            } else if (parts.length === 2) {
+                result = parts.join(" and ");
+            } else if (parts.length === 3) {
+                result = `${parts[0]}, ${parts[1]} and ${parts[2]}`;
+            }
+
+            // Replace the original date with the result
+            return str.replace(/\/\/\d{4}-\d{2}-\d{2}\/\//, result);
+        }
+
         function getRandomCategory() {
-            const categories = [
+            var categories = [
                 { type: "common", weight: 0.7 },
                 { type: "uncommon", weight: 0.2 },
                 { type: "rare", weight: 0.099 },
                 { type: "legendary", weight: 0.001 }
             ];
 
-            const rand = Math.random();
+            var rand = Math.random();
             let cumulative = 0;
 
-            for (let cat of categories) {
-                cumulative += cat.weight;
+            for (var i = 0; i < categories.length; i++) {
+                cumulative += categories[i].weight;
                 if (rand < cumulative) {
-                    return cat.type;
+                    return categories[i].type;
                 }
             }
         }
 
         function getRandomMessage() {
-            const category = getRandomCategory();
-            const options = messages[category];
+            var category = getRandomCategory();
+            var options = messages[category];
             return options[Math.floor(Math.random() * options.length)];
         }
 
         $(function () {
 
-            const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+            var randomStyle = styles[Math.floor(Math.random() * styles.length)];
 
             $('#banner-section')
                 .addClass('section-' + (randomStyle.codeEx ? randomStyle.codeEx : randomStyle.code))
                 .addClass('text-' + randomStyle.code);
 
-            $('#banner-tagline').text(getRandomMessage());
+            $('#banner-tagline').text(replaceDateWithDiff(getRandomMessage()));
         })
     </script>
 }
