@@ -5,6 +5,15 @@
     int picture_count = Request.UserAgent.Contains("Nintendo 3DS") ? 3 : 12;
 }
 
+<div id="banner-section">
+    <div class="container body-content text-center">
+        <div class="h1">
+            3DS Gallery
+        </div>
+        <p id="banner-tagline"></p>
+    </div>
+</div>
+
 <div class="section-white">
     <div class="container body-content">
         <div class="h2-container">
@@ -58,4 +67,66 @@
 
 @section scripts {
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
+
+    <script>
+        const styles = [
+            { name: 'Slate Grey', code: 'default', codeEx: 'slate-gray' },
+            { name: 'Sky Blue', code: 'info', codeEx: 'sky-blue' },
+            { name: 'Grass Green', code: 'success', codeEx: 'grass-green' },
+            { name: 'Rusty Orange', code: 'warning', codeEx: 'rusty-orange' },
+            { name: 'Sweet Pink', code: 'sweet-pink' },
+            { name: 'Nocturnal Purple', code: 'nocturnal-purple' }
+        ];
+
+        const messages = {
+            common: ["Share your pics straight from a Nintendo 3DS Internet Browser!",
+                "Publish your lo-fi 0.3MP photos using a Nintendo 3DS Internet Browser",
+                "Feel free to share what you draw in Colors3D, ArtAcademy, or any other apps",
+                "Maybe upload some funny moments from Tomodachi Life or ACNL",
+                "Private Galleries are now available to use"],
+            uncommon: ["Every image here is clickable! And if you press it using a 3DS - it might open in a glorious 3D",
+                "Use a 3D indicator on the images and galleries to locate some stereoscopic goodness",
+                "You can use the Filter feature on the top-right corner where there's pics or galleries. Even I forget that such feature exists",
+                "3DS Gallery does not have any ads or tracking scripts that steals your data. That's cool, huh?",
+                "You can type up to 150 symbols for a pic/gallery description. You can also do it later from ur phone"],
+            rare: ["This message changes every time the page is reloaded. Msgs are also categorized by rarity. Is one is rare btw (9% chance), you're kinda lucky"],
+            legendary: ["WOW! You got the rarest message! Chances were 1 in 1000 (0.1%). It could be you lucky day, maybe get a lotto?"]
+        };
+
+        function getRandomCategory() {
+            const categories = [
+                { type: "common", weight: 0.7 },
+                { type: "uncommon", weight: 0.2 },
+                { type: "rare", weight: 0.099 },
+                { type: "legendary", weight: 0.001 }
+            ];
+
+            const rand = Math.random();
+            let cumulative = 0;
+
+            for (let cat of categories) {
+                cumulative += cat.weight;
+                if (rand < cumulative) {
+                    return cat.type;
+                }
+            }
+        }
+
+        function getRandomMessage() {
+            const category = getRandomCategory();
+            const options = messages[category];
+            return options[Math.floor(Math.random() * options.length)];
+        }
+
+        $(function () {
+
+            const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+
+            $('#banner-section')
+                .addClass('section-' + (randomStyle.codeEx ? randomStyle.codeEx : randomStyle.code))
+                .addClass('text-' + randomStyle.code);
+
+            $('#banner-tagline').text(getRandomMessage());
+        })
+    </script>
 }
