@@ -216,3 +216,33 @@ ul.pagination .dropdown-menu {
 .t-sweet-pink ul.pagination .dropdown-toggle:focus {
     background-color: #FFF7F9;
 }
+
+
+
+/* --- Тема "Watermelon Red" --- */
+
+.t-watermelon-red ul.pagination > li > a,
+.t-watermelon-red ul.pagination .dropdown-toggle {
+    border-color: #FDE4E1;
+}
+
+.t-watermelon-red ul.pagination li:not(.active) > a,
+.t-watermelon-red ul.pagination .dropdown-toggle,
+.t-watermelon-red ul.pagination .page-search {
+    color: #F2786A;
+}
+
+.t-watermelon-red ul.pagination li.active > a,
+.t-watermelon-red ul.pagination li.active > a:focus,
+.t-watermelon-red ul.pagination li.active > a:hover,
+.t-watermelon-red #load-more {
+    background-color: #F2786A;
+    border-color: #F2786A;
+}
+
+.t-watermelon-red ul.pagination li > a:focus,
+.t-watermelon-red ul.pagination li > a:hover,
+.t-watermelon-red ul.pagination .dropdown-toggle:hover,
+.t-watermelon-red ul.pagination .dropdown-toggle:focus {
+    background-color: #FFF7F7;
+}

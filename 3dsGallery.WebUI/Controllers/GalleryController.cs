@@ -222,6 +222,14 @@ namespace _3dsGallery.WebUI.Controllers
             return PartialView(items);
         }
 
+        public ActionResult GetGalleryElements(IEnumerable<GalleryModel> items)
+        {
+            if (items == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            return PartialView(items);
+        }
+
         // GET: Gallery/Delete/5
         [Authorize]
         [Route("{id}/Delete")]

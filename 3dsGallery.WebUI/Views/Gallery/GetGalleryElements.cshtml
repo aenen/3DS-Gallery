@@ -1,0 +1,51 @@
+﻿@model IEnumerable<_3dsGallery.WebUI.Models.GalleryModel>
+
+@foreach (var gallery in Model)
+{
+    <div class="col-md-4">
+        <div class="panel panel-@gallery.ColorThemeClass">
+            <div class="panel-heading">
+                <div class="gallery-badges">
+                    @if (gallery.Is3D)
+                    {
+                        <span class="badge">3D</span>
+                    }
+                    <span class="badge">@gallery.PictureTotalCount</span>
+                </div>
+                <div class="one-line">
+                    @if (gallery.CreatedBy == User.Identity.Name)
+                    {
+                        <a href="@Url.Action("AddPicture", "Gallery", new { id = gallery.IdGallery })" class="btn btn-@gallery.ColorThemeClass btn-add">+</a>
+                    }
+                    <a href="@Url.Action("Details", "Gallery", new { id = gallery.IdGallery })" class="gallery-name">@gallery.GalleryName</a>
+                </div>
+            </div>
+            <div class="panel-body preview-gallery">
+                @{
+                    int counter = 2;
+                    foreach (var picturePreview in gallery.PicturePreviewList)
+                    {
+                        <div class="preview-container-sm">
+                            <a target="_blank" href="~/@picturePreview.Path">
+                                @{
+                                    string preview_sm = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{picturePreview.IdPicture}-thumb_sm.JPG") ? $"/Picture/{picturePreview.IdPicture}-thumb_sm.JPG" : $"/Picture/{picturePreview.IdPicture}.JPG";
+                                }
+                                <img class="img-thumbnail preview-img " src="@preview_sm">
+                            </a>
+                        </div>
+                        counter--;
+                    }
+                    for (int i = 0; i < counter; i++)
+                    {
+                        <div class="preview-container-sm">
+                            <img class="img-thumbnail preview-img">
+                        </div>
+                    }
+                }
+            </div>
+            <div class="panel-heading gallery-info">
+                <a href="~/User/@gallery.CreatedBy"><i>@gallery.CreatedBy</i></a>
+            </div>
+        </div>
+    </div>
+}

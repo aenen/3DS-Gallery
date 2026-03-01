@@ -194,6 +194,14 @@ namespace _3dsGallery.WebUI.Controllers
             return PartialView(items);
         }
 
+        public ActionResult GetPictureElements(IEnumerable<PictureModel> items)
+        {
+            if (items == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            return PartialView(items);
+        }
+
         public ActionResult ShowPage(int? gallery, string user, int page = 1, string filter = "new", bool user_likes = false)
         {
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");

@@ -112,6 +112,12 @@ textarea {
         border-top: 1px dotted #A4B09F;
     }
 
+    .img-date.date-danger {
+        color: #DB8475;
+        background-color: #FCD2CF;
+        border-top: 1px dotted #DB8475;
+    }
+
 
 #loading {
     width: 20px;
@@ -198,6 +204,14 @@ h2 {
     background-color: rgb(237, 247, 252);
 }
 
+.panel-danger .panel-body {
+    background-color: #FFD0D0;
+}
+
+.panel-danger .panel-heading {
+    background-color: #FFEAEA;
+}
+
 .panel-footer {
     position: relative;
     padding: 0 0 0 0;
@@ -266,6 +280,10 @@ h2 {
 
     .preview-container-md.style-info {
         background-color: #31708f;
+    }
+
+    .preview-container-md.style-danger {
+        background-color: #842F2F;
     }
 
 .qr-container {
@@ -474,6 +492,12 @@ h2 {
     background-color: #FCF8E3;
     border-top: 1px solid #faebcc;
     border-bottom: 1px solid #faebcc;
+}
+
+.section-watermelon-red {
+    background-color: #FDD6CE;
+    border-top: 1px solid #FCB7AB;
+    border-bottom: 1px solid #FCB7AB;
 }
 
 .section-separator-top {

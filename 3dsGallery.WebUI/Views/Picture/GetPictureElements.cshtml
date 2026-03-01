@@ -1,0 +1,90 @@
+﻿@model IEnumerable <_3dsGallery.WebUI.Models.PictureModel>
+@{
+    bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
+    bool isOld3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
+}
+
+@foreach (var itemPic in Model)
+{
+    bool isOwner = itemPic.CreatedBy == User.Identity.Name;
+
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <div>
+            <div class="thumbnail" data-id="@itemPic.IdPicture">
+                <div class="preview-container-md style-@itemPic.ColorThemeClass">
+                    <a target="_blank" href="~/@itemPic.Path">
+                        @{
+                            string preview_md = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.IdPicture}-thumb_md.JPG") ? $"/Picture/{itemPic.IdPicture}-thumb_md.JPG" : $"/Picture/{itemPic.IdPicture}.JPG";
+                        }
+                        <img class="preview-img" src="@preview_md" />
+                    </a>
+                    @{
+                        if (isOwner)
+                        {
+                            <input type="text" class="img-comment-change" value="@itemPic.PictureDescription" />
+                        }
+                        if (itemPic.Is3D)
+                        {
+                            <div class="type">3D</div>
+                        }
+                    }
+                    <div class="img-comment text-center">
+                        <span class="img-comment-text">@itemPic.PictureDescription</span>
+                    </div>
+                    @if (!is3ds)
+                    {
+                        <div class="qr-container">
+                            <img src="~/Content/loading.gif" data-loaded="no" class="qr-img">
+                        </div>
+                    }
+                </div>
+                <div class="img-tools text-center">
+                    @{
+                        string deleteBtnCode = !isOld3ds ? "<span class=\"glyphicon glyphicon-remove\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/remove.png\" />";
+                        string editBtnCode = !isOld3ds ? "<span class=\"glyphicon glyphicon-pencil\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/pencil.png\" />";
+                        string okBtnCode = !isOld3ds ? "<span class=\"save-icon glyphicon glyphicon-ok\"></span>" : "<img class=\"save-icon img-glyphicon\" src=\"/Content/glyphicon/ok.png\" />";
+                        if (itemPic.CreatedBy == User.Identity.Name)
+                        {
+                            <div class="ovner-tools">
+                                <button class="img-delete btn btn-danger">@Html.Raw(deleteBtnCode)</button>
+                                <button class="img-edit btn btn-info">@Html.Raw(editBtnCode)</button>
+                                <button class="img-edit-save btn btn-success">
+                                    @Html.Raw(okBtnCode)
+                                    @*<img class="saving-load" src="~/Content/loading.gif" />*@
+                                    <b class="saving-load">…</b>
+                                </button>
+                            </div>
+                        }
+                        string liked = "";
+                        if (User.Identity.IsAuthenticated)
+                        {
+                            liked = itemPic.IsLikedByMe ? "liked" : "";
+                        }
+                        if (!is3ds)
+                        {
+                            <button class="btn btn-sm qr-btn">
+                                <span class="glyphicon glyphicon-qrcode"></span>
+                            </button>
+                        }
+                        string disabled = User.Identity.IsAuthenticated ? "" : "disabled";
+                    }
+                    <div class="rate-container @liked">
+                        <span class="rate-count">@itemPic.LikeCount</span>
+                        @{
+                            if (isOld3ds)
+                            {
+                                <span class="rate-like">♥</span>
+                            }
+                            else
+                            {
+                                string glyph = liked != "" ? "glyphicon-heart" : "glyphicon-heart-empty";
+                                <span class="rate-like @disabled glyphicon @glyph"></span>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="img-date date-@itemPic.ColorThemeClass" title="@(itemPic.CreationDate?.ToString()?? "")">@(itemPic.CreationDate?.ToShortDateString()?? "??.??.????")</div>
+            </div>
+        </div>
+    </div>
+}

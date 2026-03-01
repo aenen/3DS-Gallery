@@ -308,7 +308,10 @@
     </Compile>
     <Compile Include="Jobs\DataBackup.cs" />
     <Compile Include="Jobs\DataBackupScheduler.cs" />
+    <Compile Include="Models\GalleryModel.cs" />
+    <Compile Include="Models\HomePageModel.cs" />
     <Compile Include="Models\MpoParser.cs" />
+    <Compile Include="Models\PictureModel.cs" />
     <Compile Include="Models\ViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -340,6 +343,8 @@
     <Content Include="Views\Picture\GetElements.cshtml" />
     <Content Include="Views\Gallery\GetElements.cshtml" />
     <Content Include="Views\Gallery\ShowPage.cshtml" />
+    <Content Include="Views\Gallery\GetGalleryElements.cshtml" />
+    <Content Include="Views\Picture\GetPictureElements.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
