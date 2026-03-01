@@ -22,7 +22,7 @@
             @{ Html.RenderAction("GetGalleryElements", "Gallery", new { items = Model.GalleryList }); }
 
             <p class="visible-xs-block hidden-sm hidden-md hidden-lg text-center">
-                <a href="@Url.Action("Index", "Gallery")" class="btn btn-success">...and @(Model.TotalGalleryCount - gallery_count) more</a>
+                <a href="@Url.Action("Index", "Gallery")" class="btn btn-success">...and @(Model.TotalGalleryCount - gallery_count) more!</a>
             </p>
         </div>
     </div>
@@ -38,7 +38,7 @@
             @{ Html.RenderAction("GetPictureElements", "Picture", new { items = Model.PictureList }); }
 
             <p class="visible-xs-block hidden-sm hidden-md hidden-lg text-center">
-                <a href="@Url.Action("Index", "Picture")" class="btn btn-info">...and @(Model.TotalImageCount - picture_count) more</a>
+                <a href="@Url.Action("Index", "Picture")" class="btn btn-info">...and @(Model.TotalImageCount - picture_count) more!</a>
             </p>
         </div>
     </div>
