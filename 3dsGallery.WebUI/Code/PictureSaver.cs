@@ -30,15 +30,18 @@ namespace _3dsGallery.WebUI.Code
             var img1 = images[0];
             var img2 = images[1];
 
-            int width = img1.Width + img2.Width;
-            int height = Math.Max(img1.Height, img2.Height);
+            int targetHeight = Math.Min(img1.Height, img2.Height);
+            float scale1 = (float)targetHeight / img1.Height;
+            float scale2 = (float)targetHeight / img2.Height;
 
-            using (var merged = new Bitmap(width, height))
+            int width1 = (int)(img1.Width * scale1);
+            int width2 = (int)(img2.Width * scale2);
+
+            using (var merged = new Bitmap(width1 + width2, targetHeight))
             using (var g = Graphics.FromImage(merged))
             {
-                g.Clear(Color.Black); // optional background
-                g.DrawImage(img1, new Point(0, 0));
-                g.DrawImage(img2, new Point(img1.Width, 0));
+                g.DrawImage(img1, new Rectangle(0, 0, width1, targetHeight));
+                g.DrawImage(img2, new Rectangle(width1, 0, width2, targetHeight));
 
                 using (var ms = new MemoryStream())
                 {
@@ -46,6 +49,7 @@ namespace _3dsGallery.WebUI.Code
                     return ms.ToArray();
                 }
             }
+
         }
 
 
