@@ -22,7 +22,7 @@
         <div class="row">
             @{ Html.RenderAction("GetGalleryElements", "Gallery", new { items = Model.GalleryList }); }
 
-            <p class="visible-xs-block hidden-sm hidden-md hidden-lg text-center">
+            <p style="margin-bottom: 20px" class="visible-xs-block hidden-sm hidden-md hidden-lg text-center">
                 <a href="@Url.Action("Index", "Gallery")" class="btn btn-success">...and @(Model.TotalGalleryCount - gallery_count) more!</a>
             </p>
         </div>
@@ -38,7 +38,7 @@
         <div class="row">
             @{ Html.RenderAction("GetPictureElements", "Picture", new { items = Model.PictureList }); }
 
-            <p class="visible-xs-block hidden-sm hidden-md hidden-lg text-center">
+            <p style="margin-bottom: 20px" class="visible-xs-block hidden-sm hidden-md hidden-lg text-center">
                 <a href="@Url.Action("Index", "Picture")" class="btn btn-info">...and @(Model.TotalImageCount - picture_count) more!</a>
             </p>
         </div>
@@ -55,12 +55,12 @@
                 <p>
                     Don’t own a <strong class="text-danger">Nintendo 3DS</strong>, but still want to experience pictures in <strong class="text-danger">3D</strong>? <br />
                     Now you can with the <em class="text-danger">parallel viewing mode</em>, which works on <strong class="text-danger">any screen</strong>.<br />
-                    Relax your eyes until the two side‑by‑side images merge into one, and you’ll see depth in 3D
+                    Relax your eyes until the two side-by-side images merge into one, and you’ll see depth in 3D
                     (<a target="_blank" href="https://en.wikipedia.org/wiki/Stereoscopy#Freeviewing">learn more</a>).
                 </p>
 
                 <p>
-                    Look for the <span class="type-paralel-view-guide"><strong>3D</strong></span> icon in the top‑right corner of an image - click it to open the picture in side‑by‑side mode. <br />
+                    Look for the <span class="type-paralel-view-guide"><strong>3D</strong></span> icon in the top-right corner of an image - click it to open the picture in side-by-side mode. <br />
                     Feel like gambling? Press the button below for a <strong class="text-danger">random 3D image</strong>.<br />
                     You may find something beautiful or truly <em  class="text-danger">horrific</em>.
                 </p>
