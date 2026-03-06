@@ -135,6 +135,22 @@ namespace _3dsGallery.WebUI.Controllers
             return Json(randomRow.path);
         }
 
+        public ActionResult RandomGenerateSideBySide()
+        {
+            int total = db.Picture.Where(x => !x.Gallery.IsPrivate && x.type == "3D").Count();
+            Random rand = new Random();
+            int offset = rand.Next(0, total);
+
+            var randomRow = db.Picture
+                .Where(x => !x.Gallery.IsPrivate && x.type == "3D")
+                .OrderBy(x => x.id)
+                .Skip(offset)
+                .FirstOrDefault();
+
+            var bytes = new PictureSaver(AppDomain.CurrentDomain.BaseDirectory).GenerateSideBySideImage(randomRow.path);
+            return File(bytes, "image/jpeg");
+        }
+
         public ActionResult GenerateSideBySide(int? id)
         {
             Picture item = db.Picture.Find(id);

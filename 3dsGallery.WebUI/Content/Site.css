@@ -409,6 +409,21 @@ h2 {
     cursor: pointer;
 }
 
+.dashed-bottom {
+    border-bottom: dashed;
+    border-bottom-width: 2px;
+    border-radius: 0;
+    border-color: #ddd;
+}
+
+.type-paralel-view-guide {
+    padding: 1px 5px 1px 6px;
+    background-color: rgba(0,0,0,0.7);
+    border-bottom-left-radius: 6px;
+    color: white;
+    font-weight: bold;
+}
+
 .rate-container {
     position: absolute;
     right: 5px;
