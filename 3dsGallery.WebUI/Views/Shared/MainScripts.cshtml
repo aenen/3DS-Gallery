@@ -136,6 +136,16 @@
             }
         });
 
+        $(".preview-container-md .type").click(function (e) {
+            e.preventDefault();
+
+            var id = $(this).closest(".thumbnail").attr("data-id");
+            var url = '@Url.Action("GenerateSideBySide", "Picture")/' + id;
+
+            // Open the image in a new browser tab
+            window.open(url, "_blank");
+        });
+
         // 3ds не відображає укр символи, тому довелось викручуватись з грецькою абеткою
         if (@is3ds == true) {
             $(".gallery-name,.gallery-desc,.img-comment-text,.img-comment-change").each(function (i, e) {

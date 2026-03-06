@@ -58,8 +58,8 @@ namespace _3dsGallery.WebUI.Controllers
                 LikeCount = pic.User.Count
             }).ToList();
 
-            model.TotalGalleryCount = db.Gallery.Count();
-            model.TotalImageCount = db.Picture.Count();
+            model.TotalGalleryCount = db.Gallery.Where(x=>!x.IsPrivate).Count();
+            model.TotalImageCount = db.Picture.Where(x=>!x.Gallery.IsPrivate).Count();
 
             return View(model);
         }

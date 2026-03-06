@@ -135,6 +135,17 @@ namespace _3dsGallery.WebUI.Controllers
             return Json(randomRow.path);
         }
 
+        public ActionResult GenerateSideBySide(int? id)
+        {
+            Picture item = db.Picture.Find(id);
+            if (item == null || item.type != "3D")
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var bytes = new PictureSaver(AppDomain.CurrentDomain.BaseDirectory).GenerateSideBySideImage(item.path);
+            return File(bytes, "image/jpeg");
+        }
+
+
         // POST: Picture/Delete/5
         [Authorize]
         [HttpPost]

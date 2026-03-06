@@ -4,6 +4,7 @@ using _3dsGallery.WebUI.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -18,6 +19,35 @@ namespace _3dsGallery.WebUI.Code
         {
             this.picture_folder = picture_folder;
         }
+
+        // This method merges two images side-by-side and returns the result as a byte array
+        public byte[] GenerateSideBySideImage(string filePath)
+        {
+            var images = MpoParser.GetImageSources(Path.Combine(picture_folder, filePath)).ToList();
+            if (images == null || images.Count < 2)
+                throw new InvalidOperationException("Need at least two images to merge.");
+
+            var img1 = images[0];
+            var img2 = images[1];
+
+            int width = img1.Width + img2.Width;
+            int height = Math.Max(img1.Height, img2.Height);
+
+            using (var merged = new Bitmap(width, height))
+            using (var g = Graphics.FromImage(merged))
+            {
+                g.Clear(Color.Black); // optional background
+                g.DrawImage(img1, new Point(0, 0));
+                g.DrawImage(img2, new Point(img1.Width, 0));
+
+                using (var ms = new MemoryStream())
+                {
+                    merged.Save(ms, ImageFormat.Jpeg);
+                    return ms.ToArray();
+                }
+            }
+        }
+
 
         public Picture AnalyzeAndSave(Picture picture, AddPictureModel model, HttpPostedFileBase file)
         {

@@ -406,6 +406,7 @@ h2 {
     border-bottom-left-radius: 6px;
     color: white;
     font-weight: bold;
+    cursor: pointer;
 }
 
 .rate-container {
