@@ -256,6 +256,7 @@
     <Content Include="Content\pagination.css" />
     <Content Include="Content\pagination.min.css" />
     <Content Include="Content\qr-icon.png" />
+    <Content Include="Content\qr-site-url.jpg" />
     <Content Include="Content\Site.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
