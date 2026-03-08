@@ -20,7 +20,7 @@
             <div class="form-horizontal">
                 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                 <div class="form-group">
-                    @Html.Label("Image", htmlAttributes: new { @class = "control-label col-md-2" })
+                    @Html.Label("Image", htmlAttributes: new { @class = "control-label col-md-2 required" })
                     <div class="col-md-10">
                         <input name="file" type="file" accept=".jpg, .mpo" class="form-control" />
                     </div>

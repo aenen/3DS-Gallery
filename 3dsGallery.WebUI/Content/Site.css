@@ -124,6 +124,10 @@ textarea {
         border-top: 1px dotted #DB8475;
     }
 
+.control-label.required::after {
+    content: " *";
+    color: red;
+}
 
 #loading {
     width: 20px;
