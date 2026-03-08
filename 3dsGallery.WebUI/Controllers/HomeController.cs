@@ -60,6 +60,7 @@ namespace _3dsGallery.WebUI.Controllers
 
             model.TotalGalleryCount = db.Gallery.Where(x=>!x.IsPrivate).Count();
             model.TotalImageCount = db.Picture.Where(x=>!x.Gallery.IsPrivate).Count();
+            model.Total3DImageCount = db.Picture.Where(x=>!x.Gallery.IsPrivate && x.type == "3D").Count();
 
             return View(model);
         }

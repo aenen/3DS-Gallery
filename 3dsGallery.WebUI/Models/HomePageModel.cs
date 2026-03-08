@@ -9,6 +9,7 @@ namespace _3dsGallery.WebUI.Models
     {
         public int TotalGalleryCount { get; set; }
         public int TotalImageCount { get; set; }
+        public int Total3DImageCount { get; set; }
 
         public List<GalleryModel> GalleryList { get; set; }
         public List<PictureModel> PictureList { get; set; }
