@@ -90,7 +90,7 @@ namespace _3dsGallery.WebUI.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("{id}/AddPicture")]
-        public ActionResult AddPicture(AddPictureModel model, short id, HttpPostedFileBase file)
+        public ActionResult AddPicture(AddPictureModel model, short id, HttpPostedFileBase file, string action)
         {
             if (!IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -130,7 +130,10 @@ namespace _3dsGallery.WebUI.Controllers
             db.Entry(picture).State = EntityState.Modified;
             db.SaveChanges();
 
-            return RedirectToAction("Details", new { id });
+            if (action == "Upload & Add More")
+                return RedirectToAction("AddPicture", "Gallery", new { id = id });
+            else
+                return RedirectToAction("Details", "Gallery", new { id = id });
         }
 
         // GET: Gallery/Create

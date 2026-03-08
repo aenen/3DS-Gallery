@@ -73,7 +73,9 @@
 
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <input id="submitBtn" type="submit" value="Upload" class="btn btn-default" />
+                        <input type="hidden" id="hiddenAction" name="action" value="" />
+                        <input id="submitBtn" type="submit" name="action" value="Upload" class="btn btn-default" />
+                        <input id="submitMoreBtn" style="border: 1px dashed grey; margin-top: 2px" type="submit" name="action" value="Upload & Add More" class="btn-sm" />
                     </div>
                 </div>
             </div>
@@ -87,14 +89,23 @@
 
     <script>
         $(function () {
+            $('#submitBtn').click(function () {
+                $('#hiddenAction').val('Upload');
+            });
+
+            $('#submitMoreBtn').click(function () {
+                $('#hiddenAction').val('Upload & Add More');
+            });
+
             $('#mainForm').submit(function () {
                 var form = $(this);
 
                 if (!form.valid()) {
-                    return; // Don't disable the button
+                    return; // Don't disable the buttons if validation fails
                 }
 
-                $('#submitBtn').prop('disabled', true).val('Uploading, please wait...');
+                $('#submitBtn').prop('disabled', true).val('Please wait...');
+                $('#submitMoreBtn').prop('disabled', true).val('Please wait...');
             });
         });
     </script>

@@ -52,7 +52,7 @@ namespace _3dsGallery.WebUI.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("AddPicture")]
-        public ActionResult AddPicture(AddPictureModel model, HttpPostedFileBase file)
+        public ActionResult AddPicture(AddPictureModel model, HttpPostedFileBase file, string action)
         {
             var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
             if (user == null || !IsItMineGallery(model.galleryId))
@@ -94,7 +94,11 @@ namespace _3dsGallery.WebUI.Controllers
             db.Entry(picture).State = EntityState.Modified;
             db.SaveChanges();
 
-            return RedirectToAction("Details", "Gallery", new { id = picture.galleryId });
+            if (action == "Upload & Add More")
+                return RedirectToAction("AddPicture", "Gallery", new { id = model.galleryId });
+            else
+                return RedirectToAction("Details", "Gallery", new { id = model.galleryId });
+
         }
 
         [Only3DS]
