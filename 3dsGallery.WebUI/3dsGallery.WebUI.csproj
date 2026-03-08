@@ -239,6 +239,7 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\qr-site-url.png" />
     <Content Include="Content\GalleryStyle.css" />
     <Content Include="Content\glyphicon\blackboard.png" />
     <Content Include="Content\glyphicon\heart.png" />
@@ -256,7 +257,6 @@
     <Content Include="Content\pagination.css" />
     <Content Include="Content\pagination.min.css" />
     <Content Include="Content\qr-icon.png" />
-    <Content Include="Content\qr-site-url.jpg" />
     <Content Include="Content\Site.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
