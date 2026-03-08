@@ -127,6 +127,30 @@
             legendary: ["WOW! You got the rarest message! Chances were 1 in 1000 (0.1%). It could be you lucky day, maybe get a lotto?"]
         };
 
+        // FUNCTIONS BEGIN
+
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            var expires = "expires=" + d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
         function replaceDateWithDiff(str) {
             // Extract the date between //...//
             var match = str.match(/\/\/(\d{4}-\d{2}-\d{2})\/\//);
@@ -195,6 +219,8 @@
             return options[Math.floor(Math.random() * options.length)];
         }
 
+        // FUNCTIONS END
+
         var randomStyle = styles[Math.floor(Math.random() * styles.length)];
 
         $('#banner-section')
@@ -205,6 +231,12 @@
         var msg = msg.replace('//style_name//', randomStyle.name);
 
         $('#banner-tagline').text(msg);
+
+        var cookieClickerCount = getCookie('cookieClickerCount');
+        if (cookieClickerCount) {
+            rndSbsPicClickCount = cookieClickerCount;
+            $('#rndSbsPicClickCount').text(cookieClickerCount).parent().show();
+        }
 
         $("#rndSbsPic").click(function () {
             var url = '@Url.Action("RandomGenerateSideBySide", "Picture")' + "?t=" + new Date().getTime();
@@ -221,6 +253,8 @@
 
             $('#rndSbsPicClickCount').text(rndSbsPicClickCount).parent().show();
             $(this).text('Another one!');
+
+            setCookie('cookieClickerCount', rndSbsPicClickCount, 344);
         });
 
     </script>
