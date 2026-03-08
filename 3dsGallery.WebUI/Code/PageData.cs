@@ -29,13 +29,13 @@ namespace _3dsGallery.WebUI.Code
 
         public PicturePageData GetPictruresByPage(int? gallery=null, string user=null, bool user_likes = false)
         {
-            var picturesList = db.Picture.Include(p => p.Gallery).AsEnumerable();
+            var picturesList = db.Picture.Include(p => p.Gallery);
             var userdb = db.User.FirstOrDefault(x => x.login == user);
 
             if (gallery != null)
                 picturesList = picturesList.Where(x => x.galleryId == gallery);
             if (user_likes && user != null)
-                picturesList = picturesList.Where(x => x.User.Contains(userdb));
+                picturesList = picturesList.Where(x => x.User.Any(u => u.id == userdb.id));
             else if (user != null)
                 picturesList = picturesList.Where(x => x.Gallery.User.login == user);
 
@@ -62,14 +62,17 @@ namespace _3dsGallery.WebUI.Code
                     break;
             }
 
-            int count = picturesList.Count();
+
             int show_items = Is3ds ? pictures3ds : picturesPc;
+
+            var dataList = picturesList.Skip((Page - 1) * show_items).Take(show_items).ToList();
+
+            int count = picturesList.Count();
             int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
-            picturesList = picturesList.Skip((Page - 1) * show_items).Take(show_items).ToList();
 
             PicturePageData result = new PicturePageData
             {
-                Pictures = picturesList,
+                Pictures = dataList,
                 TotalPages = pages
             };
             return result;
