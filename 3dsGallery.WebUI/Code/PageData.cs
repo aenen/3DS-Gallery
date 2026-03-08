@@ -80,7 +80,7 @@ namespace _3dsGallery.WebUI.Code
 
         public GalleryPageData GetGalleriesByPage(string user=null)
         {
-            IEnumerable<Gallery> galleriesList = db.Gallery.AsEnumerable();
+            var galleriesList = db.Gallery.AsQueryable();
             if (user != null)
                 galleriesList = galleriesList.Where(x => x.User.login == user);
 
@@ -112,12 +112,13 @@ namespace _3dsGallery.WebUI.Code
 
             int count = galleriesList.Count();
             int show_items = Is3ds ? gallery3ds : galleryPc;
+
             int pages = count / show_items + ((count % show_items == 0) ? 0 : 1);
-            galleriesList = galleriesList.Skip((Page - 1) * show_items).Take(show_items).ToList();
+            var resultList = galleriesList.Skip((Page - 1) * show_items).Take(show_items).ToList();
 
             GalleryPageData result = new GalleryPageData
             {
-                Galleries = galleriesList,
+                Galleries = resultList,
                 TotalPages = pages
             };
 
