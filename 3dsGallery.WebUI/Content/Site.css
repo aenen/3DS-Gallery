@@ -739,10 +739,31 @@ input[type=number].page-search {
     .preview-container-md {
         height: 191px;
     }
+
+    .profile-header .profile-login {
+        display: block;
+    }
+
+    .profile-header .profile-stat {
+        float: none;
+        margin-top: 15px;
+    }
+
+        .profile-header .profile-stat > a {
+            padding: 0 5px;
+        }
+
+    .create-new {
+        text-align: center;
+    }
+
+    footer {
+        text-align: center;
+    }
 }
 
-/*Small (3DS/phone) screen*/
-@media only screen and (max-device-width: 425px) {
+/*Small (3DS) screen*/
+@media only screen and (max-device-width: 320px) {
 
     .preview-gallery {
         height: 110px;
