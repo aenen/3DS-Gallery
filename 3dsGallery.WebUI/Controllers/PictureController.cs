@@ -97,6 +97,91 @@ namespace _3dsGallery.WebUI.Controllers
             return RedirectToAction("Details", "Gallery", new { id = picture.galleryId });
         }
 
+        [Only3DS]
+        [Authorize]
+        [Route("AddPictureTest")]
+        public ActionResult AddPictureTest()
+        {
+            var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
+            if (user == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            ViewBag.hasGalleries = user.Gallery.Any();
+            ViewBag.galleryId = new SelectList(user.Gallery, "id", "name");
+            return View(new AddPictureModel());
+        }
+
+        [Only3DS]
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("AddPictureTest")]
+        public ActionResult AddPictureTest(AddPictureModel model, IEnumerable<HttpPostedFileBase> files)
+        {
+            var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
+            if (user == null || !IsItMineGallery(model.galleryId))
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            ViewBag.hasGalleries = user.Gallery.Any();
+            ViewBag.galleryId = new SelectList(user.Gallery, "id", "name");
+
+            if (files == null || !files.Any())
+            {
+                ModelState.AddModelError(string.Empty, "You must select at least one image.");
+                return View(model);
+            }
+
+            if (files.Count() > 8)
+            {
+                ModelState.AddModelError(string.Empty, "You can upload a maximum of 8 files at once.");
+                return View(model);
+            }
+
+            foreach (var file in files)
+            {
+                if (file == null || file.ContentLength == 0)
+                    continue; // skip empty slots
+
+                if (file.ContentLength > 750 * 1000)
+                    ModelState.AddModelError(string.Empty, "File size must be less than 750 kilobytes.");
+
+                string file_extention = Path.GetExtension(file.FileName).ToLower();
+                if (file_extention != ".mpo" && file_extention != ".jpg")
+                    ModelState.AddModelError(string.Empty, "File extension must be '.mpo' or '.jpg'.");
+            }
+
+            if (model.isAdvanced && model.isTo2d && model.leftOrRight < 0 && model.leftOrRight > 1)
+                ModelState.AddModelError(string.Empty, "You must choose which of the images (left or right) should be saved in 2D.");
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            foreach (var file in files)
+            {
+                if (file == null || file.ContentLength == 0)
+                    continue;
+
+                Picture picture = new Picture
+                {
+                    description = model.description,
+                    galleryId = model.galleryId,
+                    CreationDate = DateTime.Now
+                };
+                db.Picture.Add(picture);
+                db.SaveChanges();
+
+                picture = new PictureSaver(
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture")
+                ).AnalyzeAndSave(picture, model, file);
+
+                picture.Gallery.LastPicture = picture;
+                db.Entry(picture).State = EntityState.Modified;
+                db.SaveChanges();
+            }
+
+            return RedirectToAction("Details", "Gallery", new { id = model.galleryId });
+        }
+
         [Authorize]
         [HttpPost]
         public ActionResult Like(int? id)
