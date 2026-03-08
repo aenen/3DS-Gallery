@@ -741,8 +741,8 @@ input[type=number].page-search {
     }
 }
 
-/*Small (3DS) screen*/
-@media only screen and (max-device-width: 320px) {
+/*Small (3DS/phone) screen*/
+@media only screen and (max-device-width: 425px) {
 
     .preview-gallery {
         height: 110px;

@@ -22,13 +22,11 @@ namespace _3dsGallery.WebUI.Controllers
             var homePageGalleryList = db.Gallery
                 .Where(x => x.LastPicture != null && (!x.IsPrivate || (x.IsPrivate && x.User.login == User.Identity.Name)))
                 .OrderByDescending(x => x.LastPicture.id)
-                .Take(galleryCount)
-                .ToList();
+                .Take(galleryCount);
             var homePagePictureList = db.Picture
                 .Where(x => !x.Gallery.IsPrivate || (x.Gallery.IsPrivate && x.Gallery.User.login == User.Identity.Name))
                 .OrderByDescending(x => x.id)
-                .Take(pictureCount)
-                .ToList();
+                .Take(pictureCount);
 
             model.GalleryList = homePageGalleryList.Select(gallery => new GalleryModel
             {

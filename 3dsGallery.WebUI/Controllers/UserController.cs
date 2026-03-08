@@ -58,9 +58,9 @@ namespace _3dsGallery.WebUI.Controllers
             User user = new User
             {
                 login = model.Login,
-                PasswordSalt=salt,
-                PasswordHash=pass,
-                Iterations=1000
+                PasswordSalt = salt,
+                PasswordHash = pass,
+                Iterations = 1000
             };
             db.User.Add(user);
             db.SaveChanges();
@@ -113,15 +113,80 @@ namespace _3dsGallery.WebUI.Controllers
             FormsAuthentication.SignOut();
             return RedirectToAction("Index", "Home");
         }
-        
+
         [Route("User/{login}")]
         public ActionResult UserProfile(string login)
         {
             var user = db.User.FirstOrDefault(x => x.login == login);
-            if (user==null)
+            if (user == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            return View(user);
+            var model = new UserProfileModel();
+
+            int galleryCount = Request.UserAgent.Contains("Nintendo 3DS") ? 3 : 6;
+            int pictureCount = Request.UserAgent.Contains("Nintendo 3DS") ? 4 : 12;
+
+            model.UserName = login;
+            model.IsItMe = User.Identity.Name == login;
+            model.SocialCredits = db.Gallery.Where(x => x.User.login == login).SelectMany(x => x.Picture).SelectMany(x => x.User).Count();
+
+            model.TotalGalleryCount = db.Gallery.Where(x => x.User.login == login).Count();
+            model.TotalImageCount = db.Picture.Where(x => x.Gallery.User.login == login).Count();
+            model.TotalLikesCount = db.Picture.Where(x => x.User.Any(y => y.login == login)).Count();
+
+            model.GalleryList = db.Gallery
+                .Where(x => x.User.login == login && (!x.IsPrivate || (x.IsPrivate && x.User.login == User.Identity.Name)))
+                .OrderByDescending(x => x.id)
+                .Take(galleryCount)
+                .Select(gallery => new GalleryModel
+                {
+                    IdGallery = gallery.id,
+                    GalleryName = gallery.name,
+                    ColorThemeClass = gallery.Style.value,
+                    CreatedBy = gallery.User.login,
+                    Is3D = gallery.Picture.Any(pic => pic.type == "3D"),
+                    PictureTotalCount = gallery.Picture.Count,
+                    PicturePreviewList = gallery.Picture.OrderByDescending(x => x.id).Take(2).Select(pic => new GalleryPicturePreview
+                    {
+                        IdPicture = pic.id,
+                        Path = pic.path
+                    }).ToList()
+                }).ToList();
+
+            model.PictureList = db.Picture
+                .Where(x => x.Gallery.User.login == login && x.Gallery.LastPicture != null && (!x.Gallery.IsPrivate || (x.Gallery.IsPrivate && x.Gallery.User.login == User.Identity.Name)))
+                .OrderByDescending(x => x.id)
+                .Take(pictureCount)
+                .Select(pic => new PictureModel
+                {
+                    IdPicture = pic.id,
+                    PictureDescription = pic.description,
+                    ColorThemeClass = pic.Gallery.Style.value,
+                    CreatedBy = pic.Gallery.User.login,
+                    CreationDate = pic.CreationDate,
+                    Is3D = pic.type == "3D",
+                    IsLikedByMe = User.Identity.IsAuthenticated && pic.User.Any(x => x.login == User.Identity.Name),
+                    Path = pic.path,
+                    LikeCount = pic.User.Count
+                }).ToList();
+
+            model.LikeList = db.Picture
+                .Where(x => x.User.Any(y => y.login == login) && (!x.Gallery.IsPrivate || (x.Gallery.IsPrivate && x.Gallery.User.login == User.Identity.Name)))
+                .Take(pictureCount)
+                .Select(pic => new PictureModel
+                {
+                    IdPicture = pic.id,
+                    PictureDescription = pic.description,
+                    ColorThemeClass = pic.Gallery.Style.value,
+                    CreatedBy = pic.Gallery.User.login,
+                    CreationDate = pic.CreationDate,
+                    Is3D = pic.type == "3D",
+                    IsLikedByMe = User.Identity.IsAuthenticated && pic.User.Any(x => x.login == User.Identity.Name),
+                    Path = pic.path,
+                    LikeCount = pic.User.Count
+                }).ToList();
+
+            return View(model);
         }
 
         [Authorize]
@@ -173,7 +238,7 @@ namespace _3dsGallery.WebUI.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            PicturePageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetPictruresByPage(user: login,user_likes: true);
+            PicturePageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetPictruresByPage(user: login, user_likes: true);
             ViewBag.Page = page;
             ViewBag.Filter = filter;
             ViewBag.Pages = pageData.TotalPages;
