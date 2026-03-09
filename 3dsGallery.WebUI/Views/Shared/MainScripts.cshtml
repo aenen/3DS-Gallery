@@ -40,6 +40,9 @@
         });
 
         $(".img-delete").click(function (e) {
+            if (!confirm("Whoa, hold on! 🚨 Are you sure you want to delete this pic forever? There's no coming back from this one! 😬")) {
+                return;
+            }
             var item = $(this).closest(".thumbnail");
             var id = item.attr("data-id");
             $.ajax({
