@@ -27,7 +27,12 @@
                 <div class="form-group">
                     @Html.Label("Image", htmlAttributes: new { @class = "control-label col-md-2 required" })
                     <div class="col-md-10">
-                        <input name="file" type="file" accept=".jpg, .mpo" class="form-control" />
+                        <div id="file-inputs-container">
+                            <div class="file-input-row form-group">
+                                <input name="file" type="file" accept=".jpg, .mpo" />
+                            </div>
+                        </div>
+                        <button type="button" id="addMoreBtn" class="btn btn-default btn-sm">Add More</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -100,7 +105,42 @@
     @System.Web.Optimization.Scripts.Render("~/bundles/jqueryval")
 
     <script>
+        var MAX_FILE_INPUTS = 5;
+
+        function updateAddMoreBtn() {
+            var count = $('#file-inputs-container .file-input-row').length;
+            if (count >= MAX_FILE_INPUTS) {
+                $('#addMoreBtn').hide();
+            } else {
+                $('#addMoreBtn').show();
+            }
+        }
+
+        function createFileRow() {
+            var row = $('<div class="file-input-row form-group"></div>');
+            var input = $('<input name="file" type="file" accept=".jpg, .mpo" />');
+            var deleteBtn = $('<button type="button" class="btn btn-danger btn-sm">Remove</button>');
+            deleteBtn.click(function () {
+                $(this).closest('.file-input-row').remove();
+                updateAddMoreBtn();
+            });
+            row.append(input);
+            row.append(' ');
+            row.append(deleteBtn);
+            return row;
+        }
+
         $(function () {
+            $('#addMoreBtn').click(function () {
+                var count = $('#file-inputs-container .file-input-row').length;
+                if (count < MAX_FILE_INPUTS) {
+                    $('#file-inputs-container').append(createFileRow());
+                    updateAddMoreBtn();
+                }
+            });
+
+            updateAddMoreBtn();
+
             $('#submitBtn').click(function () {
                 $('#hiddenAction').val('Upload');
             });

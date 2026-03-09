@@ -52,7 +52,7 @@ namespace _3dsGallery.WebUI.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("AddPicture")]
-        public ActionResult AddPicture(AddPictureModel model, HttpPostedFileBase file, string action)
+        public ActionResult AddPicture(AddPictureModel model, IEnumerable<HttpPostedFileBase> file, string action)
         {
             var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
             if (user == null || !IsItMineGallery(model.galleryId))
@@ -60,18 +60,29 @@ namespace _3dsGallery.WebUI.Controllers
 
             ViewBag.hasGalleries = user.Gallery.Any();
             ViewBag.galleryId = new SelectList(user.Gallery, "id", "name");
-            if (file == null)
+
+            var files = (file ?? Enumerable.Empty<HttpPostedFileBase>())
+                .Where(f => f != null && f.ContentLength > 0)
+                .ToList();
+
+            if (!files.Any())
             {
-                ModelState.AddModelError(string.Empty, "You must select an image.");
+                ModelState.AddModelError(string.Empty, "You must select at least one image.");
                 return View(model);
             }
 
-            if (file.ContentLength > 750 * 1000)
-                ModelState.AddModelError(string.Empty, "File size must be less than 750 kilobytes.");
+            if (files.Count > 5)
+                ModelState.AddModelError(string.Empty, "You can upload a maximum of 5 files at once.");
 
-            string file_extention = Path.GetExtension(file.FileName).ToLower();
-            if (file_extention != ".mpo" && file_extention != ".jpg")
-                ModelState.AddModelError(string.Empty, "File extention must be '.mpo' or '.jpg'.");
+            foreach (var f in files)
+            {
+                if (f.ContentLength > 750 * 1000)
+                    ModelState.AddModelError(string.Empty, $"File '{f.FileName}' size must be less than 750 kilobytes.");
+
+                string file_extention = Path.GetExtension(f.FileName).ToLower();
+                if (file_extention != ".mpo" && file_extention != ".jpg")
+                    ModelState.AddModelError(string.Empty, $"File '{f.FileName}' extension must be '.mpo' or '.jpg'.");
+            }
 
             if (model.isAdvanced && model.isTo2d && model.leftOrRight < 0 && model.leftOrRight > 1)
                 ModelState.AddModelError(string.Empty, "You must choose which of the images (left or right) should be saved in 2D.");
@@ -79,20 +90,31 @@ namespace _3dsGallery.WebUI.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            Picture picture = new Picture
+            Picture lastPicture = null;
+            foreach (var f in files)
             {
-                description = model.description,
-                galleryId = model.galleryId,
-                CreationDate = DateTime.Now
-            };
-            db.Picture.Add(picture);
-            db.SaveChanges();
+                Picture picture = new Picture
+                {
+                    description = model.description,
+                    galleryId = model.galleryId,
+                    CreationDate = DateTime.Now
+                };
+                db.Picture.Add(picture);
+                db.SaveChanges();
 
-            picture = new PictureSaver(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture")).AnalyzeAndSave(picture, model, file);
+                picture = new PictureSaver(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture")).AnalyzeAndSave(picture, model, f);
 
-            picture.Gallery.LastPicture = picture;
-            db.Entry(picture).State = EntityState.Modified;
-            db.SaveChanges();
+                db.Entry(picture).State = EntityState.Modified;
+                db.SaveChanges();
+                lastPicture = picture;
+            }
+
+            if (lastPicture != null)
+            {
+                lastPicture.Gallery.LastPicture = lastPicture;
+                db.Entry(lastPicture.Gallery).State = EntityState.Modified;
+                db.SaveChanges();
+            }
 
             if (action == "Upload & Add More")
                 return RedirectToAction("AddPicture", "Gallery", new { id = model.galleryId });
