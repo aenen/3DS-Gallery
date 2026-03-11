@@ -100,24 +100,15 @@
                 .addClass('navbar-fixed-bottom');
 
             if (getCookie('menuHidden') === 'true') {
-                $('.navbar').css({ 'margin-left': -350, 'right': 350 }).addClass('menu-hidden');
-                $('body.menu-bottom').css('padding-bottom', '0px');
+                $('.navbar').addClass('menu-hidden');
+                $('body.menu-bottom').addClass('menu-collapsed');
                 $('#toggleMenuBtn').text('M\nE\nN\nU');
             }
-            else {
-                $('body.menu-bottom').css('padding-bottom', '90px');
-            }
 
-            $('#toggleMenuBtn').css({
-                'visibility': 'visible',
-                'opacity': 1
-            });
+            $('#toggleMenuBtn').removeClass('initially-hidden');
         }
 
-        $('div.navbar').css({
-            'visibility': 'visible',
-            'opacity': 1
-        });
+        $('div.navbar').removeClass('initially-hidden');
 
         $('#secretFeature').click(function () {
             var newTab = window.open('', '_blank');
@@ -142,16 +133,16 @@
         $('#toggleMenuBtn').click(function () {
             // show menu
             if ($('.navbar').hasClass('menu-hidden')) {
-                $('.navbar').css({ 'margin-left': 0, 'right': 0 }).removeClass('menu-hidden');
-                $('body.menu-bottom').css('padding-bottom', '90px');
+                $('.navbar').removeClass('menu-hidden');
+                $('body.menu-bottom').removeClass('menu-collapsed');
                 $(this).text('H\nI\nD\nE');
 
                 setCookie('menuHidden', 'false', 7);
             }
             // hide menu
             else {
-                $('.navbar').css({ 'margin-left': -350, 'right': 350 }).addClass('menu-hidden');
-                $('body.menu-bottom').css('padding-bottom', '0px');
+                $('.navbar').addClass('menu-hidden');
+                $('body.menu-bottom').addClass('menu-collapsed');
                 $(this).text('M\nE\nN\nU');
 
                 setCookie('menuHidden', 'true', 7);

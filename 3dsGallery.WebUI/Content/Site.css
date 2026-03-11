@@ -3,10 +3,14 @@
 }
 
 body.menu-bottom {
-    padding-bottom: 30px;
+    padding-bottom: 90px;
     -webkit-transition: padding-bottom .25s linear;
     -o-transition: padding-bottom .25s linear;
     transition: padding-bottom .25s linear;
+}
+
+body.menu-bottom.menu-collapsed {
+    padding-bottom: 0;
 }
 
     body.menu-bottom .navbar {
@@ -871,4 +875,13 @@ input[type=number].page-search {
 
 .text-footnote {
     font-size: 11px;
+}
+
+.navbar.menu-hidden {
+    margin-left: -350px;
+    right: 350px;
+}
+
+.img-comment.comment-expanded {
+    white-space: normal;
 }
