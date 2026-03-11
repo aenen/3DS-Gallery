@@ -11,7 +11,11 @@
     <title>@ViewBag.Title - 3DS Gallery</title>
     <link rel="shortcut icon" type="image/x-icon" href="~/Content/icon.png" />
     @Styles.Render("~/Content/maincss")
-    @if (!is3ds)
+    @if (is3ds)
+    {
+        @Styles.Render("~/Content/3dsfonts")
+    }
+    else
     {
         @Styles.Render("~/Content/desktopfonts")
         @Scripts.Render("~/bundles/modernizr")

@@ -1,0 +1,14 @@
+@font-face {
+    font-family: 'FotYurukaStdSubset';
+    src: url('/fonts/fot-yuruka-std-subset.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.logo {
+    font-family: 'FotYurukaStdSubset', monospace;
+}
+
+.kawaii {
+    font-family: 'FotYurukaStdSubset', monospace;
+}
