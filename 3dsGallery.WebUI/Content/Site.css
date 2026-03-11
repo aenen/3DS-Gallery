@@ -130,8 +130,8 @@ textarea {
 }
 
 #loading {
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
 }
 
 
@@ -175,7 +175,8 @@ h2 {
 
 .r-pin {
     position: absolute;
-    right: 0px;
+    right: 0;
+    top: 0;
 }
 
 .pos-rel {
@@ -534,12 +535,6 @@ h2 {
     padding-bottom: 20px;
 }
 
-.r-pin {
-    position: absolute;
-    right: 0;
-    top: 0;
-}
-
 footer {
     color: #A9A9A9;
     height: 47.5px;
@@ -835,3 +830,45 @@ input[type=number].page-search {
         text-decoration: none;
         color: inherit;
     }
+
+.initially-hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.text-3ds-red {
+    color: #CF181F;
+}
+
+.text-3ds-dark {
+    color: #231F20;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.img-border {
+    border: 1px solid #ccc;
+}
+
+.qr-code-border {
+    border: 5px dashed #231F20;
+}
+
+.btn-dashed {
+    border: 1px dashed grey;
+    margin-top: 2px;
+}
+
+.no-border {
+    border: none;
+}
+
+.text-tiny {
+    font-size: 6px;
+}
+
+.text-footnote {
+    font-size: 11px;
+}
