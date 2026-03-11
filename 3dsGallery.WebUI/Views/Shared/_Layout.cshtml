@@ -31,7 +31,7 @@
                 string gallCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-blackboard text-success\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/blackboard.png\" />";
                 string picCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-picture text-info\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/picture.png\" />";
             }
-            <a href="/" class="navbar-brand">@Html.Raw(homeCode)<span class="collapsible"> 3DS Gallery</span></a>
+            <a href="/" class="navbar-brand">@Html.Raw(homeCode)<span class="collapsible kawaii"><span style="color: #CF181F">3</span>DS GALLERY</span></a>
             <ul class="nav navbar-nav">
                 <li><a href="@Url.Action("Index", "Gallery")">@Html.Raw(gallCode)<span class="collapsible"> Galleries</span></a></li>
                 <li><a href="@Url.Action("Index", "Picture")">@Html.Raw(picCode)<span class="collapsible"> Images</span></a></li>
