@@ -11,7 +11,11 @@
     <title>@ViewBag.Title - 3DS Gallery</title>
     <link rel="shortcut icon" type="image/x-icon" href="~/Content/icon.png" />
     @Styles.Render("~/Content/maincss")
-    @Scripts.Render("~/bundles/modernizr")
+    @if (!is3ds)
+    {
+        @Styles.Render("~/Content/desktopfonts")
+        @Scripts.Render("~/bundles/modernizr")
+    }
     @RenderSection("Styles", false)
 </head>
 <body class="@(is3ds? "menu-bottom" : "menu-top")">
@@ -67,7 +71,11 @@
         </footer>
     </div>
 
-    @Scripts.Render("~/bundles/jquery", "~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jquery")
+    @if (!is3ds)
+    {
+        @Scripts.Render("~/bundles/bootstrap")
+    }
     @RenderSection("scripts", false)
 
     <script>

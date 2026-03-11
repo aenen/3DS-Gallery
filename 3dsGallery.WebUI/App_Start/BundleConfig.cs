@@ -38,6 +38,9 @@ namespace _3dsGallery.WebUI
                       "~/Content/Site.css",
                       "~/Content/GalleryStyle.css"));
 
+            bundles.Add(new StyleBundle("~/Content/desktopfonts").Include(
+                      "~/Content/Fonts.css"));
+
             bundles.Add(new StyleBundle("~/Content/pagination").Include(
                       "~/Content/pagination.css"));
 
