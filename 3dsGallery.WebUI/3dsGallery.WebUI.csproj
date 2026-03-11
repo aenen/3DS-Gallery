@@ -268,6 +268,10 @@
     <Content Include="Content\bootstrap.css.map" />
     <Content Include="Content\bootstrap-theme.min.css.map" />
     <Content Include="Content\bootstrap-theme.css.map" />
+    <Content Include="fonts\fot-yuruka-std-subset.ttf" />
+    <Content Include="fonts\fot-yuruka-std-subset.eot" />
+    <Content Include="fonts\fot-yuruka-std-subset.woff" />
+    <Content Include="fonts\fot-yuruka-std-subset.woff2" />
     <None Include="job_scheduling_data_2_0.xsd">
       <SubType>Designer</SubType>
     </None>
