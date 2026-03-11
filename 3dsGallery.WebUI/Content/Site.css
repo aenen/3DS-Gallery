@@ -820,6 +820,11 @@ input[type=number].page-search {
     font-family: 'FotYurukaStdSubset', monospace;
     font-size: 33px;
 }
+
+.kawaii {
+    font-family: 'FotYurukaStdSubset', monospace;
+}
+
 .no-link-style {
     color: inherit;
     text-decoration: none;
