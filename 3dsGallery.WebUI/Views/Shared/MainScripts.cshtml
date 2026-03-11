@@ -40,6 +40,9 @@
         });
 
         $(".img-delete").click(function (e) {
+            if (!confirm('This image will be deleted. OK?'))
+                return;
+
             var item = $(this).closest(".thumbnail");
             var id = item.attr("data-id");
             $.ajax({
@@ -47,7 +50,9 @@
                 url: "@Url.Action("Delete","Picture")/" + id,
                 success: function (data) {
                     if (data == "ok")
-                        item.parent().fadeOut();
+                        item.parent().fadeOut(500, function (x) {
+                            $(this).parent().remove();
+                        });
                 }
             });
         });

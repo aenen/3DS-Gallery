@@ -818,4 +818,15 @@ input[type=number].page-search {
 
 .logo {
     font-family: 'FotYurukaStdSubset', monospace;
+    font-size: 33px;
 }
+.no-link-style {
+    color: inherit;
+    text-decoration: none;
+}
+
+    .no-link-style:hover,
+    .no-link-style:focus {
+        text-decoration: none;
+        color: inherit;
+    }
