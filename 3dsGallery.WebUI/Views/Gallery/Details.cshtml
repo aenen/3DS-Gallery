@@ -60,7 +60,16 @@
     <div class="container body-content section-separator-top">
         <div id="picture-data">
             <div class="row">
-                @{ Html.RenderAction("GetElements", "Picture", new { items = Model.PicturePageData }); }
+                @{
+                    if (Model.PicturePageData.Any())
+                    {
+                        Html.RenderAction("GetElements", "Picture", new { items = Model.PicturePageData });
+                    }
+                    else
+                    {
+                        <div class="col-sm-12 text-center mb-20"><p><em>~ nothing is here ~</em></p></div>
+                    }
+                }
             </div>
         </div>
 
