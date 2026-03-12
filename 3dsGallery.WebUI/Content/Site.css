@@ -3,10 +3,14 @@
 }
 
 body.menu-bottom {
-    padding-bottom: 30px;
+    padding-bottom: 90px;
     -webkit-transition: padding-bottom .25s linear;
     -o-transition: padding-bottom .25s linear;
     transition: padding-bottom .25s linear;
+}
+
+body.menu-bottom.menu-collapsed {
+    padding-bottom: 0;
 }
 
     body.menu-bottom .navbar {
@@ -130,8 +134,8 @@ textarea {
 }
 
 #loading {
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
 }
 
 
@@ -175,7 +179,8 @@ h2 {
 
 .r-pin {
     position: absolute;
-    right: 0px;
+    right: 0;
+    top: 0;
 }
 
 .pos-rel {
@@ -534,12 +539,6 @@ h2 {
     padding-bottom: 20px;
 }
 
-.r-pin {
-    position: absolute;
-    right: 0;
-    top: 0;
-}
-
 footer {
     color: #A9A9A9;
     height: 47.5px;
@@ -805,24 +804,8 @@ input[type=number].page-search {
     }
 }
 
-@font-face {
-    font-family: 'FotYurukaStdSubset';
-    src: url('/fonts/fot-yuruka-std-subset.eot');
-    src: url('/fonts/fot-yuruka-std-subset.eot?#iefix') format('embedded-opentype'),
-    url('/fonts/fot-yuruka-std-subset.woff2') format('woff2'),
-    url('/fonts/fot-yuruka-std-subset.woff') format('woff'),
-    url('/fonts/fot-yuruka-std-subset.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
-
 .logo {
-    font-family: 'FotYurukaStdSubset', monospace;
     font-size: 33px;
-}
-
-.kawaii {
-    font-family: 'FotYurukaStdSubset', monospace;
 }
 
 .no-link-style {
@@ -835,3 +818,54 @@ input[type=number].page-search {
         text-decoration: none;
         color: inherit;
     }
+
+.initially-hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.text-3ds-red {
+    color: #CF181F;
+}
+
+.text-3ds-dark {
+    color: #231F20;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.img-border {
+    border: 1px solid #ccc;
+}
+
+.qr-code-border {
+    border: 5px dashed #231F20;
+}
+
+.btn-dashed {
+    border: 1px dashed grey;
+    margin-top: 2px;
+}
+
+.no-border {
+    border: none;
+}
+
+.text-tiny {
+    font-size: 6px;
+}
+
+.text-footnote {
+    font-size: 11px;
+}
+
+.navbar.menu-hidden {
+    margin-left: -350px;
+    right: 350px;
+}
+
+.img-comment.comment-expanded {
+    white-space: normal;
+}

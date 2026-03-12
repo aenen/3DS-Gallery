@@ -5,13 +5,12 @@
 
 <script>
     var showHideCommentInit= function(){
-        if ($(this).parent().css("white-space") == "normal"){
-            $(this).text("▲").prependTo($(this).parent());
-            $(this).parent().css("white-space", "nowrap");
+        $(this).parent().toggleClass('comment-expanded');
+        if ($(this).parent().hasClass('comment-expanded')){
+            $(this).text("▼").appendTo($(this).parent());
         }
         else{
-            $(this).text("▼").appendTo($(this).parent());
-            $(this).parent().css("white-space", "normal");
+            $(this).text("▲").prependTo($(this).parent());
         }
     }
     function initImg() {
@@ -61,15 +60,15 @@
             var thumb = $(this).closest(".thumbnail");
             var id = thumb.attr("data-id");
             if ($(this).hasClass("active")) {
-                thumb.find(".img-comment-change").css("display", "none").val(thumb.find(".img-comment-text").text());
-                thumb.find(".img-comment").css("display", "block");
-                thumb.find(".img-edit-save").css("display", "none");
+                thumb.find(".img-comment-change").hide().val(thumb.find(".img-comment-text").text());
+                thumb.find(".img-comment").show();
+                thumb.find(".img-edit-save").hide();
                 $(this).removeClass("active");
             }
             else {
-                thumb.find(".img-comment-change").css("display", "block");
-                thumb.find(".img-comment").css("display", "none");
-                thumb.find(".img-edit-save").css("display", "inline-block");
+                thumb.find(".img-comment-change").show();
+                thumb.find(".img-comment").hide();
+                thumb.find(".img-edit-save").show();
                 $(this).addClass("active");
             }
         });
@@ -86,13 +85,13 @@
                 type: "POST",
                 success: function (data) {
                     if (data == "ok"){
-                        thumb.find(".img-comment-change").css("display", "none");
-                        thumb.find(".img-comment").css({"display": "block", "white-space":"nowrap"}).find(".img-comment-text").text(comment);
+                        thumb.find(".img-comment-change").hide();
+                        thumb.find(".img-comment").show().removeClass("comment-expanded").find(".img-comment-text").text(comment);
                         thumb.find(".img-comment").find(".show-hide-comment").remove();
                         if (thumb.find(".img-comment")[0].scrollWidth > thumb.find(".img-comment").innerWidth()) {
                             $(thumb.find(".img-comment")).prepend($('<span class="show-hide-comment pull-right">▲</span>').click(showHideCommentInit));
                         }
-                        thumb.find(".img-edit-save").css("display", "none");
+                        thumb.find(".img-edit-save").hide();
                         thumb.find(".img-edit").removeClass("active");
 
                         thumb.find(".saving-load").hide();
@@ -121,7 +120,7 @@
             var item = $(this).closest(".thumbnail").find(".qr-container");
             var itemImg = item.find(".qr-img");
             if ($(this).hasClass("active")) {
-                item.css("display", "none");
+                item.hide();
                 $(this).removeClass("active");
             }
             else {
@@ -136,7 +135,7 @@
                     });
                 }
 
-                item.css("display", "block");
+                item.show();
                 $(this).addClass("active");
             }
         });

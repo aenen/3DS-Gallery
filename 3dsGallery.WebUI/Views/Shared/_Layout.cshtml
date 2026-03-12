@@ -11,17 +11,25 @@
     <title>@ViewBag.Title - 3DS Gallery</title>
     <link rel="shortcut icon" type="image/x-icon" href="~/Content/icon.png" />
     @Styles.Render("~/Content/maincss")
-    @Scripts.Render("~/bundles/modernizr")
+    @if (is3ds)
+    {
+        @Styles.Render("~/Content/3dsfonts")
+    }
+    else
+    {
+        @Styles.Render("~/Content/desktopfonts")
+        @Scripts.Render("~/bundles/modernizr")
+    }
     @RenderSection("Styles", false)
 </head>
 <body class="@(is3ds? "menu-bottom" : "menu-top")">
-    <div id="toggleMenuBtn" style="visibility: hidden; opacity: 0">
+    <div id="toggleMenuBtn" class="initially-hidden">
         H
         I
         D
         E
     </div>
-    <div class="navbar navbar-inverse navbar-fixed-top" style="visibility: hidden; opacity: 0">
+    <div class="navbar navbar-inverse navbar-fixed-top initially-hidden">
         <div class="container">
             @{
                 string homeCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-home\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/home.png\" />";
@@ -31,7 +39,7 @@
                 string gallCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-blackboard text-success\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/blackboard.png\" />";
                 string picCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-picture text-info\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/picture.png\" />";
             }
-            <a href="/" class="navbar-brand">@Html.Raw(homeCode)<span class="collapsible kawaii"><span style="color: #CF181F">3</span>DS GALLERY</span></a>
+            <a href="/" class="navbar-brand">@Html.Raw(homeCode)<span class="collapsible kawaii"><span class="text-3ds-red">3</span>DS GALLERY</span></a>
             <ul class="nav navbar-nav">
                 <li><a href="@Url.Action("Index", "Gallery")">@Html.Raw(gallCode)<span class="collapsible"> Galleries</span></a></li>
                 <li><a href="@Url.Action("Index", "Picture")">@Html.Raw(picCode)<span class="collapsible"> Images</span></a></li>
@@ -67,7 +75,8 @@
         </footer>
     </div>
 
-    @Scripts.Render("~/bundles/jquery", "~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", false)
 
     <script>
@@ -100,24 +109,15 @@
                 .addClass('navbar-fixed-bottom');
 
             if (getCookie('menuHidden') === 'true') {
-                $('.navbar').css({ 'margin-left': -350, 'right': 350 }).addClass('menu-hidden');
-                $('body.menu-bottom').css('padding-bottom', '0px');
+                $('.navbar').addClass('menu-hidden');
+                $('body.menu-bottom').addClass('menu-collapsed');
                 $('#toggleMenuBtn').text('M\nE\nN\nU');
             }
-            else {
-                $('body.menu-bottom').css('padding-bottom', '90px');
-            }
 
-            $('#toggleMenuBtn').css({
-                'visibility': 'visible',
-                'opacity': 1
-            });
+            $('#toggleMenuBtn').removeClass('initially-hidden');
         }
 
-        $('div.navbar').css({
-            'visibility': 'visible',
-            'opacity': 1
-        });
+        $('div.navbar').removeClass('initially-hidden');
 
         $('#secretFeature').click(function () {
             var newTab = window.open('', '_blank');
@@ -142,16 +142,16 @@
         $('#toggleMenuBtn').click(function () {
             // show menu
             if ($('.navbar').hasClass('menu-hidden')) {
-                $('.navbar').css({ 'margin-left': 0, 'right': 0 }).removeClass('menu-hidden');
-                $('body.menu-bottom').css('padding-bottom', '90px');
+                $('.navbar').removeClass('menu-hidden');
+                $('body.menu-bottom').removeClass('menu-collapsed');
                 $(this).text('H\nI\nD\nE');
 
                 setCookie('menuHidden', 'false', 7);
             }
             // hide menu
             else {
-                $('.navbar').css({ 'margin-left': -350, 'right': 350 }).addClass('menu-hidden');
-                $('body.menu-bottom').css('padding-bottom', '0px');
+                $('.navbar').addClass('menu-hidden');
+                $('body.menu-bottom').addClass('menu-collapsed');
                 $(this).text('M\nE\nN\nU');
 
                 setCookie('menuHidden', 'true', 7);
