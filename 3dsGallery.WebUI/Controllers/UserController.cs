@@ -186,6 +186,15 @@ namespace _3dsGallery.WebUI.Controllers
                     LikeCount = pic.User.Count
                 }).ToList();
 
+            var favStyle = db.Gallery
+                .Where(x=>x.User.login == login)
+                .Select(x=>x.Style)
+                .GroupBy(x=>x).Select(g => new { Item = g.Key, Count = g.Count() })
+                .OrderByDescending(g => g.Count)
+                .FirstOrDefault();
+
+            model.FavColorCss = favStyle?.Item.value ?? "default";
+
             return View(model);
         }
 

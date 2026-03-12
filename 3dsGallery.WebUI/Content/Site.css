@@ -558,6 +558,7 @@ footer {
 
         .profile-header .profile-login h2 {
             display: inline-block;
+            font-weight: bold;
         }
 
     .profile-header h2 {

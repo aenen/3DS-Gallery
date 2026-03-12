@@ -8,6 +8,7 @@ namespace _3dsGallery.WebUI.Models
     public class UserProfileModel
     {
         public string UserName { get; set; }
+        public string FavColorCss { get; set; }
 
         public int TotalGalleryCount { get; set; }
         public int TotalImageCount { get; set; }
