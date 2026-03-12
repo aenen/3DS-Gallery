@@ -76,10 +76,7 @@
     </div>
 
     @Scripts.Render("~/bundles/jquery")
-    @if (!is3ds)
-    {
-        @Scripts.Render("~/bundles/bootstrap")
-    }
+    @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", false)
 
     <script>
