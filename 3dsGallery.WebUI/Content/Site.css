@@ -549,6 +549,7 @@ footer {
 .profile-header {
     font-size: 22px;
     margin: 20px 0px;
+    font-weight: bold;
 }
 
     .profile-header .profile-login {
@@ -806,6 +807,7 @@ input[type=number].page-search {
 
 .logo {
     font-size: 33px;
+    margin-bottom: 0;
 }
 
 .no-link-style {
