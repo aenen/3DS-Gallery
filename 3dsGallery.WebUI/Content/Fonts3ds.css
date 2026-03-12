@@ -1,6 +1,8 @@
 @font-face {
     font-family: 'FotYurukaStdSubset';
-    src: url('/fonts/fot-yuruka-std-subset.woff') format('woff');
+    src: url('/fonts/fot-yuruka-std-subset.eot');
+    src: url('/fonts/fot-yuruka-std-subset.eot?#iefix') format('embedded-opentype'),
+    url('/fonts/fot-yuruka-std-subset.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
 }
