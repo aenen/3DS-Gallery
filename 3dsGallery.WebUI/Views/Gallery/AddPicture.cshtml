@@ -2,6 +2,9 @@
 
 @{
     ViewBag.Title = "Add image to the gallery";
+
+    bool isOld3ds =  Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
+    string deleteBtnCode = !isOld3ds ? "<span class=\"glyphicon glyphicon-remove\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/remove.png\" />";
 }
 
 <div class="section-white">
@@ -11,6 +14,11 @@
     </div>
 </div>
 
+<div class="section-grass-green dashed-top">
+    <div class="container text-success text-center">
+        <b><em>NEW!</em></b> Press the <b>+1</b> btn to add up to 5 pics
+    </div>
+</div>
 <div class="section-grey">
     <div class="container body-content section-separator-top">
         @using (Html.BeginForm("AddPicture", "Gallery", FormMethod.Post, new { enctype = "multipart/form-data", @id = "mainForm" }))
@@ -23,11 +31,11 @@
                     @Html.Label("Image", htmlAttributes: new { @class = "control-label col-md-2 required" })
                     <div class="col-md-10">
                         <div id="file-inputs-container">
-                            <div class="file-input-row form-group">
-                                <input name="file" type="file" accept=".jpg, .mpo" />
+                            <div class="file-input-row">
+                                <input class="form-control" name="file" type="file" accept=".jpg, .mpo" />
+                                <button type="button" id="addMoreBtn" class="btn btn-success btn-xs">+1</button>
                             </div>
                         </div>
-                        <button type="button" id="addMoreBtn" class="btn btn-default btn-sm">Add More</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -105,9 +113,9 @@
         }
 
         function createFileRow() {
-            var row = $('<div class="file-input-row form-group"></div>');
-            var input = $('<input name="file" type="file" accept=".jpg, .mpo" />');
-            var deleteBtn = $('<button type="button" class="btn btn-danger btn-sm">Remove</button>');
+            var row = $('<div class="file-input-row"></div>');
+            var input = $('<input name="file" class="form-control" type="file" accept=".jpg, .mpo" />');
+            var deleteBtn = $('<button class="img-delete btn btn-xs btn-danger">@Html.Raw(deleteBtnCode)</button>');
             deleteBtn.click(function () {
                 $(this).closest('.file-input-row').remove();
                 updateAddMoreBtn();
