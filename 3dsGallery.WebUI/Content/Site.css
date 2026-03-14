@@ -431,6 +431,12 @@ h2 {
     border-color: #ddd;
 }
 
+.dashed-top {
+    border-top: dashed !important;
+    border-top-width: 2px !important;
+    border-radius: 0;
+}
+
 .type-paralel-view-guide {
     padding: 1px 5px 1px 6px;
     background-color: rgba(0,0,0,0.7);
@@ -515,7 +521,9 @@ h2 {
 
 .section-grass-green {
     background-color: #DFF0D8;
-    border-top: 1px solid #d6e9c6;
+    border-top-width: 1px;
+    border-top-style: solid;
+    border-top-color: #d6e9c6 !important;
     border-bottom: 1px solid #d6e9c6;
 }
 
@@ -579,6 +587,16 @@ footer {
             padding-left: 10px;
             text-decoration: none;
         }
+
+.file-input-row > input {
+    display: inline-block;
+    max-width: 244px;
+}
+
+.no-gutter {
+    padding-left: 0;
+    padding-right: 0;
+}
 
 .create-new {
     padding-bottom: 20px;
