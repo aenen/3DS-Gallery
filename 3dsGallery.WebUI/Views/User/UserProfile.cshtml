@@ -11,7 +11,7 @@
     <div class="container body-content">
         <div class="profile-header">
             <div class="profile-login text-center">
-                <h2>@Model.UserName</h2>
+                <h2 class="h2 text-@Model.FavColorCss">@Model.UserName</h2>
                 <span class="profile-rating">+@Model.SocialCredits</span>
             </div>
             <div class="profile-stat text-center">
@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        <ul class="nav nav-tabs" style="border:none" id="myTab" role="tablist">
+        <ul class="nav nav-tabs no-border" id="myTab" role="tablist">
             <li class="nav-item">
                 <a class="nav-link active" id="gallery-tab" data-toggle="tab" href="#gallery" role="tab" aria-controls="gallery" aria-expanded="true">Galleries</a>
             </li>
@@ -66,7 +66,7 @@
                     if (gallery_count < Model.TotalGalleryCount)
                     {
                         <div class="create-new">
-                            <a href="@Url.Action("Galleries", "User", new { login = Model.UserName })" class="btn btn-default">View All</a>
+                            <a href="@Url.Action("Galleries", "User", new { login = Model.UserName })" class="btn btn-success">View All (@Model.TotalGalleryCount)</a>
                         </div>
                     }
                 }
@@ -76,7 +76,7 @@
                     @if (Model.IsItMe)
                     {
                         <div class="container create-new">
-                            <a href="@Url.Action("AddPicture", "Picture")" class="btn btn-success">Add New</a>
+                            <a href="@Url.Action("AddPicture", "Picture")" class="btn btn-info">Add New</a>
                         </div>
                     }
                     @{ 
@@ -87,7 +87,7 @@
                     if (picture_count < Model.TotalImageCount)
                     {
                         <div class="create-new">
-                            <a href="@Url.Action("Pictures", "User", new { login = Model.UserName })" class="btn btn-default">View All</a>
+                            <a href="@Url.Action("Pictures", "User", new { login = Model.UserName })" class="btn btn-info">View All (@Model.TotalImageCount)</a>
                         </div>
                     }
                 }
@@ -102,7 +102,7 @@
                     if (picture_count < Model.TotalLikesCount)
                     {
                         <div class="create-new">
-                            <a href="@Url.Action("Likes", "User", new { login = Model.UserName })" class="btn btn-default">View All</a>
+                            <a href="@Url.Action("Likes", "User", new { login = Model.UserName })" class="btn btn-danger">View All (@Model.TotalLikesCount)</a>
                         </div>
                     }
                 }

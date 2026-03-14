@@ -23,7 +23,7 @@
                     <li><a class="filter" value="2d" href="#">2D</a></li>
                 </ul>
             </div>
-            <h2 class="text-info">Images <img id="loading" src="~/Content/loading_black.gif" height="25" width="25" hidden /></h2>
+            <h2 class="text-info">Images <img id="loading" src="~/Content/loading_black.gif" hidden /></h2>
         </div>
     </div>
 </div>
@@ -31,8 +31,8 @@
     <div class="container body-content section-separator-top">
         @if (User.Identity.IsAuthenticated)
         {
-            <div class="create-new" style="padding-bottom:20px">
-                <a href="@Url.Action("AddPicture", "Picture")" class="btn btn-success">Add New</a>
+            <div class="create-new">
+                <a href="@Url.Action("AddPicture", "Picture")" class="btn btn-info">Add New</a>
             </div>
         }
         <div id="picture-data">

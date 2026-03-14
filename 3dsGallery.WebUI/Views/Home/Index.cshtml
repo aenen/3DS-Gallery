@@ -8,8 +8,11 @@
 
 <div id="banner-section">
     <div class="container body-content text-center">
-        <div class="h1" style="font-family: monospace;font-weight: bold"><span style="color: #CF181F">3</span><span style="color: #231F20">DS</span> Gallery</div>
-        <p id="banner-tagline"></p>
+        <h1 class="logo">
+            <a class="no-link-style" href="/"><span class="text-3ds-red">3</span><span class="text-3ds-dark">DS</span> GALLERY</a>
+        </h1>
+        <p><b><em>ニンテンドー<span class="text-3ds-red">3</span><span class="text-3ds-dark">DS</span>ギャラリー</em></b></p>
+        <p id="banner-tagline"><span></span></p>
     </div>
 </div>
 
@@ -22,7 +25,7 @@
         <div class="row">
             @{ Html.RenderAction("GetGalleryElements", "Gallery", new { items = Model.GalleryList }); }
 
-            <p style="margin-bottom: 20px" class="visible-xs-block hidden-sm hidden-md hidden-lg text-center">
+            <p class="visible-xs-block hidden-sm hidden-md hidden-lg text-center mb-20">
                 <a href="@Url.Action("Index", "Gallery")" class="btn btn-success">...and @(Model.TotalGalleryCount - gallery_count) more!</a>
             </p>
         </div>
@@ -38,7 +41,7 @@
         <div class="row">
             @{ Html.RenderAction("GetPictureElements", "Picture", new { items = Model.PictureList }); }
 
-            <p style="margin-bottom: 20px" class="visible-xs-block hidden-sm hidden-md hidden-lg text-center">
+            <p class="visible-xs-block hidden-sm hidden-md hidden-lg text-center mb-20">
                 <a href="@Url.Action("Index", "Picture")" class="btn btn-info">...and @(Model.TotalImageCount - picture_count) more!</a>
             </p>
         </div>
@@ -48,7 +51,7 @@
 <div class="section-white dashed-bottom">
     <div class="container body-content">
         <div class="h2-container">
-            <h2 class="text-danger">See 3D Without a 3DS</h2>
+            <h2 class="text-danger">See 3D Without a <span class="kawaii"><span class="text-3ds-red">3</span><span class="text-3ds-dark">DS</span></h2>
         </div>
         <div class="row">
             <div class="col-xs-12">
@@ -61,11 +64,11 @@
                     <b class="text-danger">Click the</b> <span class="type-paralel-view-guide"><strong>3D</strong></span> icon in the top-right corner of an image to open it in <em class="text-danger">side-by-side mode</em>.<br />
                     Or press the button below to view a <strong class="text-danger">random 3D image</strong> from <b class="text-danger"><em>@(Model.Total3DImageCount)</em></b>.
                 </p>
-                <p style="font-size: 11px"><em><b class="text-danger">*</b>works best on a <span style="font-size: 6px">small</span> screen</em></p>
-                <button id="rndSbsPic" class="btn btn-danger" style="margin-bottom: 20px">Show me</button>
+                <p class="text-footnote"><em><b class="text-danger">*</b>works best on a <span class="text-tiny">small</span> screen</em></p>
+                <button id="rndSbsPic" class="btn btn-danger mb-20">Show me</button>
                 <span hidden><div id="rndSbsPicClickCount" class="btn disabled"></div></span>
-                <div style="margin-bottom:20px;" hidden>
-                    <img id="rndPicDisplay" src="" alt="Random 3D pic" style="max-width:100%; border:1px solid #ccc;" />
+                <div class="mb-20" hidden>
+                    <img id="rndPicDisplay" src="" alt="Random 3D pic" class="img-responsive img-border" />
                 </div>
             </div>
         </div>
@@ -75,7 +78,7 @@
 @section scripts {
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
 
-    <script>
+<script>
         var rndSbsPicClickCount = 0;
         var styles = [
             { name: 'Slate Grey', code: 'default', codeEx: 'slate-gray' },
@@ -88,45 +91,45 @@
         ];
 
         var messages = {
-            common: ["Share your pics straight from a Nintendo 3DS Internet Browser!",
-                "Publish your lo-fi 0.3MP photos using a Nintendo 3DS Internet Browser",
-                "Upload your images online using only Nintendo 3DS Internet Browser",
-                "Developed for Nintendo 3DS Internet Browser",
-                "No need to take out an SD card to transfer some pics. Just Nintendo 3DS Internet Browser... and a Wi-Fi connection",
+            common: ["Share your pics straight from a Nintendo <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span> Internet Browser!",
+                "Publish your lo-fi 0.3MP photos using a Nintendo <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span> Internet Browser",
+                "Upload your images online using only Nintendo <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span> Internet Browser",
+                "Developed for Nintendo <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span> Internet Browser",
+                "No need to take out an SD card to transfer some pics. Just Nintendo <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span> Internet Browser... and a Wi-Fi connection",
                 "Feel free to share what you draw in Colors3D, ArtAcademy, or any other apps",
                 "Maybe upload some funny moments from Tomodachi Life or ACNL",
                 "Private Galleries are now available to use",
                 "This new \"Upload & Add More\" button allows you to publish pics faster (kinda)",
-                "It's Red. Watermelon Red. Use this new juicy theme for your gallery!",
-                "Browsing from your phone? Check the new home page section \"See 3D Without a 3DS\"!",
+                "It's Red. Watermelon Red. Use this new juicy theme for your <span class=\"kawaii\">GALLERY</span>!",
+                "Browsing from your phone? Check the new home page section \"See 3D Without a <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span>\"!",
                 "You may see a strange/unique message here. Means it's rare",
-                "You can always access 3DS Gallery from your phone to save and share your uploads"],
-            uncommon: ["Every image here is clickable! And if you press it using a 3DS - it might open in a glorious 3D",
+                "You can always access <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span> GALLERY</span> from your phone to save and share your uploads"],
+            uncommon: ["Every image here is clickable! And if you press it using a <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span> - it might open in a glorious 3D",
                 "Use a 3D indicator on the images and galleries to locate some stereoscopic goodness",
-                "3D pictures are saved in it's original format, and you can view them in 3D on a 3DS, VR, 3D Monitors",
-                "Use the Filter feature on the top-right corner where there's pics or galleries. Even I forget that such feature exists",
-                "3DS Gallery does not have any ads or tracking scripts that steals your data. That's cool, huh?",
-                "Type up to 150 symbols for a pic/gallery description. You can also do it later from ur phone",
+                "3D pictures are saved in its original format, and you can view them in 3D on a <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span>, VR, 3D Monitors",
+                "Use the Filter feature on the top-right corner where there are pictures or galleries. Even I forget that such feature exists",
+                "<span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span> GALLERY</span> does not have any ads or tracking scripts that steals your data. That's cool, huh?",
+                "Type up to 150 symbols for a PIC/<span class=\"kawaii\">GALLERY</span> description. You can also do it later from ur phone",
                 "The total amount of likes you earned is shown next to your nickname. It doesn't affect anything tho.",
                 "No need to enter your Email or any personal info while creating an account. Feel free to sign up if you haven't already.",
                 "See a lovely pic? Give it a like! Go to your profile page to view it later",
-                "Enjoying the colors of this section? It's called //style_name//, and you can use if for you Gallery!"],
-            rare: ["Nintendo 3DS was released //2011-02-26// ago. Feeling old yet?",
+                "Enjoying the colors of this section? It's called //style_name//, and you can use it for your <span class=\"kawaii\">GALLERY</span>!"],
+            rare: ["Nintendo <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span> was released //2011-02-26// ago. Feeling old yet?",
                 "EShop was closed //2023-03-27// ago",
                 "I didn't feed my Nintendog for //2021-12-22//",
                 "Shiggy was born //1952-11-16// ago",
                 "Hidden indie gem Celeste came out //2018-01-25// ago",
                 "Masahiro Sakurai was born //1970-08-03// ago. He once said he only drinks Coke Zero since he dislikes water. Elixir of youth? Probably not lmao",
-                "Hideo Kojima was born //1963-08-24// ago. His game Metal Gear Solid 3 came out on a 3DS and it features an in-game Camera that u can use",
+                "Hideo Kojima was born //1963-08-24// ago. His game Metal Gear Solid 3 came out on a <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span> and it features an in-game Camera that u can use",
                 "Satoru Iwata passed away //2015-07-11// ago. The console you're holding came out under his supervision",
                 "You love Pokemon, huh? Then upload all 802 of them from USUM. Don't forget the shiny ones",
                 "I bought lime, it was green lemon",
                 "Sometimes cocojumbo means something more",
-                "Funny rabits with bloody eyes on balloons",
-                "The Universe was born 13,8 billion years ago",
+                "Funny rabbits with bloody eyes on balloons",
+                "The universe was born 13.8 billion years ago",
                 "More updates are coming: more color themes, multiple uploads, \"Picture of the Day\" feature, QOL improvements",
                 "This site was made using now old ASP.NET MVC tech, along with HTML, CSS, JS, JQuery, BootStrap, C#, EntityFramework. Hosted on a free Azure service"],
-            legendary: ["WOW! You got the rarest message! Chances were 1 in 1000 (0.1%). It could be you lucky day, maybe get a lotto?"]
+            legendary: ["WOW! You got the rarest message! Chances were 1 in 1000 (0.1%). It could be your lucky day, maybe get a lotto?"]
         };
 
         // FUNCTIONS BEGIN
@@ -232,7 +235,7 @@
         var msg = replaceDateWithDiff(getRandomMessage());
         var msg = msg.replace('//style_name//', randomStyle.name);
 
-        $('#banner-tagline').text(msg);
+        $('#banner-tagline').children().html(msg);
 
         var cookieClickerCount = getCookie('cookieClickerCount');
         if (cookieClickerCount) {
@@ -259,5 +262,5 @@
             setCookie('cookieClickerCount', rndSbsPicClickCount, 344);
         });
 
-    </script>
+</script>
 }
