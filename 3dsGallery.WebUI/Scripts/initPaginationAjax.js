@@ -23,11 +23,14 @@
     loadMoreButton: true,
     beforeLoadMore: function () {
       loading(true);
+      $('#load-more').text('...').prop('disabled', true);
     },
     afterLoadMoreSuccess: function () {
       loading(false);
       initImg();
+      $('#load-more').text('Load more').prop('disabled', false);
     },
+    afterLoadMoreError: function () { loading(false); },
   };
 
   $("#pagination").paginationAjax(url, pages, paginationAjaxData);
