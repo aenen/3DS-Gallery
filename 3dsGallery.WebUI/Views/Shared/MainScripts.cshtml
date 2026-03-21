@@ -13,22 +13,24 @@
             $(this).text("▲").prependTo($(this).parent());
         }
     }
+
     function initImg() {
-        $(".rate-like").click(function (e) {
-            var auth=@User.Identity.IsAuthenticated.ToString().ToLower();
-            if (!auth)
-                return;
+    $(".rate-like").not("[data-init]").each(function () {
+        $(this).attr("data-init", "true").click(function (e) {
+            var auth = @User.Identity.IsAuthenticated.ToString().ToLower();
+            if (!auth) return;
 
             var item = $(this).closest(".thumbnail");
             var id = item.attr("data-id");
             var self = this;
+
             $.ajax({
                 type: "POST",
                 url: "@Url.Action("Like","Picture")/" + id,
                 success: function (data) {
                     $(self).closest(".rate-container").toggleClass("liked");
                     $(self).closest(".rate-container").find(".rate-count").text(data);
-                    if(@isOld3ds == false) {
+                    if (@isOld3ds == false) {
                         if ($(self).hasClass("glyphicon-heart"))
                             $(self).removeClass("glyphicon-heart").addClass("glyphicon-heart-empty");
                         else
@@ -37,10 +39,11 @@
                 }
             });
         });
+    });
 
-        $(".img-delete").click(function (e) {
-            if (!confirm('This image will be deleted. OK?'))
-                return;
+    $(".img-delete").not("[data-init]").each(function () {
+        $(this).attr("data-init", "true").click(function (e) {
+            if (!confirm('This image will be deleted. OK?')) return;
 
             var item = $(this).closest(".thumbnail");
             var id = item.attr("data-id");
@@ -49,14 +52,16 @@
                 url: "@Url.Action("Delete","Picture")/" + id,
                 success: function (data) {
                     if (data == "ok")
-                        item.parent().fadeOut(500, function (x) {
+                        item.parent().fadeOut(500, function () {
                             $(this).parent().remove();
                         });
                 }
             });
         });
+    });
 
-        $(".img-edit").click(function(e){
+    $(".img-edit").not("[data-init]").each(function () {
+        $(this).attr("data-init", "true").click(function (e) {
             var thumb = $(this).closest(".thumbnail");
             var id = thumb.attr("data-id");
             if ($(this).hasClass("active")) {
@@ -64,27 +69,28 @@
                 thumb.find(".img-comment").show();
                 thumb.find(".img-edit-save").hide();
                 $(this).removeClass("active");
-            }
-            else {
+            } else {
                 thumb.find(".img-comment-change").show();
                 thumb.find(".img-comment").hide();
                 thumb.find(".img-edit-save").show();
                 $(this).addClass("active");
             }
         });
+    });
 
-        $(".img-edit-save").click(function(e){
+    $(".img-edit-save").not("[data-init]").each(function () {
+        $(this).attr("data-init", "true").click(function (e) {
             var thumb = $(this).closest(".thumbnail");
             var id = thumb.attr("data-id");
             var comment = thumb.find(".img-comment-change").val();
-            var self=this;
+            var self = this;
             thumb.find(".save-icon").hide();
             thumb.find(".saving-load").show();
             $.ajax({
                 url: '@Url.Action("EditComment", "Picture")?id=' + id + '&comment=' + encodeURIComponent(comment),
                 type: "POST",
                 success: function (data) {
-                    if (data == "ok"){
+                    if (data == "ok") {
                         thumb.find(".img-comment-change").hide();
                         thumb.find(".img-comment").show().removeClass("comment-expanded").find(".img-comment-text").text(comment);
                         thumb.find(".img-comment").find(".show-hide-comment").remove();
@@ -98,32 +104,37 @@
                         thumb.find(".save-icon").show();
                     }
                 },
-                error: function(){
+                error: function () {
                     thumb.find(".saving-load").hide();
                     thumb.find(".save-icon").show();
                     alert("Error occurred.\nMaybe you've entered too many words into description.\nMax length in photo description is 150 symbols.");
                 }
             });
         });
+    });
 
-        $(".img-comment").each(function(i,e){
-            if ($(e)[0].scrollWidth > $(e).innerWidth()) {
-                $(e).prepend($('<span class="show-hide-comment pull-right">▲</span>'));
-            }
-        })
-        $(".show-hide-comment").click(function(){
+    $(".img-comment").not("[data-init]").each(function (i, e) {
+        $(this).attr("data-init", "true");
+        if ($(e)[0].scrollWidth > $(e).innerWidth()) {
+            $(e).prepend($('<span class="show-hide-comment pull-right">▲</span>'));
+        }
+    });
+
+    $(".show-hide-comment").not("[data-init]").each(function () {
+        $(this).attr("data-init", "true").click(function () {
             showHideCommentInit.call(this);
         });
+    });
 
-        $(".qr-btn").click(function (e) {
+    $(".qr-btn").not("[data-init]").each(function () {
+        $(this).attr("data-init", "true").click(function (e) {
             var id = $(this).closest(".thumbnail").attr("data-id");
             var item = $(this).closest(".thumbnail").find(".qr-container");
             var itemImg = item.find(".qr-img");
             if ($(this).hasClass("active")) {
                 item.hide();
                 $(this).removeClass("active");
-            }
-            else {
+            } else {
                 if (itemImg.attr("data-loaded") == "no") {
                     $.ajax({
                         url: '@Url.Action("GetPath", "Picture")/' + id,
@@ -134,35 +145,33 @@
                         }
                     });
                 }
-
                 item.show();
                 $(this).addClass("active");
             }
         });
+    });
 
-        $(".preview-container-md .type").click(function (e) {
+    $(".preview-container-md .type").not("[data-init]").each(function () {
+        $(this).attr("data-init", "true").click(function (e) {
             e.preventDefault();
-
             var id = $(this).closest(".thumbnail").attr("data-id");
             var url = '@Url.Action("GenerateSideBySide", "Picture")/' + id;
-
-            // Open the image in a new browser tab
             window.open(url, "_blank");
         });
+    });
 
-        // 3ds не відображає укр символи, тому довелось викручуватись з грецькою абеткою
-        if (@is3ds == true) {
-            $(".gallery-name,.gallery-desc,.img-comment-text,.img-comment-change").each(function (i, e) {
-                var thisText = $(this).text();
-                $(this).text(thisText=thisText.replace(/І/g, 'I'));
-                $(this).text(thisText=thisText.replace(/і/g, 'i'));
-                $(this).text(thisText=thisText.replace(/Ї/g, 'Ï'));
-                $(this).text(thisText=thisText.replace(/ї/g, 'ï'));
-                $(this).text(thisText=thisText.replace(/Є/g, 'Σ'));
-                $(this).text(thisText=thisText.replace(/є/g, 'ε'));
-            });
-        }
-    };
+    if (@is3ds == true) {
+        $(".gallery-name,.gallery-desc,.img-comment-text,.img-comment-change").not("[data-init]").each(function (i, e) {
+            $(this).attr("data-init", "true");
+            var thisText = $(this).text();
+            $(this).text(thisText = thisText.replace(/І/g, 'I'));
+            $(this).text(thisText = thisText.replace(/і/g, 'i'));
+            $(this).text(thisText = thisText.replace(/Ї/g, 'Ï'));
+            $(this).text(thisText = thisText.replace(/ї/g, 'ï'));
+            $(this).text(thisText = thisText.replace(/Є/g, 'Σ'));
+            $(this).text(thisText = thisText.replace(/є/g, 'ε'));
+        });
+    }};
 
     $(function(){
         initImg();

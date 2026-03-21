@@ -19,7 +19,15 @@
 
     paginationStyle: paginationStyle,
     paginationStyleFlexible: true,
-    visiblePagesCount: 5
+    visiblePagesCount: 5,
+    loadMoreButton: true,
+    beforeLoadMore: function () {
+      loading(true);
+    },
+    afterLoadMoreSuccess: function () {
+      loading(false);
+      initImg();
+    },
   };
 
   $("#pagination").paginationAjax(url, pages, paginationAjaxData);
