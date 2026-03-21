@@ -27,7 +27,8 @@
     },
     afterLoadMoreSuccess: function () {
       loading(false);
-      initImg();
+      if(initImg)
+        initImg();
       $('#load-more').text('Load more').prop('disabled', false);
     },
     afterLoadMoreError: function () { loading(false); },
