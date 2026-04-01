@@ -20,6 +20,7 @@
   - Download as .JPG (non-3ds device only)
   - Download as .MPO (if available) (non-3ds device only)
   - Download as Side-by-Side LR (if .MPO) (non-3ds device only)
++ В це ж контекстне меню додати опцію Report. Залогінений користувач матиме змогу натиснути на кнопку, після чого мені відправиться емейл з інфою про зображення. Тоді як для гостей сайту зявиться простий js alert з текстом. Please, login into your account to automatically report this image. Or email diractly to {admin_email} if you're a guest and dont have a 3DS Gallery account. Thank you.
 + Дрібні покращення інтерфейсу:
   - ~~Додати банер на головну сторінку. Логотип навряд намалюю, тому просто буде секція вгорі з назвою (3DS GALLERY) та короткий підпис з призначенням сайту. Щоб банер був трішки сіллі, то секція матиме рандомний колір (бек+текст), як в галереях.~~
   - ~~Додати простий JS Confirm діалог під час видалення пікчі.~~
