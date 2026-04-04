@@ -46,6 +46,7 @@ namespace _3dsGallery.WebUI.Controllers
             model.PictureList = homePagePictureList.Select(pic => new PictureModel
             {
                 IdPicture = pic.id,
+                IdGallery = pic.galleryId,
                 PictureDescription = pic.description,
                 ColorThemeClass = pic.Gallery.Style.value,
                 CreatedBy = pic.Gallery.User.login,

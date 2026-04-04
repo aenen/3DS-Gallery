@@ -423,6 +423,44 @@ h2 {
     font-weight: bold;
     cursor: pointer;
 }
+.preview-container-md .menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 1px 2px;
+    background-color: rgba(0,0,0,0.7);
+    border-bottom-right-radius: 6px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+    .preview-container-md .menu.active {
+        background-color: rgba(255,255,255,0.9);
+        color: black;
+        border: 3px solid black;
+        border-left: none;
+        border-top: none;
+    }
+.preview-container-md .menu-items {
+    position: absolute;
+    top: 24px;
+    left: 0;
+    color: black;
+    cursor: pointer;
+    z-index: 9;
+}
+    .preview-container-md .menu-items > .item {
+        display: block;
+        width: fit-content;
+        background-color: rgba(255,255,255,0.9);
+        border-bottom-right-radius: 6px;
+        border: 1px dashed black;
+        border-top-right-radius: 6px;
+        border-left: none;
+        padding: 2px 4px;
+    }
+
 
 .dashed-bottom {
     border-bottom: dashed;

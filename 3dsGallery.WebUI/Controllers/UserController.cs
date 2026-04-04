@@ -160,6 +160,7 @@ namespace _3dsGallery.WebUI.Controllers
                 .Select(pic => new PictureModel
                 {
                     IdPicture = pic.id,
+                    IdGallery = pic.galleryId,
                     PictureDescription = pic.description,
                     ColorThemeClass = pic.Gallery.Style.value,
                     CreatedBy = pic.Gallery.User.login,
@@ -176,6 +177,7 @@ namespace _3dsGallery.WebUI.Controllers
                 .Select(pic => new PictureModel
                 {
                     IdPicture = pic.id,
+                    IdGallery = pic.galleryId,
                     PictureDescription = pic.description,
                     ColorThemeClass = pic.Gallery.Style.value,
                     CreatedBy = pic.Gallery.User.login,

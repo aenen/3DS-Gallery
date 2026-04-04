@@ -8,6 +8,7 @@ namespace _3dsGallery.WebUI.Models
     public class PictureModel
     {
         public int IdPicture { get; set; }
+        public short IdGallery { get; set; }
         public string PictureDescription { get; set; }
         public string Path { get; set; }
         public string ColorThemeClass { get; set; }

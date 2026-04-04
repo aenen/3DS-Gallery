@@ -1,4 +1,4 @@
-﻿@model IEnumerable <_3dsGallery.WebUI.Models.PictureModel>
+﻿@model IEnumerable<_3dsGallery.WebUI.Models.PictureModel>
 @{
     bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
     bool isOld3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
@@ -11,7 +11,7 @@
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div>
             <div class="thumbnail" data-id="@itemPic.IdPicture">
-                <div class="preview-container-md style-@itemPic.ColorThemeClass">
+                <div class="preview-container-md style-@itemPic.ColorThemeClass"  data-style="@itemPic.ColorThemeClass" data-author="@itemPic.CreatedBy" data-id-gallery="@itemPic.IdGallery" data-pic-path="@itemPic.Path">
                     <a target="_blank" href="~/@itemPic.Path">
                         @{
                             string preview_md = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.IdPicture}-thumb_md.JPG") ? $"/Picture/{itemPic.IdPicture}-thumb_md.JPG" : $"/Picture/{itemPic.IdPicture}.JPG";
@@ -28,6 +28,9 @@
                             <div class="type">3D</div>
                         }
                     }
+                    <div class="menu">
+                        <span>●●●</span>
+                    </div>
                     <div class="img-comment text-center">
                         <span class="img-comment-text">@itemPic.PictureDescription</span>
                     </div>
