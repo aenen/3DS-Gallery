@@ -11,7 +11,7 @@
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div>
             <div class="thumbnail" data-id="@itemPic.id">
-                <div class="preview-container-md style-@itemPic.Gallery.Style.value">
+                <div class="preview-container-md style-@itemPic.Gallery.Style.value" data-style="@itemPic.Gallery.Style.value" data-author="@itemPic.Gallery.User.login" data-id-gallery="@itemPic.galleryId" data-pic-path="@itemPic.path">
                     <a target="_blank" href="~/@itemPic.path">
                         @{
                             string preview_md = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.id}-thumb_md.JPG") ? $"/Picture/{itemPic.id}-thumb_md.JPG" : $"/Picture/{itemPic.id}.JPG";
@@ -28,6 +28,16 @@
                             <div class="type">@itemPic.type</div>
                         }
                     }
+                    <div class="menu">
+                        @if (is3ds)
+                        {
+                            <span>•••</span>
+                        }
+                        else
+                        {
+                            <span>●●●</span>
+                        }
+                    </div>
                     <div class="img-comment text-center">
                         <span class="img-comment-text">@itemPic.description</span>
                     </div>
