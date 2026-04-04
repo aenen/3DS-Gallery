@@ -160,77 +160,81 @@
         });
     });
 
-    $(".preview-container-md .menu").not("[data-init]").each(function () {
-        var $menu = $(this);
-        $menu.attr("data-init", "true").click(function (e) {
-            e.preventDefault();
-            var $parent = $menu.parent();
+$(".preview-container-md .menu").not("[data-init]").each(function () {
+    var $menu = $(this);
+    $menu.attr("data-init", "true").click(function (e) {
+        e.preventDefault();
+        var $parent = $menu.parent();
 
-            $(".preview-container-md .menu.active").not($menu).each(function () {
-                var $otherMenu = $(this);
-                $otherMenu.removeClass("active");
-                $otherMenu.parent().find(".menu-items").fadeOut(200, function () { $(this).remove(); });
+        $(".preview-container-md .menu.active").not($menu).each(function () {
+            var $otherMenu = $(this);
+            $otherMenu.removeClass("active");
+            $otherMenu.parent().find(".menu-items").fadeOut(200, function () { $(this).remove(); });
+        });
+
+        if ($menu.hasClass("active")) {
+            $menu.removeClass("active");
+            $parent.find(".menu-items").fadeOut(200, function () { $(this).remove(); });
+            return;
+        }
+
+        $menu.addClass("active");
+
+        var styleClass = $parent.attr("data-style");
+        var author = $parent.attr("data-author");
+        var galleryId = $parent.attr("data-id-gallery");
+        var picPath = $parent.attr("data-pic-path");
+
+        var lowerPath = picPath.toLowerCase();
+        var isMpo = lowerPath.indexOf(".mpo") === lowerPath.length - 4;
+
+        var html = '<div class="menu-items">\
+            <div class="item">\
+                <a class="no-link-style" href="@Url.Content("~/User/")' + author + '">\
+                    Visit <b class="text-' + styleClass + '">' + author + '\'s</b> profile\
+                </a>\
+            </div>\
+            <div class="item">\
+                <a class="no-link-style" href="@Url.Content("~/Gallery/")' + galleryId + '">\
+                    Open <b class="text-' + styleClass + '">Gallery</b>\
+                </a>\
+            </div>';
+
+        if (!@is3ds) {
+            html += '<div class="item download-jpg">Download as .<b>JPG</b></div>';
+            if (isMpo) {
+                html += '<div class="item download-mpo">Download as .<b class="text-3ds-red">M</b><b class="text-3ds-dark">PO</b></div>';
+            }
+        }
+
+        html += '</div>';
+
+        var $menuItems = $(html);
+
+        $parent.append($menuItems.hide().fadeIn(200));
+
+        if (!@is3ds) {
+            $menuItems.find(".download-jpg").click(function () {
+                var downloadPath = isMpo ? picPath.replace(/\.mpo$/i, ".jpg") : picPath;
+                var link = document.createElement("a");
+                link.href = "@Url.Content("~")" + downloadPath;
+                link.download = downloadPath.substring(downloadPath.lastIndexOf("/") + 1);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             });
 
-            if ($menu.hasClass("active")) {
-                $menu.removeClass("active");
-                $parent.find(".menu-items").fadeOut(200, function () { $(this).remove(); });
-                return;
-            }
-
-            $menu.addClass("active");
-
-            var styleClass = $parent.data("style");
-            var author = $parent.data("author");
-            var galleryId = $parent.data("id-gallery");
-            var picPath = $parent.data("pic-path");
-
-            var isMpo = picPath.toLowerCase().endsWith(".mpo");
-
-            var $menuItems = $('<div class="menu-items">\
-                <div class="item">\
-                    <a class="no-link-style" href="@Url.Content("~/User/")' + author + '">\
-                        Visit <b class="text-' + styleClass + '">' + author + '\'s</b> profile\
-                    </a>\
-                </div>\
-                <div class="item">\
-                    <a class="no-link-style" href="@Url.Content("~/Gallery/")' + galleryId + '">\
-                        Open <b class="text-' + styleClass + '">Gallery</b>\
-                    </a>\
-                </div>\
-                ' +
-                // Razor decides whether to include download buttons
-                (@is3ds ? '' : '\
-                <div class="item download-jpg">Download as .<b>JPG</b></div>\
-                ' + (isMpo ? '<div class="item download-mpo">Download as .<b class="text-3ds-red">M</b><b class="text-3ds-dark">PO</b></div>' : '')
-                ) +
-            '</div>');
-
-            $parent.append($menuItems.hide().fadeIn(200));
-
-            // Attach download handlers only if not 3DS
-            if (!@is3ds) {
-                $menuItems.find(".download-jpg").click(function () {
-                    var downloadPath = isMpo ? picPath.replace(/\.mpo$/i, ".jpg") : picPath;
-                    var link = document.createElement("a");
-                    link.href = "@Url.Content("~")" + downloadPath;
-                    link.download = downloadPath.split("/").pop();
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                });
-
-                $menuItems.find(".download-mpo").click(function () {
-                    var link = document.createElement("a");
-                    link.href = "@Url.Content("~")" + picPath;
-                    link.download = picPath.split("/").pop();
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                });
-            }
-        });
+            $menuItems.find(".download-mpo").click(function () {
+                var link = document.createElement("a");
+                link.href = "@Url.Content("~")" + picPath;
+                link.download = picPath.substring(picPath.lastIndexOf("/") + 1);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
     });
+});
 
 
     if (@is3ds == true) {
