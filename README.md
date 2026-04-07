@@ -15,10 +15,10 @@
 + ~~Інтегрувати кнопку Load More в пагінацю по всьому сайту. Так само як це працює на https://movievote.azurewebsites.net/~~
 + ~~Додати side-by-side 3D режим. При натисненні на флажок 3D (правий верхній куток зображення) - відкривати ліве і праве зображення склеїне один біля одного, аби можна було побачити його в 3д навіть з телефона "схрещуючи очі". Дякую сабу r/ParallelView за ідею 🤓~~
 + Додати кнопку для контекстного меню top-left на зображенні. Натискаючи з'являться наступні опції:
-  - Visit {username}'s profile
-  - Open gallery {galleryname}
-  - Download as .JPG (non-3ds device only)
-  - Download as .MPO (if available) (non-3ds device only)
+  - ~~Visit {username}'s profile~~
+  - ~~Open gallery {galleryname}~~
+  - ~~Download as .JPG (non-3ds device only)~~
+  - ~~Download as .MPO (if available) (non-3ds device only)~~
   - Download as Side-by-Side LR (if .MPO) (non-3ds device only)
 + В це ж контекстне меню додати опцію Report. Залогінений користувач матиме змогу натиснути на кнопку, після чого мені відправиться емейл з інфою про зображення. Тоді як для гостей сайту зявиться простий js alert з текстом. Please, login into your account to automatically report this image. Or email diractly to {admin_email} if you're a guest and dont have a 3DS Gallery account. Thank you.
 + Дрібні покращення інтерфейсу:
