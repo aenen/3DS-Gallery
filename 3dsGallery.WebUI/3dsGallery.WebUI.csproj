@@ -315,6 +315,7 @@
     <Compile Include="Jobs\DataBackup.cs" />
     <Compile Include="Jobs\DataBackupScheduler.cs" />
     <Compile Include="Models\GalleryModel.cs" />
+    <Compile Include="Models\TimecapsuleModel.cs" />
     <Compile Include="Models\UserProfileModel.cs" />
     <Compile Include="Models\HomePageModel.cs" />
     <Compile Include="Models\MpoParser.cs" />

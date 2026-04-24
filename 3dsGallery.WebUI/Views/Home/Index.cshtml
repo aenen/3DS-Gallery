@@ -4,6 +4,7 @@
     var is3ds = Request.UserAgent.Contains("Nintendo 3DS").ToString().ToLower();
     int gallery_count = Request.UserAgent.Contains("Nintendo 3DS") ? 2 : 3;
     int picture_count = Request.UserAgent.Contains("Nintendo 3DS") ? 3 : 12;
+    string authName = @User.Identity.Name;
 }
 
 <div id="banner-section">
@@ -13,6 +14,13 @@
         </h1>
         <p><b><em>ニンテンドー<span class="text-3ds-red">3</span><span class="text-3ds-dark">DS</span>ギャラリー</em></b></p>
         <p id="banner-tagline"><span></span></p>
+        @if (authName == "aenen")
+        {
+            <button id="get-timecapsule" class="btn">Dig out a Time Capsule</button>
+            <div id="total-timecapsule">0?</div>
+            <div id="img-timecapsule" class="row">
+            </div>
+        }
     </div>
 </div>
 
@@ -78,7 +86,7 @@
 @section scripts {
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
 
-<script>
+    <script>
         var rndSbsPicClickCount = 0;
         var styles = [
             { name: 'Slate Grey', code: 'default', codeEx: 'slate-gray' },
@@ -262,5 +270,25 @@
             setCookie('cookieClickerCount', rndSbsPicClickCount, 344);
         });
 
-</script>
+    $('#get-timecapsule').addClass('btn-' + randomStyle.code).click(function (e) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetTimeCapsule", "Picture")",// + (id? id : ''),
+                success: function (data) {
+                    $('#total-timecapsule').text(data.TimecapsuleCount)
+                    if (!data.IdPicture)
+                        return;
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("GetPictureElementById", "Picture")/" + data.IdPicture,
+                        success: function (data) {
+                            if (data)
+                                $('#img-timecapsule').html(data)
+                        }
+                    });
+                }
+            });
+        });
+
+    </script>
 }

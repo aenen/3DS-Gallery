@@ -122,92 +122,6 @@ namespace _3dsGallery.WebUI.Controllers
                 return RedirectToAction("Details", "Gallery", new { id = model.galleryId });
 
         }
-
-        [Only3DS]
-        [Authorize]
-        [Route("AddPictureTest")]
-        public ActionResult AddPictureTest()
-        {
-            var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
-            if (user == null)
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-
-            ViewBag.hasGalleries = user.Gallery.Any();
-            ViewBag.galleryId = new SelectList(user.Gallery, "id", "name");
-            return View(new AddPictureModel());
-        }
-
-        [Only3DS]
-        [Authorize]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Route("AddPictureTest")]
-        public ActionResult AddPictureTest(AddPictureModel model, IEnumerable<HttpPostedFileBase> files)
-        {
-            var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
-            if (user == null || !IsItMineGallery(model.galleryId))
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-
-            ViewBag.hasGalleries = user.Gallery.Any();
-            ViewBag.galleryId = new SelectList(user.Gallery, "id", "name");
-
-            if (files == null || !files.Any())
-            {
-                ModelState.AddModelError(string.Empty, "You must select at least one image.");
-                return View(model);
-            }
-
-            if (files.Count() > 8)
-            {
-                ModelState.AddModelError(string.Empty, "You can upload a maximum of 8 files at once.");
-                return View(model);
-            }
-
-            foreach (var file in files)
-            {
-                if (file == null || file.ContentLength == 0)
-                    continue; // skip empty slots
-
-                if (file.ContentLength > 750 * 1000)
-                    ModelState.AddModelError(string.Empty, "File size must be less than 750 kilobytes.");
-
-                string file_extention = Path.GetExtension(file.FileName).ToLower();
-                if (file_extention != ".mpo" && file_extention != ".jpg")
-                    ModelState.AddModelError(string.Empty, "File extension must be '.mpo' or '.jpg'.");
-            }
-
-            if (model.isAdvanced && model.isTo2d && model.leftOrRight < 0 && model.leftOrRight > 1)
-                ModelState.AddModelError(string.Empty, "You must choose which of the images (left or right) should be saved in 2D.");
-
-            if (!ModelState.IsValid)
-                return View(model);
-
-            foreach (var file in files)
-            {
-                if (file == null || file.ContentLength == 0)
-                    continue;
-
-                Picture picture = new Picture
-                {
-                    description = model.description,
-                    galleryId = model.galleryId,
-                    CreationDate = DateTime.Now
-                };
-                db.Picture.Add(picture);
-                db.SaveChanges();
-
-                picture = new PictureSaver(
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture")
-                ).AnalyzeAndSave(picture, model, file);
-
-                picture.Gallery.LastPicture = picture;
-                db.Entry(picture).State = EntityState.Modified;
-                db.SaveChanges();
-            }
-
-            return RedirectToAction("Details", "Gallery", new { id = model.galleryId });
-        }
-
         [Authorize]
         [HttpPost]
         public ActionResult Like(int? id)
@@ -238,12 +152,34 @@ namespace _3dsGallery.WebUI.Controllers
             int offset = rand.Next(0, total);
 
             var randomRow = db.Picture
-                .Where(x=>!x.Gallery.IsPrivate)
-                .OrderBy(x=>x.id)
+                .Where(x => !x.Gallery.IsPrivate)
+                .OrderBy(x => x.id)
                 .Skip(offset)
                 .FirstOrDefault();
 
             return Json(randomRow.path);
+        }
+
+        [HttpPost]
+        public ActionResult GetTimeCapsule(int? existingId)
+        {
+            var result = new TimecapsuleModel();
+            var timeCapsulesQuery = db.Picture
+                .Where(x => !x.Gallery.IsPrivate 
+                    && x.CreationDate.HasValue
+                    && x.CreationDate.Value.Month == DateTime.Now.Month 
+                    && x.CreationDate.Value.Day == DateTime.Now.Day
+                    && x.CreationDate.Value.Year < DateTime.Now.Year
+                    && (!existingId.HasValue || x.id != existingId));
+            var timeCapsulesCount = timeCapsulesQuery.Count();
+            if (timeCapsulesCount == 0)
+                return Json(new TimecapsuleModel { TimecapsuleCount = 0 });
+
+            Random rand = new Random();
+            int offset = rand.Next(0, timeCapsulesCount);
+            var idPictureTimecapsule = timeCapsulesQuery.Skip(offset).Select(x=>x.id).FirstOrDefault();
+
+            return Json(new TimecapsuleModel { TimecapsuleCount = 0, IdPicture = idPictureTimecapsule });
         }
 
         public ActionResult RandomGenerateSideBySide()
@@ -331,14 +267,49 @@ namespace _3dsGallery.WebUI.Controllers
 
             return PartialView(items);
         }
+        //return RedirectToAction("Details", "Gallery", new { id = model.galleryId });
+
+        [HttpPost]
+        public ActionResult GetPictureElementById(int? id)
+        {
+            if (id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var picModel = db.Picture
+                .Where(x => !x.Gallery.IsPrivate && x.id == id)
+                .Take(1)
+                .Select(pic => new PictureModel
+            {
+                IdPicture = pic.id,
+                IdGallery = pic.galleryId,
+                PictureDescription = pic.description,
+                ColorThemeClass = pic.Gallery.Style.value,
+                CreatedBy = pic.Gallery.User.login,
+                CreationDate = pic.CreationDate,
+                Is3D = pic.type == "3D",
+                IsLikedByMe = User.Identity.IsAuthenticated && pic.User.Any(x => x.login == User.Identity.Name),
+                Path = pic.path,
+                LikeCount = pic.User.Count
+            }).ToList();
+
+            TempData["items"] = picModel;
+            return RedirectToAction("GetPictureElements", "Picture");
+        }
 
         public ActionResult GetPictureElements(IEnumerable<PictureModel> items)
         {
-            if (items == null)
+            // If called directly with items, use them
+            if (items != null)
+                return PartialView(items);
+
+            // If redirected, pull from TempData
+            var tempItems = TempData["items"] as IEnumerable<PictureModel>;
+            if (tempItems == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            return PartialView(items);
+            return PartialView(tempItems);
         }
+
 
         public ActionResult ShowPage(int? gallery, string user, int page = 1, string filter = "new", bool user_likes = false)
         {
