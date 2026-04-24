@@ -49,7 +49,14 @@ div.navbar {
     font-weight: bold;
     font-style: italic;
 }
+#img-timecapsule {
+    text-align: center;
+}
 
+    #img-timecapsule > [class*="col-"] {
+        display: inline-block; 
+        float: none;
+    }
 #toggleMenuBtn {
     position: fixed;
     left: 0;

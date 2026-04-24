@@ -168,10 +168,11 @@ namespace _3dsGallery.WebUI.Controllers
             var timeCapsulesQuery = db.Picture
                 .Where(x => !x.Gallery.IsPrivate 
                     && x.CreationDate.HasValue
-                    && x.CreationDate.Value.Month == DateTime.Now.Month 
+                    && x.CreationDate.Value.Month == DateTime.Now.Month
                     && x.CreationDate.Value.Day == (DateTime.Now.Day + 1)
                     && x.CreationDate.Value.Year < DateTime.Now.Year
-                    && x.id != existingId);
+                    && x.id != existingId)
+                .OrderBy(x => x.id);
             var timeCapsulesCount = timeCapsulesQuery.Count();
             
             if (timeCapsulesCount == 0) 
@@ -179,10 +180,14 @@ namespace _3dsGallery.WebUI.Controllers
 
             Random rand = new Random();
             int offset = rand.Next(0, timeCapsulesCount);
-            var idPictureTimecapsule = timeCapsulesQuery.Skip(offset).Select(x=>x.id).FirstOrDefault();
+            var pictureTimecapsule = timeCapsulesQuery.Skip(offset).FirstOrDefault();
 
             result.TimecapsuleCount = timeCapsulesCount;
-            result.IdPicture = idPictureTimecapsule;
+            result.IdPicture = pictureTimecapsule.id;
+            result.YearsOld = DateTime.Now.Year - pictureTimecapsule.CreationDate.Value.Year;
+            result.GalleryName = pictureTimecapsule.Gallery.name;
+            result.IdGallery = pictureTimecapsule.galleryId;
+            result.CreatedBy = pictureTimecapsule.Gallery.User.login;
 
             return Json(result);
         }

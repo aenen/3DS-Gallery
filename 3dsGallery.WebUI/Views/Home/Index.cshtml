@@ -288,6 +288,9 @@
                     if (!data.IdPicture)
                         return;
 
+
+                    $('#msg-timecapsule').html('<b>' + data.YearsOld + ' years ago </b>today - <a>' + data.CreatedBy + '</a> uploaded this into \"<a>' + data.GalleryName + '</a>\":');
+
                     $.ajax({
                         type: "POST",
                         url: "@Url.Action("GetPictureElementById", "Picture")/" + data.IdPicture,
