@@ -281,9 +281,9 @@
                 success: function (data) {
                     $('#wrapper-timecapsule').show();
                     if (!data.TimecapsuleCount)
-                        $('#msg-timecapsule').html('Sorry, no time capsules were found today.<br/>Try again later, or upload something yourself for people from the future to dig out!');
+                        $('#msg-timecapsule').html('Sorry, no Time Capsules were found today.<br/>Try again later, or upload something yourself for people from the future to dig out!');
 
-                    $('#refresh-timecapsule').html('Check in <b>' + data.RefreshTimeInfo + '</b> for new time capsules.');
+                    $('#refresh-timecapsule').html('<b>' + data.TimecapsuleCount + '</b> Time Capsules can be found today.<br/>Refresh in <b>' + data.RefreshTimeInfo + '</b>.');
 
                     if (!data.IdPicture)
                         return;

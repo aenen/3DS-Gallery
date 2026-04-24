@@ -169,7 +169,7 @@ namespace _3dsGallery.WebUI.Controllers
                 .Where(x => !x.Gallery.IsPrivate 
                     && x.CreationDate.HasValue
                     && x.CreationDate.Value.Month == DateTime.Now.Month
-                    && x.CreationDate.Value.Day == (DateTime.Now.Day + 1)
+                    && x.CreationDate.Value.Day == DateTime.Now.Day
                     && x.CreationDate.Value.Year < DateTime.Now.Year
                     && x.id != existingId)
                 .OrderBy(x => x.id);
