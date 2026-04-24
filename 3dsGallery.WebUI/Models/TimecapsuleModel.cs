@@ -9,5 +9,6 @@ namespace _3dsGallery.WebUI.Models
     {
         public int IdPicture { get; set; }
         public int TimecapsuleCount { get; set; }
+        public string RefreshTimeInfo { get; set; }
     }
 }

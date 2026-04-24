@@ -42,6 +42,14 @@ div.navbar {
     cursor: default;
 }
 
+#info-timecapsule {
+    border: 2px dotted white;
+    padding: 5px 10px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-style: italic;
+}
+
 #toggleMenuBtn {
     position: fixed;
     left: 0;

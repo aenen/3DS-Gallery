@@ -164,6 +164,7 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult GetTimeCapsule(int? existingId)
         {
             var result = new TimecapsuleModel();
+            result.RefreshTimeInfo = TimeUntilTomorrow();
             var timeCapsulesQuery = db.Picture
                 .Where(x => !x.Gallery.IsPrivate 
                     && x.CreationDate.HasValue
@@ -172,14 +173,18 @@ namespace _3dsGallery.WebUI.Controllers
                     && x.CreationDate.Value.Year < DateTime.Now.Year
                     && (!existingId.HasValue || x.id != existingId));
             var timeCapsulesCount = timeCapsulesQuery.Count();
-            if (timeCapsulesCount == 0)
-                return Json(new TimecapsuleModel { TimecapsuleCount = 0 });
+            
+            if (timeCapsulesCount == 0) 
+                return Json(result);
 
             Random rand = new Random();
             int offset = rand.Next(0, timeCapsulesCount);
             var idPictureTimecapsule = timeCapsulesQuery.Skip(offset).Select(x=>x.id).FirstOrDefault();
 
-            return Json(new TimecapsuleModel { TimecapsuleCount = 0, IdPicture = idPictureTimecapsule });
+            result.TimecapsuleCount = timeCapsulesCount;
+            result.IdPicture = idPictureTimecapsule;
+
+            return Json(result);
         }
 
         public ActionResult RandomGenerateSideBySide()
@@ -349,6 +354,23 @@ namespace _3dsGallery.WebUI.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+        private string TimeUntilTomorrow()
+        {
+            DateTime now = DateTime.Now;
+            DateTime tomorrow = now.Date.AddDays(1);
+
+            TimeSpan remaining = tomorrow - now;
+
+            int hours = remaining.Hours;
+            int minutes = remaining.Minutes;
+
+            if (hours > 0 && minutes > 0)
+                return $"{hours}hr and {minutes}min";
+            else if (hours > 0)
+                return $"{hours}hr";
+            else
+                return $"{minutes}min";
         }
     }
 }

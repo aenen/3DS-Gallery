@@ -16,9 +16,12 @@
         <p id="banner-tagline"><span></span></p>
         @if (authName == "aenen")
         {
-            <button id="get-timecapsule" class="btn">Dig out a Time Capsule</button>
-            <div id="total-timecapsule">0?</div>
-            <div id="img-timecapsule" class="row">
+            <button id="get-timecapsule" class="btn inline">Dig out a Time Capsule</button>
+            <a id="info-timecapsule" class="btn btn-xs">?</a>
+            <div id="wrapper-timecapsule" hidden>
+                <p id="msg-timecapsule"></p>
+                <div id="img-timecapsule" class="row"></div>
+                <p id="refresh-timecapsule"></p>
             </div>
         }
     </div>
@@ -239,6 +242,7 @@
         $('#banner-section')
             .addClass('section-' + (randomStyle.codeEx ? randomStyle.codeEx : randomStyle.code))
             .addClass('text-' + randomStyle.code);
+        $('#info-timecapsule').addClass('btn-' + randomStyle.code)
 
         var msg = replaceDateWithDiff(getRandomMessage());
         var msg = msg.replace('//style_name//', randomStyle.name);
@@ -275,9 +279,15 @@
                 type: "POST",
                 url: "@Url.Action("GetTimeCapsule", "Picture")",// + (id? id : ''),
                 success: function (data) {
-                    $('#total-timecapsule').text(data.TimecapsuleCount)
+                    $('#wrapper-timecapsule').show();
+                    if (!data.TimecapsuleCount)
+                        $('#msg-timecapsule').html('Sorry, no time capsules were found today.<br/>Try again later, or upload something yourself for people from the future to dig out!');
+
+                    $('#refresh-timecapsule').html('Check in <b>' + data.RefreshTimeInfo + '</b> for new time capsules.');
+
                     if (!data.IdPicture)
                         return;
+
                     $.ajax({
                         type: "POST",
                         url: "@Url.Action("GetPictureElementById", "Picture")/" + data.IdPicture,
