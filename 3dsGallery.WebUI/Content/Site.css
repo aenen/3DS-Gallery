@@ -42,12 +42,17 @@ div.navbar {
     cursor: default;
 }
 
+#get-timecapsule, #wrapper-timecapsule {
+    margin-bottom: 10px;
+}
+
 #info-timecapsule {
     border: 2px dotted white;
     padding: 5px 10px;
     border-radius: 50%;
     font-weight: bold;
     font-style: italic;
+    margin-bottom: 10px;
 }
 #img-timecapsule {
     text-align: center;
@@ -779,6 +784,11 @@ input[type=number].page-search {
 
     .collapsible {
         display: none !important;
+    }
+
+    #img-timecapsule > [class*="col-"] {
+        display: block; /* full width */
+        margin: 0 auto; /* center block */
     }
 }
 

@@ -360,9 +360,10 @@ namespace _3dsGallery.WebUI.Controllers
             }
             base.Dispose(disposing);
         }
+
         private string TimeUntilTomorrow()
         {
-            DateTime now = DateTime.Now;
+            DateTime now = DateTime.UtcNow;
             DateTime tomorrow = now.Date.AddDays(1);
 
             TimeSpan remaining = tomorrow - now;
