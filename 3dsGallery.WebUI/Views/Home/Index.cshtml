@@ -283,14 +283,14 @@
                     if (!data.TimecapsuleCount)
                         $('#msg-timecapsule').html('Sorry, no Time Capsules were found today.<br/>Try again later, or upload something yourself for people from the future to dig out!');
 
-                    $('#refresh-timecapsule').html('<b>' + data.TimecapsuleCount + '</b> Time Capsules can be found today.<br/>Refresh in <b>' + data.RefreshTimeInfo + '</b>.');
+                    $('#refresh-timecapsule').html('<b>' + data.TimecapsuleCount + '</b> Time Capsules can be found today.<br/>Refresh in <b>' + data.RefreshTimeInfo + '</b>.<br/>srv: <b>' + data.TestSrvDate + '</b>.<br/>img: <b>' + data.TestImgDate + '</b>.');
                     //data.IdPicture = 560;
                     if (!data.IdPicture)
                         return;
 
                     $('#msg-timecapsule').html(
                       'On this day, <b>' + data.YearsOld + ' years ago</b>, ' +
-                      '<a href="@Url.Content("~/User/")' + data.CreatedBy + '">' + data.CreatedBy + '</a> ' +
+                      '<a target="_blank" href="@Url.Content("~/User/")' + data.CreatedBy + '">' + data.CreatedBy + '</a> ' +
                       'added a picture to "<a target="_blank" href="@Url.Content("~/Gallery/")' + data.IdGallery + '">' + data.GalleryName + '</a>".'
                     );
 

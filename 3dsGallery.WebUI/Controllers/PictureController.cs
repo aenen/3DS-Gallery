@@ -164,17 +164,20 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult GetTimeCapsule(int? existingId)
         {
             var result = new TimecapsuleModel();
-            result.RefreshTimeInfo = TimeUntilTomorrow();
+
+            DateTime utcNow = DateTime.UtcNow;
+            result.RefreshTimeInfo = TimeUntilTomorrow(utcNow);
+
             var timeCapsulesQuery = db.Picture
-                .Where(x => !x.Gallery.IsPrivate 
+                .Where(x => !x.Gallery.IsPrivate
                     && x.CreationDate.HasValue
-                    && x.CreationDate.Value.Month == DateTime.Now.Month
-                    && x.CreationDate.Value.Day == DateTime.Now.Day
-                    && x.CreationDate.Value.Year < DateTime.Now.Year
+                    && x.CreationDate.Value.Month == utcNow.Month
+                    && x.CreationDate.Value.Day == utcNow.Day
+                    && x.CreationDate.Value.Year < utcNow.Year
                     && x.id != existingId)
                 .OrderBy(x => x.id);
-            var timeCapsulesCount = timeCapsulesQuery.Count();
-            
+
+            int timeCapsulesCount = timeCapsulesQuery.Count();
             if (timeCapsulesCount == 0) 
                 return Json(result);
 
@@ -184,10 +187,15 @@ namespace _3dsGallery.WebUI.Controllers
 
             result.TimecapsuleCount = timeCapsulesCount;
             result.IdPicture = pictureTimecapsule.id;
-            result.YearsOld = DateTime.Now.Year - pictureTimecapsule.CreationDate.Value.Year;
+            result.YearsOld = utcNow.Year - pictureTimecapsule.CreationDate.Value.Year;
             result.GalleryName = pictureTimecapsule.Gallery.name;
             result.IdGallery = pictureTimecapsule.galleryId;
             result.CreatedBy = pictureTimecapsule.Gallery.User.login;
+
+            result.TestImgDate = pictureTimecapsule.CreationDate.Value.ToString();
+            result.TestSrvDate = utcNow.ToString();
+
+
 
             return Json(result);
         }
@@ -361,14 +369,12 @@ namespace _3dsGallery.WebUI.Controllers
             base.Dispose(disposing);
         }
 
-        private string TimeUntilTomorrow()
+        private string TimeUntilTomorrow(DateTime now)
         {
-            DateTime now = DateTime.UtcNow;
             DateTime tomorrow = now.Date.AddDays(1);
-
             TimeSpan remaining = tomorrow - now;
 
-            int hours = remaining.Hours;
+            int hours = (int)remaining.TotalHours;
             int minutes = remaining.Minutes;
 
             if (hours > 0 && minutes > 0)
@@ -378,5 +384,6 @@ namespace _3dsGallery.WebUI.Controllers
             else
                 return $"{minutes}min";
         }
+
     }
 }

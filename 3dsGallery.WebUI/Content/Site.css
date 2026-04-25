@@ -53,6 +53,7 @@ div.navbar {
     font-weight: bold;
     font-style: italic;
     margin-bottom: 10px;
+    margin-right: -32px;
 }
 #img-timecapsule {
     text-align: center;
