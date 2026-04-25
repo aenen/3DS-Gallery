@@ -237,7 +237,8 @@
 
         // FUNCTIONS END
 
-        var randomStyle = styles[Math.floor(Math.random() * styles.length)];
+    var randomStyle = styles[Math.floor(Math.random() * styles.length)];
+    var idLoadedTimecapsule = null;
 
         $('#banner-section')
             .addClass('section-' + (randomStyle.codeEx ? randomStyle.codeEx : randomStyle.code))
@@ -277,7 +278,7 @@
     $('#get-timecapsule').addClass('btn-' + randomStyle.code).click(function (e) {
             $.ajax({
                 type: "POST",
-                url: "@Url.Action("GetTimeCapsule", "Picture")",// + (id? id : ''),
+                url: "@Url.Action("GetTimeCapsule", "Picture")/" + (idLoadedTimecapsule ? idLoadedTimecapsule : ''),
                 success: function (data) {
                     $('#wrapper-timecapsule').show();
                     if (!data.TimecapsuleCount)
