@@ -286,7 +286,7 @@
     $('#get-timecapsule').addClass('btn-' + randomStyle.code).click(function (e) {
             $.ajax({
                 type: "POST",
-                url: "@Url.Action("GetTimeCapsule", "Picture")/" + (idLoadedTimecapsule ? idLoadedTimecapsule : ''),
+                url: "@Url.Action("GetTimeCapsule", "Picture")?existingId=" + (idLoadedTimecapsule ? idLoadedTimecapsule : ''),
                 success: function (data) {
                     if (!data.TimecapsuleCount && !data.IdPicture)
                         $('#msg-timecapsule').html('Try again later, or upload something yourself for people from the future to dig out!');
