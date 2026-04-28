@@ -14,6 +14,8 @@ namespace _3dsGallery.WebUI.Models
         public int YearsOld { get; set; }
         public string CreatedBy { get; set; }
         public string GalleryName { get; set; }
+        public string GalleryCssCode { get; set; }
+        public string GalleryCssCodeEx { get; set; }
 
         public string TestImgDate { get; set; }
         public string TestSrvDate { get; set; }

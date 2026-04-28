@@ -189,13 +189,16 @@ namespace _3dsGallery.WebUI.Controllers
             result.IdPicture = pictureTimecapsule.id;
             result.YearsOld = utcNow.Year - pictureTimecapsule.CreationDate.Value.Year;
             result.GalleryName = pictureTimecapsule.Gallery.name;
+            result.GalleryCssCode = pictureTimecapsule.Gallery.Style.value;
+            result.GalleryCssCodeEx = pictureTimecapsule.Gallery.Style.ValueEx;
             result.IdGallery = pictureTimecapsule.galleryId;
             result.CreatedBy = pictureTimecapsule.Gallery.User.login;
 
             result.TestImgDate = pictureTimecapsule.CreationDate.Value.ToString();
             result.TestSrvDate = utcNow.ToString();
 
-
+            if (!existingId.HasValue && result.TimecapsuleCount > 0)
+                result.TimecapsuleCount--; // should show the remaining TC available
 
             return Json(result);
         }

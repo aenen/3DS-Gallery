@@ -18,12 +18,20 @@
         {
             <button id="get-timecapsule" class="btn inline">Dig out a Time Capsule</button>
             <a id="info-timecapsule" class="btn btn-xs">?</a>
-            <div id="wrapper-timecapsule" hidden>
-                <p id="msg-timecapsule"></p>
-                <div id="img-timecapsule" class="row"></div>
-                <p id="refresh-timecapsule"></p>
-            </div>
         }
+    </div>
+</div>
+
+<div id="timecapsule-separator" class="section-white dashed-bottom" style="height: 2px" hidden></div>
+<div id="timecapsule-section" hidden>
+    <div class="container body-content text-center">
+        @if (authName == "aenen")
+        {
+            <p id="msg-timecapsule"></p>
+            <div id="img-timecapsule" class="row"></div>
+            <p id="refresh-timecapsule"></p>
+        }
+
     </div>
 </div>
 
@@ -89,7 +97,7 @@
 @section scripts {
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
 
-<script>
+    <script>
         var rndSbsPicClickCount = 0;
         var styles = [
             { name: 'Slate Grey', code: 'default', codeEx: 'slate-gray' },
@@ -240,7 +248,7 @@
     var randomStyle = styles[Math.floor(Math.random() * styles.length)];
     var idLoadedTimecapsule = null;
 
-        $('#banner-section')
+        $('#banner-section,#timecapsule-section')
             .addClass('section-' + (randomStyle.codeEx ? randomStyle.codeEx : randomStyle.code))
             .addClass('text-' + randomStyle.code);
         $('#info-timecapsule').addClass('btn-' + randomStyle.code)
@@ -280,20 +288,44 @@
                 type: "POST",
                 url: "@Url.Action("GetTimeCapsule", "Picture")/" + (idLoadedTimecapsule ? idLoadedTimecapsule : ''),
                 success: function (data) {
-                    $('#wrapper-timecapsule').show();
-                    if (!data.TimecapsuleCount)
-                        $('#msg-timecapsule').html('Sorry, no Time Capsules were found today.<br/>Try again later, or upload something yourself for people from the future to dig out!');
+                    if (!data.TimecapsuleCount && !data.IdPicture)
+                        $('#msg-timecapsule').html('Try again later, or upload something yourself for people from the future to dig out!');
 
-                    $('#refresh-timecapsule').html('<b>' + data.TimecapsuleCount + '</b> Time Capsules can be found today.<br/>Refresh in <b>' + data.RefreshTimeInfo + '</b>.<br/>srv: <b>' + data.TestSrvDate + '</b>.<br/>img: <b>' + data.TestImgDate + '</b>.');
+                    $('#refresh-timecapsule').html('<b>' + (data.TimecapsuleCount ? data.TimecapsuleCount : 'No') +
+                        '</b> more Time Capsule' + (data.TimecapsuleCount === 1? '': 's') +' can be found today.' +
+                        '<br/>Refresh in <b>' + data.RefreshTimeInfo 
+                    );
+
+                    console.log(randomStyle.codeEx ? randomStyle.codeEx : randomStyle.code)
+                    console.log(data.GalleryCssCodeEx ? data.GalleryCssCodeEx : data.GalleryCssCode)
+
+                    $('#timecapsule-section,#timecapsule-separator').show();
+
                     //data.IdPicture = 560;
+                    //data.GalleryCssCode = 'nocturnal-purple';
+
                     if (!data.IdPicture)
                         return;
+
+                    idLoadedTimecapsule = data.IdPicture;
+
+                    $('#timecapsule-section')
+                        .removeClass()
+                        .removeClass();
+
+                    $('#timecapsule-section')
+                        .addClass('section-' + (data.GalleryCssCodeEx ? data.GalleryCssCodeEx : data.GalleryCssCode))
+                        .addClass('text-' + data.GalleryCssCode);
+
 
                     $('#msg-timecapsule').html(
                       'On this day, <b>' + data.YearsOld + ' years ago</b>, ' +
                       '<a target="_blank" href="@Url.Content("~/User/")' + data.CreatedBy + '">' + data.CreatedBy + '</a> ' +
                       'added a picture to "<a target="_blank" href="@Url.Content("~/Gallery/")' + data.IdGallery + '">' + data.GalleryName + '</a>".'
                     );
+
+                    if (data.TimecapsuleCount > 0)
+                        $('#get-timecapsule').text('Dig out another one!');
 
                     $.ajax({
                         type: "POST",
@@ -303,12 +335,11 @@
                                 $('#img-timecapsule').html(data);
                                 initImg();
                             }
-
                         }
                     });
                 }
             });
         });
 
-</script>
+    </script>
 }

@@ -42,7 +42,7 @@ div.navbar {
     cursor: default;
 }
 
-#get-timecapsule, #wrapper-timecapsule {
+#get-timecapsule {
     margin-bottom: 10px;
 }
 
@@ -51,17 +51,26 @@ div.navbar {
     padding: 5px 10px;
     border-radius: 50%;
     font-weight: bold;
-    font-style: italic;
     margin-bottom: 10px;
     margin-right: -32px;
 }
+
+#msg-timecapsule {
+    font-size:17px;
+    margin-top:10px;
+}
+
 #img-timecapsule {
     text-align: center;
 }
 
     #img-timecapsule > [class*="col-"] {
-        display: inline-block; 
+        display: inline-block;
         float: none;
+    }
+
+    #img-timecapsule > [class*="col-"] .thumbnail {
+        margin-bottom: 10px;
     }
 #toggleMenuBtn {
     position: fixed;
