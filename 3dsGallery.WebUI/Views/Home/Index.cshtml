@@ -320,8 +320,8 @@
 
                     $('#msg-timecapsule').html(
                       'On this day, <b>' + data.YearsOld + ' years ago</b>, ' +
-                      '<a target="_blank" href="@Url.Content("~/User/")' + data.CreatedBy + '">' + data.CreatedBy + '</a> ' +
-                      'added a picture to "<a target="_blank" href="@Url.Content("~/Gallery/")' + data.IdGallery + '">' + data.GalleryName + '</a>".'
+                      '<b><a target="_blank" href="@Url.Content("~/User/")' + data.CreatedBy + '">' + data.CreatedBy + '</a></b> ' +
+                      'added a picture to "<b><a target="_blank" href="@Url.Content("~/Gallery/")' + data.IdGallery + '">' + data.GalleryName + '</a></b>".'
                     );
 
                     if (data.TimecapsuleCount > 0)
