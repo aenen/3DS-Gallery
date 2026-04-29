@@ -55,6 +55,10 @@ div.navbar {
     margin-right: -32px;
 }
 
+#timecapsule-section {
+    box-shadow: inset 0 8px 12px -8px, inset 0 -8px 12px -8px;
+}
+
 #msg-timecapsule {
     font-size:17px;
     margin-top:10px;

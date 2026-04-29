@@ -67,7 +67,11 @@ namespace _3dsGallery.WebUI.Code
             Image img_for_thumb;
             if (!images.Any()) // якщо 2D
             {
-                img_for_thumb = Image.FromFile(picture_folder_name);
+                using (var fs = new FileStream(picture_folder_name, FileMode.Open, FileAccess.Read))
+                using (var tempImg = Image.FromStream(fs))
+                {
+                    img_for_thumb = new Bitmap(tempImg);
+                }
                 picture.type = "2D";
             }
             else // якщо 3D
