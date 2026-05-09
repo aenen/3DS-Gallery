@@ -14,17 +14,17 @@
         </h1>
         <p><b><em>ニンテンドー<span class="text-3ds-red">3</span><span class="text-3ds-dark">DS</span>ギャラリー</em></b></p>
         <p id="banner-tagline"><span></span></p>
-            <button id="get-timecapsule" class="btn inline">Dig out a Time Capsule</button>
-            <a id="info-timecapsule" class="btn btn-xs">?</a>
+        <button id="get-timecapsule" class="btn inline">Dig out a Time Capsule</button>
+        <a id="info-timecapsule" class="btn btn-xs">?</a>
     </div>
 </div>
 
 <div id="timecapsule-section" hidden>
     <div class="container body-content text-center">
-        <p><b>[Under Development. Releasing May, 24 (1y public anniversary)]</b><br />[I hope you'll like this Time Capsules thingy]<br/>[After this i'll finally add MOTHER FRICKING COMMENTS so you can cyberbully someone here.]</p>
-            <p id="msg-timecapsule"></p>
-            <div id="img-timecapsule" class="row"></div>
-            <p id="refresh-timecapsule"></p>
+        <p><b>[Under Development. Releasing May, 24 (1y public anniversary)]</b><br />[I hope you'll like this Time Capsules thingy]<br />[After this i'll finally add MOTHER FRICKING COMMENTS so you can cyberbully someone here.]</p>
+        <p id="msg-timecapsule"></p>
+        <div id="img-timecapsule" class="row"></div>
+        <p id="refresh-timecapsule"></p>
     </div>
 </div>
 
@@ -239,7 +239,13 @@
         // FUNCTIONS END
 
     var randomStyle = styles[Math.floor(Math.random() * styles.length)];
-    var idLoadedTimecapsule = null;
+        var idLoadedTimecapsule = null;
+        var tcDugCount = getCookie('tcDugCount');
+        var tcDugLastDate = getCookie('tcDugLastDate');
+        var tcDayStreak = getCookie('tcDayStreak');
+
+        var tcLongestStreak = getCookie('tcLongestStreak');
+        var tcLongestStreakDate = getCookie('tcLongestStreakDate');
 
         $('#banner-section,#timecapsule-section')
             .addClass('section-' + (randomStyle.codeEx ? randomStyle.codeEx : randomStyle.code))
@@ -276,17 +282,71 @@
             setCookie('cookieClickerCount', rndSbsPicClickCount, 344);
         });
 
-    $('#get-timecapsule').addClass('btn-' + randomStyle.code).click(function (e) {
+        $('#info-timecapsule').click(function (e) {
+            alert('Time Capsule - is a public image that was uploaded to 3DS Gallery on this day and month, BUT more than a year ago!\n\n' +
+                'Dig them out every day to discover interesting pics from the past.\n'+
+                'Or upload something yourself - so someone will discover it in the future!\n\n' +
+                'Your Stats*:' +
+                '\nDug out: ' + (tcDugCount ? tcDugCount : 0) + ' capsules' + 
+                '\nCurrent Streak: ' + (tcDayStreak ? tcDayStreak : 0) + ' day' + (tcDayStreak == 1 ? '': 's') +
+                '\nRecord Streak: ' + (tcLongestStreak ? tcLongestStreak : 0) + ' day' + (tcLongestStreak == 1 ? '' : 's') +
+                '\nRecord Streak On: ' + tcLongestStreakDate +
+                '\n\n*saved as your browser cookie');
+        });
+        $('#get-timecapsule').addClass('btn-' + randomStyle.code).click(function (e) {
+            var self = this;
             $.ajax({
                 type: "POST",
                 url: "@Url.Action("GetTimeCapsule", "Picture")?existingId=" + (idLoadedTimecapsule ? idLoadedTimecapsule : ''),
                 success: function (data) {
-                    if (!data.TimecapsuleCount && !data.IdPicture)
-                        $('#msg-timecapsule').html('Try again later, or upload something yourself for people from the future to dig out!');
+                    // first access
+                    if (!tcDayStreak || tcDugLastDate) {
+                        tcDayStreak = 1;
+                        tcDugLastDate = new Date().toISOString().split('T')[0];
+                        tcLongestStreak = tcDayStreak;
+                        tcLongestStreakDate = tcDugLastDate;
+
+                        setCookie('tcDayStreak', tcDayStreak, 344);
+                        setCookie('tcDugLastDate', tcDugLastDate, 344);
+                        setCookie('tcLongestStreak', tcLongestStreak, 344);
+                        setCookie('tcLongestStreakDate', tcLongestStreakDate, 344);
+                    } else {
+                        // checking if i should increase the streak or reset it
+                        let today = new Date(new Date().toISOString().split('T')[0]);
+                        let other = new Date(tcDugLastDate);
+                        let diffMs = today - other;
+                        let diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+                        if (diffDays === 1) {
+                            ++tcDayStreak; // shold work even if it's a string (from a cookie)
+                            setCookie('tcDayStreak', tcDayStreak, 344);
+                            tcDugLastDate = today;
+                            setCookie('tcDugLastDate', tcDugLastDate, 344);
+
+                            // save the records
+                            if (tcDayStreak > tcLongestStreak) {
+                                tcLongestStreak = tcDayStreak;
+                                tcLongestStreakDate = tcDugLastDate;
+                                setCookie('tcLongestStreak', tcLongestStreak, 344);
+                                setCookie('tcLongestStreakDate', tcLongestStreakDate, 344);
+                            }
+                        } else if (diffDays > 1) {
+                            // reset
+                            tcDayStreak = 1;
+                            setCookie('tcDayStreak', tcDayStreak, 344);
+                            tcDugLastDate = today;
+                            setCookie('tcDugLastDate', tcDugLastDate, 344);
+                        }
+                    }
+
+                    if (!data.TimecapsuleCount && !data.IdPicture) {
+                        $('#msg-timecapsule').html('Try again later, or <a target="_blank" href="@(Url.Content("~/AddPicture"))">upload</a> something yourself for people from the future to dig out!');
+                        $(self).prop('disabled', true);
+                    }
 
                     $('#refresh-timecapsule').html('<b>' + (data.TimecapsuleCount ? data.TimecapsuleCount : 'No') +
                         '</b> more Time Capsule' + (data.TimecapsuleCount === 1? '': 's') +' can be found today.' +
-                        '<br/>Refresh in <b>' + data.RefreshTimeInfo 
+                        '<br/>Refresh in <b>' + data.RefreshTimeInfo
                     );
 
                     console.log(randomStyle.codeEx ? randomStyle.codeEx : randomStyle.code)
@@ -299,6 +359,9 @@
 
                     if (!data.IdPicture)
                         return;
+
+                    tcDugCount = (tcDugCount ? tcDugCount : 0) + 1;
+                    setCookie('tcDugCount', tcDugCount, 344);
 
                     idLoadedTimecapsule = data.IdPicture;
 
