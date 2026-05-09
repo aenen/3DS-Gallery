@@ -11,6 +11,11 @@ namespace _3dsGallery.WebUI.Models
         public int TotalImageCount { get; set; }
         public int Total3DImageCount { get; set; }
 
+        public string RandomTagline { get; set; }
+        public string RandomStyleName { get; set; }
+        public string RandomStyleValue { get; set; }
+        public string RandomStyleValueEx { get; set; }
+
         public List<GalleryModel> GalleryList { get; set; }
         public List<PictureModel> PictureList { get; set; }
     }

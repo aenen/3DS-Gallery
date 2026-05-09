@@ -1,4 +1,5 @@
 ﻿using _3dsGallery.DataLayer.DataBase;
+using _3dsGallery.WebUI.Code;
 using _3dsGallery.WebUI.Models;
 using System;
 using System.Collections.Generic;
@@ -60,6 +61,22 @@ namespace _3dsGallery.WebUI.Controllers
             model.TotalGalleryCount = db.Gallery.Where(x=>!x.IsPrivate).Count();
             model.TotalImageCount = db.Picture.Where(x=>!x.Gallery.IsPrivate).Count();
             model.Total3DImageCount = db.Picture.Where(x=>!x.Gallery.IsPrivate && x.type == "3D").Count();
+
+            int totalStyleCount = db.Style.Count();
+            Random rand = new Random();
+            int offset = rand.Next(0, totalStyleCount);
+            var randomStyle = db.Style
+                .OrderBy(x => x.id)
+                .Skip(offset)
+                .First();
+
+            model.RandomStyleName = randomStyle.name;
+            model.RandomStyleValue = randomStyle.value;
+            model.RandomStyleValueEx = randomStyle.ValueEx;
+
+            var rndTagline = MessageProvider.GetRandomMessage();
+            model.RandomTagline = MessageProvider.ReplaceDateWithDiff(rndTagline);
+            model.RandomTagline = model.RandomTagline.Replace("//style_name//", randomStyle.name);
 
             return View(model);
         }

@@ -301,6 +301,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Code\GoogleDriveManager.cs" />
+    <Compile Include="Code\MessageProvider.cs" />
     <Compile Include="Code\Only3dsAttribute.cs" />
     <Compile Include="Code\PageData.cs" />
     <Compile Include="Code\PasswordGenerator.cs" />
