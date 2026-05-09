@@ -115,6 +115,17 @@
             return "";
         }
 
+        function toIsoDate(d) {
+            return d.getFullYear() + "-" +
+                String(d.getMonth() + 1).padStart(2, "0") + "-" +
+                String(d.getDate()).padStart(2, "0");
+        }
+
+        function parseIsoDate(s) {
+            var parts = s.split("-");
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+
         var rndSbsPicClickCount = 0;
         var idLoadedTimecapsule = null;
         var tcDugCount = getCookie('tcDugCount');
@@ -165,10 +176,9 @@
                 type: "POST",
                 url: "@Url.Action("GetTimeCapsule", "Picture")?existingId=" + (idLoadedTimecapsule ? idLoadedTimecapsule : ''),
                 success: function (data) {
-                    // first access
                     if (!tcDayStreak || tcDugLastDate) {
                         tcDayStreak = 1;
-                        tcDugLastDate = new Date().toISOString().split('T')[0];
+                        tcDugLastDate = toIsoDate(new Date());
                         tcLongestStreak = tcDayStreak;
                         tcLongestStreakDate = tcDugLastDate;
 
@@ -177,19 +187,18 @@
                         setCookie('tcLongestStreak', tcLongestStreak, 344);
                         setCookie('tcLongestStreakDate', tcLongestStreakDate, 344);
                     } else {
-                        // checking if i should increase the streak or reset it
-                        let today = new Date(new Date().toISOString().split('T')[0]);
-                        let other = new Date(tcDugLastDate);
-                        let diffMs = today - other;
-                        let diffDays = diffMs / (1000 * 60 * 60 * 24);
+                        var todayStr = toIsoDate(new Date());
+                        var today = parseIsoDate(todayStr);
+                        var other = parseIsoDate(tcDugLastDate);
+                        var diffMs = today - other;
+                        var diffDays = diffMs / (1000 * 60 * 60 * 24);
 
                         if (diffDays === 1) {
-                            ++tcDayStreak; // shold work even if it's a string (from a cookie)
+                            tcDayStreak++;
                             setCookie('tcDayStreak', tcDayStreak, 344);
-                            tcDugLastDate = today;
+                            tcDugLastDate = todayStr;
                             setCookie('tcDugLastDate', tcDugLastDate, 344);
 
-                            // save the records
                             if (tcDayStreak > tcLongestStreak) {
                                 tcLongestStreak = tcDayStreak;
                                 tcLongestStreakDate = tcDugLastDate;
@@ -197,10 +206,9 @@
                                 setCookie('tcLongestStreakDate', tcLongestStreakDate, 344);
                             }
                         } else if (diffDays > 1) {
-                            // reset
                             tcDayStreak = 1;
                             setCookie('tcDayStreak', tcDayStreak, 344);
-                            tcDugLastDate = today;
+                            tcDugLastDate = todayStr;
                             setCookie('tcDugLastDate', tcDugLastDate, 344);
                         }
                     }
