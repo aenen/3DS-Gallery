@@ -1,0 +1,45 @@
+﻿@model _3dsGallery.WebUI.Models.PictureDetailsModel
+@{
+    ViewBag.Title = "Image Details";
+}
+
+<div class="section-@Model.Pic.ColorThemeName">
+    <div class="container body-content section-separator-top">
+        <div id="picture-data">
+            <div class="row">
+                @{ Html.RenderAction("GetPictureElements", "Picture", new { items = new List<_3dsGallery.WebUI.Models.PictureModel> { Model.Pic } }); }
+
+                <div class="col-lg-9 col-md-8 col-sm-6">
+                    <div class="row">
+
+                        @foreach (var comment in Model.Comments)
+                        {
+                            <div class="col-xs-12" data-id="idComment" style="display: table; width: 100%;">
+                                <div style="display: table-cell; vertical-align: top;">
+                                    <div class="comment-user-img"
+                                         style="width: 50px; height: 50px; border: 1px solid black; margin: 5px 15px; border-radius: 50%; text-align: center; font-size: 24px; line-height: 50px; overflow: hidden;">
+                                        a
+                                    </div>
+                                </div>
+                                <div class="w-100"
+                                     style="display: table-cell; vertical-align: top; width: 100%;">
+                                    <div>
+                                        <span class="comment-username" style="font-size: 17.5px; font-weight: 500;">aenen</span>
+                                        <span class="comment-date" title="@DateTime.Now.ToString()" style="font-size: 12.5px; color: #979799;">@DateTime.Now.ToShortDateString()</span>
+                                        @if ("aenen" == User.Identity.Name)
+                                        {
+                                            <a class="comment-delete text-danger icon-trashcan"></a>
+                                        }
+                                    </div>
+                                    <div class="comment-text" style="white-space: pre-line;">@comment</div>
+                                </div>
+                            </div>
+
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

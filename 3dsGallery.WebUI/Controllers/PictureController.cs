@@ -33,6 +33,41 @@ namespace _3dsGallery.WebUI.Controllers
             return View(pageData.Pictures);
         }
 
+        // GET: Pictures/Details/5
+        [Route("Pictures/{id}")]
+        public ActionResult Details(int? id)
+        {
+            if (id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var pic = db.Picture.Find(id);
+            if (pic == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            if (pic.Gallery.IsPrivate && pic.Gallery.User.login != User.Identity.Name)
+                return RedirectToAction("Index", "Home");
+
+            var modelResult = new PictureDetailsModel
+            {
+                Pic = new PictureModel
+                {
+                    IdPicture = pic.id,
+                    IdGallery = pic.galleryId,
+                    PictureDescription = pic.description,
+                    ColorThemeClass = pic.Gallery.Style.value,
+                    ColorThemeName = pic.Gallery.Style.ValueEx?? pic.Gallery.Style.value,
+                    CreatedBy = pic.Gallery.User.login,
+                    CreationDate = pic.CreationDate,
+                    Is3D = pic.type == "3D",
+                    IsLikedByMe = User.Identity.IsAuthenticated && pic.User.Any(x => x.login == User.Identity.Name),
+                    Path = pic.path,
+                    LikeCount = pic.User.Count
+                }
+            };
+
+            return View(modelResult);
+        }
+
         [Only3DS]
         [Authorize]
         [Route("AddPicture")]

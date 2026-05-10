@@ -354,6 +354,7 @@
     <Content Include="Views\Gallery\ShowPage.cshtml" />
     <Content Include="Views\Gallery\GetGalleryElements.cshtml" />
     <Content Include="Views\Picture\GetPictureElements.cshtml" />
+    <Content Include="Views\Picture\Details.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

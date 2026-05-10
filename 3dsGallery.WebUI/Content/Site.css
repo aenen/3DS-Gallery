@@ -9,9 +9,9 @@ body.menu-bottom {
     transition: padding-bottom .25s linear;
 }
 
-body.menu-bottom.menu-collapsed {
-    padding-bottom: 0;
-}
+    body.menu-bottom.menu-collapsed {
+        padding-bottom: 0;
+    }
 
     body.menu-bottom .navbar {
         min-height: 30px !important;
@@ -60,8 +60,8 @@ div.navbar {
 }
 
 #msg-timecapsule {
-    font-size:17px;
-    margin-top:10px;
+    font-size: 17px;
+    margin-top: 10px;
 }
 
 #img-timecapsule {
@@ -73,9 +73,10 @@ div.navbar {
         float: none;
     }
 
-    #img-timecapsule > [class*="col-"] .thumbnail {
-        margin-bottom: 10px;
-    }
+        #img-timecapsule > [class*="col-"] .thumbnail {
+            margin-bottom: 10px;
+        }
+
 #toggleMenuBtn {
     position: fixed;
     left: 0;
@@ -457,6 +458,7 @@ h2 {
     font-weight: bold;
     cursor: pointer;
 }
+
 .preview-container-md .menu {
     position: absolute;
     top: 0;
@@ -469,6 +471,7 @@ h2 {
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
+
     .preview-container-md .menu.active {
         background-color: rgba(255,255,255,0.9);
         color: black;
@@ -476,6 +479,7 @@ h2 {
         border-left: none;
         border-top: none;
     }
+
 .preview-container-md .menu-items {
     position: absolute;
     top: 24px;
@@ -484,6 +488,7 @@ h2 {
     cursor: pointer;
     z-index: 9;
 }
+
     .preview-container-md .menu-items > .item {
         display: block;
         width: fit-content;
@@ -532,7 +537,6 @@ h2 {
 
         .rate-container > .rate-like.glyphicon {
             font-size: 18px;
-            padding-left: 5px;
             cursor: pointer;
             line-height: 18px;
         }
@@ -541,7 +545,11 @@ h2 {
             cursor: not-allowed;
         }
 
-    .rate-container.liked {
+    .rate-container > .rate-count, .rate-container > .comment-count {
+        padding: 0 5px 0 8px;
+    }
+
+    .rate-container.liked > .rate-count, .rate-container.liked > .rate-like {
         color: rgb(255, 102, 81);
     }
 

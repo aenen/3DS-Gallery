@@ -79,6 +79,20 @@
                         string disabled = User.Identity.IsAuthenticated ? "" : "disabled";
                     }
                     <div class="rate-container @liked">
+                        @{
+                            if (User.Identity.Name == "aenen")
+                            {
+                                <span class="comment-count">67</span>
+                                if (isOld3ds)
+                                {
+                                    <a href="@Url.Action("Details", "Picture", new { id = itemPic.IdPicture })" class="comment-btn">K</a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Details", "Picture", new { id = itemPic.IdPicture })" class="comment-btn glyphicon glyphicon-comment"></a>
+                                }
+                            }
+                        }
                         <span class="rate-count">@itemPic.LikeCount</span>
                         @{
                             if (isOld3ds)
