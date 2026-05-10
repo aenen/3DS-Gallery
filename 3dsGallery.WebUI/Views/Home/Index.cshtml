@@ -232,7 +232,7 @@
                     if (!data.IdPicture)
                         return;
 
-                    tcDugCount = (tcDugCount ? tcDugCount : 0) + 1;
+                    tcDugCount = +(tcDugCount ? tcDugCount : 0) + 1;
                     setCookie('tcDugCount', tcDugCount, 344);
 
                     idLoadedTimecapsule = data.IdPicture;
