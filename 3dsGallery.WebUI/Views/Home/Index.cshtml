@@ -177,7 +177,7 @@
                 type: "POST",
                 url: "@Url.Action("GetTimeCapsule", "Picture")?existingId=" + (idLoadedTimecapsule ? idLoadedTimecapsule : ''),
                 success: function (data) {
-                    if (!tcDayStreak || tcDugLastDate) {
+                    if (!tcDayStreak || !tcDugLastDate) {
                         tcDayStreak = 1;
                         tcDugLastDate = toIsoDate(new Date());
                         tcLongestStreak = tcDayStreak;
@@ -192,7 +192,7 @@
                         var today = parseIsoDate(todayStr);
                         var other = parseIsoDate(tcDugLastDate);
                         var diffMs = today - other;
-                        var diffDays = diffMs / (1000 * 60 * 60 * 24);
+                        var diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
                         if (diffDays === 1) {
                             tcDayStreak++;
