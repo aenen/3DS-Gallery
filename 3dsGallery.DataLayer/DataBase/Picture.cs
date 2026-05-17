@@ -13,6 +13,7 @@ namespace _3dsGallery.DataLayer.DataBase
         public Picture()
         {
             User = new HashSet<User>();
+            Comments = new HashSet<PictureComment>();
         }
 
         public int id { get; set; }
@@ -38,5 +39,8 @@ namespace _3dsGallery.DataLayer.DataBase
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<User> User { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<PictureComment> Comments { get; set; }
     }
 }

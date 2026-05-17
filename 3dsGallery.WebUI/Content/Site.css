@@ -546,7 +546,7 @@ h2 {
         }
 
     .rate-container > .rate-count, .rate-container > .comment-count {
-        padding: 0 5px 0 8px;
+        padding: 0 3px 0 8px;
     }
 
     .rate-container.liked > .rate-count, .rate-container.liked > .rate-like {

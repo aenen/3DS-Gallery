@@ -62,4 +62,14 @@ namespace _3dsGallery.WebUI.Models
 
         public int leftOrRight { get; set; }
     }
+
+    public class CommentViewModel
+    {
+        [Required]
+        public int IdPicture { get; set; }
+
+        [Required]
+        [StringLength(1000)]
+        public string Text { get; set; }
+    }
 }

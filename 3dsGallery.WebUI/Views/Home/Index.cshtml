@@ -23,7 +23,6 @@
 <div id="timecapsule-section" hidden
      class="section-@(Model.RandomStyleValueEx ?? Model.RandomStyleValue) text-@Model.RandomStyleValue">
     <div class="container body-content text-center">
-        <p><b>[Under Development. Releasing May, 24 (1y public anniversary)]</b><br />[I hope you'll like this Time Capsules thingy]<br />[After this i'll finally add MOTHER FRICKING COMMENTS so you can cyberbully someone here.]</p>
         <p id="msg-timecapsule"></p>
         <div id="img-timecapsule" class="row"></div>
         <p id="refresh-timecapsule"></p>
@@ -215,13 +214,13 @@
                     }
 
                     if (!data.TimecapsuleCount && !data.IdPicture) {
-                        $('#msg-timecapsule').html('Try again later, or <a target="_blank" href="@(Url.Content("~/AddPicture"))">upload</a> something yourself for people from the future to dig out!');
+                        $('#msg-timecapsule').html('Try again in <b>' + data.RefreshTimeInfo + '</b>, or <b><a target="_blank" href="@(Url.Content("~/AddPicture"))">upload</a></b> something yourself for people from the future to dig out!');
                         $(self).prop('disabled', true);
                     }
 
                     $('#refresh-timecapsule').html('<b>' + (data.TimecapsuleCount ? data.TimecapsuleCount : 'No') +
                         '</b> more Time Capsule' + (data.TimecapsuleCount === 1? '': 's') +' can be found today.' +
-                        '<br/>Refresh in <b>' + data.RefreshTimeInfo
+                        '<br/>Refresh in <b>' + data.RefreshTimeInfo + '</b>'
                     );
 
                     $('#timecapsule-section,#timecapsule-separator').show();

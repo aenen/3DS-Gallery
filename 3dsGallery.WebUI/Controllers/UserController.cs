@@ -168,7 +168,8 @@ namespace _3dsGallery.WebUI.Controllers
                     Is3D = pic.type == "3D",
                     IsLikedByMe = User.Identity.IsAuthenticated && pic.User.Any(x => x.login == User.Identity.Name),
                     Path = pic.path,
-                    LikeCount = pic.User.Count
+                    LikeCount = pic.User.Count,
+                    CommentCount = pic.Comments.Count
                 }).ToList();
 
             model.LikeList = db.Picture
@@ -185,7 +186,8 @@ namespace _3dsGallery.WebUI.Controllers
                     Is3D = pic.type == "3D",
                     IsLikedByMe = User.Identity.IsAuthenticated && pic.User.Any(x => x.login == User.Identity.Name),
                     Path = pic.path,
-                    LikeCount = pic.User.Count
+                    LikeCount = pic.User.Count,
+                    CommentCount = pic.Comments.Count
                 }).ToList();
 
             var favStyle = db.Gallery

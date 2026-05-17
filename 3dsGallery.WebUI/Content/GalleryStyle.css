@@ -36,6 +36,11 @@
 
 /* SWEET PINK Other */
 
+/*.text-input-sweet-pink {
+    border-color: #E6ADBD !important;
+    color: #E6ADBD;
+}*/
+
 .text-sweet-pink {
     color: #BF6060;
 }
@@ -96,6 +101,11 @@
     }
 
 /* NOCTURNAL PURPLE Other */
+
+/*.text-input-nocturnal-purple {
+    border-color: #b195b1 !important;
+    color: #b195b1;
+}*/
 
 .text-nocturnal-purple {
     color: #5c3e5c;

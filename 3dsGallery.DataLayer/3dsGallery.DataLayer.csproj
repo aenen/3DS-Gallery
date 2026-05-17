@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="DataBase\Gallery.cs" />
     <Compile Include="DataBase\GalleryContext.cs" />
+    <Compile Include="DataBase\PictureComment.cs" />
     <Compile Include="DataBase\Picture.cs" />
     <Compile Include="DataBase\Style.cs" />
     <Compile Include="DataBase\User.cs" />
@@ -85,6 +86,10 @@
     <Compile Include="Migrations\202601080751432_AddIsPrivateToGallery.Designer.cs">
       <DependentUpon>202601080751432_AddIsPrivateToGallery.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202605171209598_AddPictureComments.cs" />
+    <Compile Include="Migrations\202605171209598_AddPictureComments.Designer.cs">
+      <DependentUpon>202605171209598_AddPictureComments.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\IEnumerableExtensions.cs" />
@@ -115,6 +120,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202601080751432_AddIsPrivateToGallery.resx">
       <DependentUpon>202601080751432_AddIsPrivateToGallery.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605171209598_AddPictureComments.resx">
+      <DependentUpon>202605171209598_AddPictureComments.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

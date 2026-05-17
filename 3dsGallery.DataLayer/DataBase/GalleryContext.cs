@@ -16,6 +16,7 @@ namespace _3dsGallery.DataLayer.DataBase
         public virtual DbSet<Picture> Picture { get; set; }
         public virtual DbSet<Style> Style { get; set; }
         public virtual DbSet<User> User { get; set; }
+        public virtual DbSet<PictureComment> PictureComments { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -38,6 +39,19 @@ namespace _3dsGallery.DataLayer.DataBase
                 .HasMany(e => e.Gallery)
                 .WithRequired(e => e.User)
                 .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<PictureComment>()
+                .HasRequired(pc => pc.Picture)
+                .WithMany(p => p.Comments)
+                .HasForeignKey(pc => pc.IdPicture)
+                .WillCascadeOnDelete(true); 
+
+            modelBuilder.Entity<PictureComment>()
+                .HasRequired(pc => pc.CreatedBy)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(pc => pc.IdUser)
+                .WillCascadeOnDelete(false);
+
         }
     }
 }

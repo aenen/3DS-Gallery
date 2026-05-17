@@ -61,8 +61,16 @@ namespace _3dsGallery.WebUI.Controllers
                     Is3D = pic.type == "3D",
                     IsLikedByMe = User.Identity.IsAuthenticated && pic.User.Any(x => x.login == User.Identity.Name),
                     Path = pic.path,
-                    LikeCount = pic.User.Count
-                }
+                    LikeCount = pic.User.Count,
+                    CommentCount = pic.Comments.Count
+                },
+                Comments = pic.Comments.Select(x=> new PictureCommentModel
+                {
+                    CommentDesc = x.CommentDesc,
+                    CreationDate = x.CreationDate,
+                    Username = x.CreatedBy.login,
+                    IdComment = x.IdComment
+                }).ToList()
             };
 
             return View(modelResult);
@@ -179,6 +187,31 @@ namespace _3dsGallery.WebUI.Controllers
             return Json(item.User.Count);
         }
 
+
+
+        [Authorize]
+        [HttpPost]
+        public ActionResult AddComment(CommentViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var user = db.User.Where(x => x.login == User.Identity.Name).First();
+            var picture = db.Picture.First(x => x.id == model.IdPicture);
+            picture.Comments.Add(new PictureComment
+            {
+                CommentDesc = model.Text,
+                CreationDate = DateTime.Now,
+                CreatedBy = user
+            });
+
+            db.SaveChanges();
+
+            return Json("ok");
+        }
+
         [HttpPost]
         public ActionResult Random()
         {
@@ -292,6 +325,19 @@ namespace _3dsGallery.WebUI.Controllers
             return Json("ok");
         }
 
+        [Authorize]
+        [HttpPost]
+        public ActionResult DeleteComment(int id)
+        {
+            var pictureComments = db.PictureComments.First(x => x.IdComment == id);
+            if(pictureComments.CreatedBy.login != User.Identity.Name)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            db.PictureComments.Remove(pictureComments);
+            db.SaveChanges();
+            return Json("ok");
+        }
+
 
         [Authorize]
         [HttpPost]
@@ -345,8 +391,9 @@ namespace _3dsGallery.WebUI.Controllers
                 Is3D = pic.type == "3D",
                 IsLikedByMe = User.Identity.IsAuthenticated && pic.User.Any(x => x.login == User.Identity.Name),
                 Path = pic.path,
-                LikeCount = pic.User.Count
-            }).ToList();
+                LikeCount = pic.User.Count,
+                    CommentCount = pic.Comments.Count
+                }).ToList();
 
             TempData["items"] = picModel;
             return RedirectToAction("GetPictureElements", "Picture");

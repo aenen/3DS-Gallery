@@ -1,6 +1,7 @@
 ﻿@model _3dsGallery.WebUI.Models.PictureDetailsModel
 @{
     ViewBag.Title = "Image Details";
+    bool isOld3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
 }
 
 <div class="section-@Model.Pic.ColorThemeName">
@@ -12,30 +13,58 @@
                 <div class="col-lg-9 col-md-8 col-sm-6">
                     <div class="row">
 
-                        @foreach (var comment in Model.Comments)
+                        <h3 class="col-xs-12 text-@Model.Pic.ColorThemeClass">Comments <span id="commentsCounter">(@Model.Comments.Count)</span></h3>
+                        @if (User.Identity.IsAuthenticated)
                         {
-                            <div class="col-xs-12" data-id="idComment" style="display: table; width: 100%;">
+                            <form id="formComment" action="@Url.Action("AddComment", "Picture")" method="post">
+                                <input type="hidden" name="IdPicture" value="@Model.Pic.IdPicture" />
+                                <div class="col-xs-12" style="display: table; width: 100%;">
+                                    <div style="display: table-cell; vertical-align: top;">
+                                        <div class="comment-user-img"
+                                             style="width: 50px; height: 50px; border: 1px solid #979799; margin: 5px 15px 5px 0; border-radius: 50%; text-align: center; font-size: 24px; line-height: 50px; overflow: hidden;">
+                                            @User.Identity.Name.First()
+                                        </div>
+                                    </div>
+                                    <div style="display: table-cell; vertical-align: top; width: 100%;">
+                                        <div class="comment-textarea">
+                                            <textarea rows="2" class="form-control text-@Model.Pic.ColorThemeClass" maxlength="150" name="Text" placeholder="" style="resize: none; min-width: 100%"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="formSelect" class="col-xs-12" style="text-align: right;">
+                                    <button id="addComment" type="button" class="btn btn-@Model.Pic.ColorThemeClass">Send</button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="col-xs-12 panel-@Model.Pic.ColorThemeClass text-center" style="background-color: white; padding: 5px; border-width: 2px; border-style: dashed; margin-bottom: 10px"><b><a href="@Url.Action("Login","User")">Login</a></b> to comment</div>
+                        }
+
+
+                        @foreach (var comment in Model.Comments.OrderByDescending(x=>x.CreationDate))
+                        {
+                            <div class="col-xs-12"  style="display: table; width: 100%;">
                                 <div style="display: table-cell; vertical-align: top;">
                                     <div class="comment-user-img"
-                                         style="width: 50px; height: 50px; border: 1px solid black; margin: 5px 15px; border-radius: 50%; text-align: center; font-size: 24px; line-height: 50px; overflow: hidden;">
-                                        a
+                                         style="width: 50px; height: 50px; border: 1px solid #979799; margin: 5px 15px 5px 0; border-radius: 50%; text-align: center; font-size: 24px; line-height: 50px; overflow: hidden;">
+                                        @comment.Username.First()
                                     </div>
                                 </div>
-                                <div class="w-100"
-                                     style="display: table-cell; vertical-align: top; width: 100%;">
+                                <div style="display: table-cell; vertical-align: top; width: 100%;">
                                     <div>
-                                        <span class="comment-username" style="font-size: 17.5px; font-weight: 500;">aenen</span>
-                                        <span class="comment-date" title="@DateTime.Now.ToString()" style="font-size: 12.5px; color: #979799;">@DateTime.Now.ToShortDateString()</span>
-                                        @if ("aenen" == User.Identity.Name)
+                                        <span class="comment-username" style="font-size: 17.5px; font-weight: 500;">@comment.Username</span>
+                                        <span class="comment-date" title="@comment.CreationDate.ToString()" style="font-size: 12.5px; color: #979799;">@comment.CreationDate.ToShortDateString()</span>
+                                        @if (@comment.Username == User.Identity.Name)
                                         {
-                                            <a class="comment-delete text-danger icon-trashcan"></a>
+                                            string deleteBtnCode = !isOld3ds ? "<span class=\"glyphicon glyphicon-remove\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/remove.png\" />";
+
+                                            <button class="comment-delete btn btn-danger" data-id="@comment.IdComment" style="padding: 0 5px; width: 25px; height: 25px; font-size: 12px; line-height: 1.5;">@Html.Raw(deleteBtnCode)</button>
                                         }
                                     </div>
-                                    <div class="comment-text" style="white-space: pre-line;">@comment</div>
+                                    <div class="comment-text" style="white-space: pre-line; word-wrap: break-word; ">@comment.CommentDesc</div>
                                 </div>
                             </div>
-
-
                         }
                     </div>
                 </div>
@@ -43,3 +72,38 @@
         </div>
     </div>
 </div>
+@section scripts{
+    @RenderPage("~/Views/Shared/MainScripts.cshtml")
+<script>
+        initImg();
+        $("#addComment").click(function (e) {
+            var frm = $("#formComment");
+            $.ajax({
+                type: frm.attr('method'),
+                url: frm.attr('action'),
+                data: frm.serialize(),
+                success: function (data) {
+                    location.reload(true);
+                },
+                error: function (data) {
+                    alert("An error occurred.\nMaybe you've entered too many words.\nMax comment length is 150 symbols.");
+                },
+            });
+        });
+
+    $(".comment-delete").not("[data-init]").each(function () {
+        $(this).attr("data-init", "true").click(function (e) {
+            if (!confirm('This comment will be deleted. OK?')) return;
+
+            var id = $(this).attr("data-id");
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("DeleteComment", "Picture")/" + id,
+                success: function (data) {
+                    location.reload(true);
+                }
+            });
+        });
+    });
+</script>
+}
