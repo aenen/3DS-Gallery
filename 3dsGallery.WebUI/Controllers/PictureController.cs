@@ -338,7 +338,6 @@ namespace _3dsGallery.WebUI.Controllers
             return Json("ok");
         }
 
-
         [Authorize]
         [HttpPost]
         public ActionResult EditComment(int id, string comment)

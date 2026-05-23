@@ -42,6 +42,8 @@
                     <img id="loading" src="~/Content/loading_black.gif" hidden />
                 }
             </h2>
+            
+            <h5>by <a href="~/User/@Model.Gallery.User.login"><i>@Model.Gallery.User.login</i></a></h5>
         </div>
         <p class="gallery-desc">@Model.Gallery.info</p>
         @if (Model.Gallery.User.login == User.Identity.Name)
