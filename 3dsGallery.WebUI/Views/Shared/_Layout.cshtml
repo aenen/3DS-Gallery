@@ -35,7 +35,7 @@
                 string homeCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-home\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/home.png\" />";
                 string userCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-user\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/user.png\" />";
                 string loginCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-log-in\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/log-in.png\" />";
-                string logoutCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-log-out text-danger\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/log-out-red.png\" />";
+                //string logoutCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-log-out text-danger\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/log-out-red.png\" />";
                 string gallCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-blackboard text-success\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/blackboard.png\" />";
                 string picCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-picture text-info\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/picture.png\" />";
             }
@@ -49,7 +49,7 @@
                     if (User.Identity.IsAuthenticated)
                     {
                         <li><a href="@Url.Action("MyProfile", "User")">@Html.Raw(userCode)<span class="collapsible"> Profile</span></a></li>
-                        <li><a href="@Url.Action("Logout", "User")">@Html.Raw(logoutCode)<span class="collapsible"> Log Out</span></a></li>
+                        @*<li><a href="@Url.Action("Logout", "User")">@Html.Raw(logoutCode)<span class="collapsible"> Log Out</span></a></li>*@
 
                     }
                     else

@@ -553,6 +553,10 @@ h2 {
         color: rgb(255, 102, 81);
     }
 
+.settings-btn-wrapper {
+    margin-bottom: 20px;
+}
+
 .gallery-info {
     text-align: center;
     border-top: dashed;
@@ -667,6 +671,15 @@ footer {
             padding-left: 10px;
             text-decoration: none;
         }
+
+.profile-bio {
+    overflow-wrap: break-word;
+    padding: 10px 0 0 0;
+    border-top: dashed;
+    border-top-width: 2px;
+    border-radius: 0;
+    border-color: #ddd;
+}
 
 .file-input-row > input {
     display: inline-block;

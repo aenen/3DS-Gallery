@@ -69,6 +69,43 @@ namespace _3dsGallery.WebUI.Controllers
             return View(model);
         }
 
+        // GET: User
+        [Authorize]
+        [Route("User/MySettings")]
+        public ActionResult MySettings()
+        {
+            var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
+            if (user == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var result = new UserInfoView
+            {
+                Bio = user.Bio
+            };
+
+            return View(result);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("User/MySettings")]
+        public ActionResult MySettings(UserInfoView model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
+            if (user == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            user.Bio = model.Bio.Trim();
+            db.SaveChanges();
+
+            return RedirectToAction("UserProfile", new { login = User.Identity.Name });
+        }
+
         [Route("Login")]
         public ActionResult Login()
         {
@@ -198,6 +235,7 @@ namespace _3dsGallery.WebUI.Controllers
                 .FirstOrDefault();
 
             model.FavColorCss = favStyle?.Item.value ?? "default";
+            model.Bio = user.Bio;
 
             return View(model);
         }

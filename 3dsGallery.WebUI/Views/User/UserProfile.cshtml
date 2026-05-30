@@ -16,10 +16,10 @@
             </div>
             <div class="profile-stat text-center">
                 @{
-                string gallCode = !is3ds ? "<span class=\"glyphicon glyphicon-blackboard\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/blackboard.png\" />";
-                string picCode = !is3ds ? "<span class=\"glyphicon glyphicon-picture\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/picture.png\" />";
-                string likeCode = !is3ds ? "<span class=\"glyphicon glyphicon-heart\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/heart.png\" />";
-            }
+                    string gallCode = !is3ds ? "<span class=\"glyphicon glyphicon-blackboard\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/blackboard.png\" />";
+                    string picCode = !is3ds ? "<span class=\"glyphicon glyphicon-picture\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/picture.png\" />";
+                    string likeCode = !is3ds ? "<span class=\"glyphicon glyphicon-heart\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/heart.png\" />";
+                }
                 <a href="@Url.Action("Galleries", "User", new { login = Model.UserName })" class="text-success">
                     @Html.Raw(gallCode) @Model.TotalGalleryCount
                 </a>
@@ -30,6 +30,13 @@
                     @Html.Raw(likeCode) @Model.TotalLikesCount
                 </a>
             </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Bio))
+            {
+                <h5 class="profile-bio">
+                    @Model.Bio
+                </h5>
+            }
         </div>
 
         <ul class="nav nav-tabs no-border" id="myTab" role="tablist">
@@ -42,6 +49,13 @@
             <li class="nav-item">
                 <a class="nav-link" id="like-tab" data-toggle="tab" href="#like" role="tab" aria-controls="like">Likes</a>
             </li>
+            @if (Model.IsItMe)
+            {
+                string cogCode = !is3ds ? "<span class=\"glyphicon glyphicon-cog\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/cog.png\" />";
+                <li class="nav-item">
+                    <a class="nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings">@Html.Raw(cogCode)</a>
+                </li>
+            }
         </ul>
     </div>
 </div>
@@ -58,8 +72,8 @@
                             <a href="@Url.Action("Create", "Gallery")" class="btn btn-success">Create New</a>
                         </div>
                     }
-                    @{ 
-                        Html.RenderAction("GetGalleryElements", "Gallery", new { items= Model.GalleryList });
+                    @{
+                        Html.RenderAction("GetGalleryElements", "Gallery", new { items = Model.GalleryList });
                     }
                 </div>
                 @{
@@ -79,7 +93,7 @@
                             <a href="@Url.Action("AddPicture", "Picture")" class="btn btn-info">Add New</a>
                         </div>
                     }
-                    @{ 
+                    @{
                         Html.RenderAction("GetPictureElements", "Picture", new { items = Model.PictureList });
                     }
                 </div>
@@ -107,6 +121,17 @@
                     }
                 }
             </div>
+            @if (Model.IsItMe)
+            {
+                <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                    <div class="settings-btn-wrapper">
+                        <a href="@Url.Action("MySettings", "User")" class="btn btn-default">Change My Settings</a>
+                    </div>
+                    <div class="settings-btn-wrapper">
+                        <a href="@Url.Action("Logout", "User")" class="btn btn-danger">Log Out</a>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>

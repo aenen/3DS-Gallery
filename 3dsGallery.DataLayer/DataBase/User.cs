@@ -29,6 +29,10 @@ namespace _3dsGallery.DataLayer.DataBase
 
         public int Iterations { get; set; }
 
+        // personalization:
+        [StringLength(150)]
+        public string Bio { get; set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Gallery> Gallery { get; set; }
 

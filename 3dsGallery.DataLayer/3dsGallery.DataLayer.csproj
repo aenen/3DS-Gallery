@@ -90,6 +90,10 @@
     <Compile Include="Migrations\202605171209598_AddPictureComments.Designer.cs">
       <DependentUpon>202605171209598_AddPictureComments.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202605300747444_UserBio.cs" />
+    <Compile Include="Migrations\202605300747444_UserBio.Designer.cs">
+      <DependentUpon>202605300747444_UserBio.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\IEnumerableExtensions.cs" />
@@ -123,6 +127,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202605171209598_AddPictureComments.resx">
       <DependentUpon>202605171209598_AddPictureComments.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605300747444_UserBio.resx">
+      <DependentUpon>202605300747444_UserBio.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

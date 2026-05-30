@@ -72,4 +72,10 @@ namespace _3dsGallery.WebUI.Models
         [StringLength(1000)]
         public string Text { get; set; }
     }
+
+    public class UserInfoView
+    {
+        [StringLength(150)]
+        public string Bio { get; set; }
+    }
 }
