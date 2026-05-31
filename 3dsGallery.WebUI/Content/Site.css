@@ -283,8 +283,8 @@ h2 {
 
 .btn-add {
     font-weight: 700;
-    margin-right: 5px;
-    padding: 0 7px;
+    margin-right: 3px;
+    padding: 0 4px;
     line-height: 0;
     font-size: 15px;
     display: inline;
@@ -679,6 +679,11 @@ footer {
     border-top-width: 2px;
     border-radius: 0;
     border-color: #ddd;
+}
+
+.comment-username{
+    color: #333 !important;
+    text-decoration: underline;
 }
 
 .file-input-row > input {

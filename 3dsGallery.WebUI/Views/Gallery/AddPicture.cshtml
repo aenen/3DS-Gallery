@@ -1,7 +1,7 @@
 ﻿@model _3dsGallery.WebUI.Models.AddPictureModel
 
 @{
-    ViewBag.Title = "Add image to the gallery";
+    ViewBag.Title = "Add an image to the gallery";
 
     bool isOld3ds =  Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
     string deleteBtnCode = !isOld3ds ? "<span class=\"glyphicon glyphicon-remove\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/remove.png\" />";
@@ -9,8 +9,9 @@
 
 <div class="section-white">
     <div class="container body-content">
-        <h2>Add <span class="text-info">Image</span></h2>
-        <h5>To "<span class="text-@Model.Gallery.Style.value">@Model.Gallery.name</span>"</h5>
+        <h2>Add an <span class="text-info">Image</span></h2>
+        <h4>To "<span class="text-@Model.Gallery.Style.value">@Model.Gallery.name</span>"</h4>
+        <h5><a href="@Url.Action("Details", "Gallery", new { id = Model.Gallery.id })"><i>← back to gallery</i></a></h5>
     </div>
 </div>
 

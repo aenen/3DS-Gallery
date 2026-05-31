@@ -62,7 +62,8 @@ namespace _3dsGallery.WebUI.Controllers
                     IsLikedByMe = User.Identity.IsAuthenticated && pic.User.Any(x => x.login == User.Identity.Name),
                     Path = pic.path,
                     LikeCount = pic.User.Count,
-                    CommentCount = pic.Comments.Count
+                    CommentCount = pic.Comments.Count,
+                    GalleryName = pic.Gallery.name
                 },
                 Comments = pic.Comments.Select(x=> new PictureCommentModel
                 {

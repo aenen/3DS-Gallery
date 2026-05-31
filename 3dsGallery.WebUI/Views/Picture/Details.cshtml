@@ -4,69 +4,81 @@
     bool isOld3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
 }
 
+
+<div class="section-white">
+    <div class="container body-content section-separator-bottom">
+        <div class="h2-container" style="margin-bottom: 0">
+            <h2 class="gallery-name">
+                From "<a class="text-@Model.Pic.ColorThemeClass" href="@Url.Action("Details", "Gallery", new { id = Model.Pic.IdGallery })">@Model.Pic.GalleryName</a>"
+            </h2>
+
+            <h5>by <a href="~/User/@Model.Pic.CreatedBy"><i>@Model.Pic.CreatedBy</i></a></h5>
+        </div>
+    </div>
+</div>
+
 <div class="section-@Model.Pic.ColorThemeName">
-    <div class="container body-content section-separator-top">
-        <div id="picture-data">
-            <div class="row">
-                @{ Html.RenderAction("GetPictureElements", "Picture", new { items = new List<_3dsGallery.WebUI.Models.PictureModel> { Model.Pic } }); }
+    <div class="container body-content section-separator-top" style="padding-bottom: 20px">
+        <div class="row">
+            @{ Html.RenderAction("GetPictureElements", "Picture", new { items = new List<_3dsGallery.WebUI.Models.PictureModel> { Model.Pic } }); }
 
-                <div class="col-lg-9 col-md-8 col-sm-6">
-                    <div class="row">
-
-                        <h3 class="col-xs-12 text-@Model.Pic.ColorThemeClass">Comments <span id="commentsCounter">(@Model.Comments.Count)</span></h3>
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <form id="formComment" action="@Url.Action("AddComment", "Picture")" method="post">
-                                <input type="hidden" name="IdPicture" value="@Model.Pic.IdPicture" />
-                                <div class="col-xs-12" style="display: table; width: 100%;">
-                                    <div style="display: table-cell; vertical-align: top;">
-                                        <div class="comment-user-img"
-                                             style="width: 50px; height: 50px; border: 1px solid #979799; margin: 5px 15px 5px 0; border-radius: 50%; text-align: center; font-size: 24px; line-height: 50px; overflow: hidden;">
-                                            @User.Identity.Name.First()
-                                        </div>
-                                    </div>
-                                    <div style="display: table-cell; vertical-align: top; width: 100%;">
-                                        <div class="comment-textarea">
-                                            <textarea rows="2" class="form-control text-@Model.Pic.ColorThemeClass" maxlength="150" name="Text" placeholder="" style="resize: none; min-width: 100%"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="formSelect" class="col-xs-12" style="text-align: right;">
-                                    <button id="addComment" type="button" class="btn btn-@Model.Pic.ColorThemeClass">Send</button>
-                                </div>
-                            </form>
-                        }
-                        else
-                        {
-                            <div class="col-xs-12 panel-@Model.Pic.ColorThemeClass text-center" style="background-color: white; padding: 5px; border-width: 2px; border-style: dashed; margin-bottom: 10px"><b><a href="@Url.Action("Login","User")">Login</a></b> to comment</div>
-                        }
-
-
-                        @foreach (var comment in Model.Comments.OrderByDescending(x=>x.CreationDate))
-                        {
-                            <div class="col-xs-12"  style="display: table; width: 100%;">
+            <div class="col-lg-9 col-md-8 col-sm-6">
+                <div class="row">
+                    <h3 class="col-xs-12 text-@Model.Pic.ColorThemeClass" style="margin-top: 0">Comments <span id="commentsCounter">(@Model.Comments.Count)</span></h3>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <form id="formComment" action="@Url.Action("AddComment", "Picture")" method="post">
+                            <input type="hidden" name="IdPicture" value="@Model.Pic.IdPicture" />
+                            <div class="col-xs-12" style="display: table; width: 100%;">
                                 <div style="display: table-cell; vertical-align: top;">
+                                    <div class="comment-user-img"
+                                         style="width: 50px; height: 50px; border: 1px solid #979799; margin: 5px 15px 5px 0; border-radius: 50%; text-align: center; font-size: 24px; line-height: 50px; overflow: hidden;">
+                                        @User.Identity.Name.First()
+                                    </div>
+                                </div>
+                                <div style="display: table-cell; vertical-align: top; width: 100%;">
+                                    <div class="comment-textarea">
+                                        <textarea rows="2" class="form-control text-@Model.Pic.ColorThemeClass" maxlength="150" name="Text" placeholder="" style="resize: none; min-width: 100%"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="formSelect" class="col-xs-12" style="text-align: right;">
+                                <button id="addComment" type="button" class="btn btn-@Model.Pic.ColorThemeClass">Send</button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="col-xs-12 panel-@Model.Pic.ColorThemeClass text-center" style="background-color: white; padding: 5px; border-width: 2px; border-style: dashed; margin-bottom: 10px"><b><a href="@Url.Action("Login","User")">Login</a></b> to comment</div>
+                    }
+
+
+                    @foreach (var comment in Model.Comments.OrderByDescending(x => x.CreationDate))
+                    {
+                        <div class="col-xs-12" style="display: table; width: 100%; margin-top: 10px;">
+                            <div style="display: table-cell; vertical-align: top;">
+                                <a href="~/User/@comment.Username" style="color: #333">
                                     <div class="comment-user-img"
                                          style="width: 50px; height: 50px; border: 1px solid #979799; margin: 5px 15px 5px 0; border-radius: 50%; text-align: center; font-size: 24px; line-height: 50px; overflow: hidden;">
                                         @comment.Username.First()
                                     </div>
-                                </div>
-                                <div style="display: table-cell; vertical-align: top; width: 100%;">
-                                    <div>
-                                        <span class="comment-username" style="font-size: 17.5px; font-weight: 500;">@comment.Username</span>
-                                        <span class="comment-date" title="@comment.CreationDate.ToString()" style="font-size: 12.5px; color: #979799;">@comment.CreationDate.ToShortDateString()</span>
-                                        @if (@comment.Username == User.Identity.Name)
-                                        {
-                                            string deleteBtnCode = !isOld3ds ? "<span class=\"glyphicon glyphicon-remove\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/remove.png\" />";
-
-                                            <button class="comment-delete btn btn-danger" data-id="@comment.IdComment" style="padding: 0 5px; width: 25px; height: 25px; font-size: 12px; line-height: 1.5;">@Html.Raw(deleteBtnCode)</button>
-                                        }
-                                    </div>
-                                    <div class="comment-text" style="white-space: pre-line; word-wrap: break-word; ">@comment.CommentDesc</div>
-                                </div>
+                                </a>
                             </div>
-                        }
-                    </div>
+                            <div style="display: table-cell; vertical-align: top; width: 100%">
+                                <div>
+                                    <a href="~/User/@comment.Username" class="comment-username" style="font-size: 17.5px; font-weight: 500;">@comment.Username</a>
+                                    <span class="comment-date" style="font-size: 12.5px; color: #979799;">@comment.CreationDate.ToString()</span>
+                                    @if (@comment.Username == User.Identity.Name)
+                                    {
+                                        string deleteBtnCode = !isOld3ds ? "<span class=\"glyphicon glyphicon-remove\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/remove.png\" />";
+
+                                        <button class="comment-delete btn btn-danger" data-id="@comment.IdComment" style="padding: 0 5px; width: 25px; height: 25px; font-size: 12px; line-height: 1.5;">@Html.Raw(deleteBtnCode)</button>
+                                    }
+                                </div>
+                                <div class="comment-text" style="white-space: pre-line; word-wrap: break-word; ">@comment.CommentDesc</div>
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -74,7 +86,7 @@
 </div>
 @section scripts{
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
-<script>
+    <script>
         initImg();
         $("#addComment").click(function (e) {
             var frm = $("#formComment");
@@ -105,5 +117,5 @@
             });
         });
     });
-</script>
+    </script>
 }

@@ -10,6 +10,7 @@ namespace _3dsGallery.WebUI.Models
         public int IdPicture { get; set; }
         public short IdGallery { get; set; }
         public string PictureDescription { get; set; }
+        public string GalleryName { get; set; }
         public string Path { get; set; }
         public string ColorThemeName { get; set; }
         public string ColorThemeClass { get; set; }
