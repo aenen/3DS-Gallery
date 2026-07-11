@@ -21,7 +21,7 @@ namespace _3dsGallery.WebUI.Controllers
         private readonly GalleryContext db = new GalleryContext();
 
         //GET: Pictures
-        [Route("Pictures")] 
+        [Route("Pictures")]
         public ActionResult Index(int page = 1, string filter = "new")
         {
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
@@ -55,7 +55,7 @@ namespace _3dsGallery.WebUI.Controllers
                     IdGallery = pic.galleryId,
                     PictureDescription = pic.description,
                     ColorThemeClass = pic.Gallery.Style.value,
-                    ColorThemeName = pic.Gallery.Style.ValueEx?? pic.Gallery.Style.value,
+                    ColorThemeName = pic.Gallery.Style.ValueEx ?? pic.Gallery.Style.value,
                     CreatedBy = pic.Gallery.User.login,
                     CreationDate = pic.CreationDate,
                     Is3D = pic.type == "3D",
@@ -65,13 +65,14 @@ namespace _3dsGallery.WebUI.Controllers
                     CommentCount = pic.Comments.Count,
                     GalleryName = pic.Gallery.name
                 },
-                Comments = pic.Comments.Select(x=> new PictureCommentModel
+                Comments = pic.Comments.Select(x => new PictureCommentModel
                 {
                     CommentDesc = x.CommentDesc,
                     CreationDate = x.CreationDate,
                     Username = x.CreatedBy.login,
                     IdComment = x.IdComment
-                }).ToList()
+                }).ToList(),
+                LikedByUsers = pic.User.Select(x => x.login).ToList()
             };
 
             return View(modelResult);
@@ -166,6 +167,7 @@ namespace _3dsGallery.WebUI.Controllers
                 return RedirectToAction("Details", "Gallery", new { id = model.galleryId });
 
         }
+
         [Authorize]
         [HttpPost]
         public ActionResult Like(int? id)
@@ -174,21 +176,55 @@ namespace _3dsGallery.WebUI.Controllers
             if (item == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            User user = db.User.Where(x => x.login == User.Identity.Name).First();
-            if (user.Picture.Any(x => x == item))
+            User user = db.User.First(x => x.login == User.Identity.Name);
+
+            bool alreadyLiked = user.Picture.Any(x => x == item);
+
+            if (alreadyLiked)
             {
+                // Unlike
                 item.User.Remove(user);
+
+                // сповіщення іДі нахуй
+                var notif = db.Notification
+                    .FirstOrDefault(n =>
+                        n.IdUser == item.Gallery.userId &&
+                        n.Type == "Like" &&
+                        n.RelatedEntityId == item.id &&
+                        n.IdUserActor == user.id);
+
+                if (notif != null)
+                {
+                    db.Notification.Remove(notif);
+                }
             }
             else
             {
+                // Like
                 item.User.Add(user);
+
+                // сповідення іДі
+                if (user.id != item.Gallery.userId)
+                {
+                    var notification = new Notification
+                    {
+                        IdUser = item.Gallery.userId,
+                        IdUserActor = user.id,
+                        Type = "Like",
+                        Message = $"{user.login} liked your picture from '" + item.Gallery.name + "'",
+                        RelatedEntityId = item.id,
+                        IsRead = false,
+                        CreationDate = DateTime.Now
+                    };
+
+                    db.Notification.Add(notification);
+                }
             }
+
             db.SaveChanges();
 
             return Json(item.User.Count);
         }
-
-
 
         [Authorize]
         [HttpPost]
@@ -199,19 +235,41 @@ namespace _3dsGallery.WebUI.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            var user = db.User.Where(x => x.login == User.Identity.Name).First();
+            var user = db.User.First(x => x.login == User.Identity.Name);
             var picture = db.Picture.First(x => x.id == model.IdPicture);
-            picture.Comments.Add(new PictureComment
+
+            var comment = new PictureComment
             {
                 CommentDesc = model.Text,
                 CreationDate = DateTime.Now,
                 CreatedBy = user
-            });
+            };
+
+            picture.Comments.Add(comment);
 
             db.SaveChanges();
 
+            // +1 сповіщення
+            if (user.id != picture.Gallery.userId)
+            {
+                var notification = new Notification
+                {
+                    IdUser = picture.Gallery.userId,
+                    IdUserActor = user.id,
+                    Type = "Comment",
+                    Message = $"{user.login} commented on your picture from '" + picture.Gallery.name + "'",
+                    RelatedEntityId = picture.id,
+                    IsRead = false,
+                    CreationDate = DateTime.Now
+                };
+
+                db.Notification.Add(notification);
+                db.SaveChanges();
+            }
+
             return Json("ok");
         }
+
 
         [HttpPost]
         public ActionResult Random()
@@ -247,7 +305,7 @@ namespace _3dsGallery.WebUI.Controllers
                 .OrderBy(x => x.id);
 
             int timeCapsulesCount = timeCapsulesQuery.Count();
-            if (timeCapsulesCount == 0) 
+            if (timeCapsulesCount == 0)
                 return Json(result);
 
             Random rand = new Random();
@@ -330,12 +388,37 @@ namespace _3dsGallery.WebUI.Controllers
         [HttpPost]
         public ActionResult DeleteComment(int id)
         {
-            var pictureComments = db.PictureComments.First(x => x.IdComment == id);
-            if(pictureComments.CreatedBy.login != User.Identity.Name)
+            var pictureComment = db.PictureComments
+                .Include(c => c.Picture)
+                .Include(c => c.CreatedBy)
+                .FirstOrDefault(x => x.IdComment == id);
+
+            if (pictureComment == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            db.PictureComments.Remove(pictureComments);
+            if (pictureComment.CreatedBy.login != User.Identity.Name)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+
+            var recipientId = pictureComment.Picture.Gallery.userId;   // picture owner
+            var actorId = pictureComment.CreatedBy.id;           // commenter
+            var notif = db.Notification.FirstOrDefault(n =>
+                n.IdUser == recipientId &&
+                n.Type == "Comment" &&
+                n.RelatedEntityId == pictureComment.Picture.id &&
+                n.IdUserActor == actorId);
+
+            if (notif != null)
+            {
+                // сповіщення іДі нахуй
+                db.Notification.Remove(notif);
+            }
+
+            // камєнт іДі нахуй
+            db.PictureComments.Remove(pictureComment);
+
             db.SaveChanges();
+
             return Json("ok");
         }
 
@@ -381,17 +464,17 @@ namespace _3dsGallery.WebUI.Controllers
                 .Where(x => !x.Gallery.IsPrivate && x.id == id)
                 .Take(1)
                 .Select(pic => new PictureModel
-            {
-                IdPicture = pic.id,
-                IdGallery = pic.galleryId,
-                PictureDescription = pic.description,
-                ColorThemeClass = pic.Gallery.Style.value,
-                CreatedBy = pic.Gallery.User.login,
-                CreationDate = pic.CreationDate,
-                Is3D = pic.type == "3D",
-                IsLikedByMe = User.Identity.IsAuthenticated && pic.User.Any(x => x.login == User.Identity.Name),
-                Path = pic.path,
-                LikeCount = pic.User.Count,
+                {
+                    IdPicture = pic.id,
+                    IdGallery = pic.galleryId,
+                    PictureDescription = pic.description,
+                    ColorThemeClass = pic.Gallery.Style.value,
+                    CreatedBy = pic.Gallery.User.login,
+                    CreationDate = pic.CreationDate,
+                    Is3D = pic.type == "3D",
+                    IsLikedByMe = User.Identity.IsAuthenticated && pic.User.Any(x => x.login == User.Identity.Name),
+                    Path = pic.path,
+                    LikeCount = pic.User.Count,
                     CommentCount = pic.Comments.Count
                 }).ToList();
 
@@ -417,7 +500,7 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult ShowPage(int? gallery, string user, int page = 1, string filter = "new", bool user_likes = false)
         {
             bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
-            PicturePageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetPictruresByPage(gallery,user,user_likes);
+            PicturePageData pageData = new PageData(page, filter, is3ds, User.Identity.Name).GetPictruresByPage(gallery, user, user_likes);
             ViewBag.Page = page;
             ViewBag.Filter = filter;
             ViewBag.Pages = pageData.TotalPages;

@@ -96,6 +96,21 @@ div.navbar {
     transition: opacity .25s linear;
 }
 
+.glyphicon-bell, .img-glyphicon {
+    position: relative; /* ensures the badge can be positioned relative to the icon */
+}
+
+.notification-badge {
+    position: absolute;
+    top: 5px; /* adjust to fine-tune placement */
+    right: 0px;
+    background: #CF181F;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 5px;
+    font-size: 12px;
+}
+
 /* Set padding to keep content from hitting the edges */
 .body-content {
     padding-left: 15px;

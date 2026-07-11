@@ -15,6 +15,7 @@ namespace _3dsGallery.DataLayer.DataBase
             Gallery = new HashSet<Gallery>();
             Picture = new HashSet<Picture>();
             Comments = new HashSet<PictureComment>();
+            Notifications = new HashSet<Notification>();
         }
 
         public short id { get; set; }
@@ -41,5 +42,8 @@ namespace _3dsGallery.DataLayer.DataBase
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PictureComment> Comments { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Notification> Notifications { get; set; }
     }
 }

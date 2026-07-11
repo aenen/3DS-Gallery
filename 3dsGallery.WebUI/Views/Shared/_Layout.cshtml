@@ -38,6 +38,7 @@
                 //string logoutCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-log-out text-danger\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/log-out-red.png\" />";
                 string gallCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-blackboard text-success\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/blackboard.png\" />";
                 string picCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-picture text-info\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/picture.png\" />";
+                string bellCode = !isRegular3ds ? "<span class=\"glyphicon glyphicon-bell\"></span>" : "<img class=\"img-glyphicon\" src=\"/Content/glyphicon/bell.png\" />";
             }
             <a href="/" class="navbar-brand">@Html.Raw(homeCode)<span class="collapsible kawaii"><span class="text-3ds-red">3</span>DS GALLERY</span></a>
             <ul class="nav navbar-nav">
@@ -48,7 +49,19 @@
                 @{
                     if (User.Identity.IsAuthenticated)
                     {
-                        <li><a href="@Url.Action("MyProfile", "User")">@Html.Raw(userCode)<span class="collapsible"> Profile</span></a></li>
+                        <li>
+                            <a href="@Url.Action("", "Notification")">
+                                @Html.Raw(bellCode)
+                                @Html.Action("Counter", "Notification")
+                                <span class="collapsible"> Notifications</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("MyProfile", "User")">
+                                @Html.Raw(userCode)
+                                <span class="collapsible"> Profile</span>
+                            </a>
+                        </li>
                         @*<li><a href="@Url.Action("Logout", "User")">@Html.Raw(logoutCode)<span class="collapsible"> Log Out</span></a></li>*@
 
                     }
@@ -69,6 +82,7 @@
                 <img id="secretFeature" hidden class="img-glyphicon" src="/Content/glyphicon/secret.png" />
                 <p><a href="mailto:yaroslav.golyuk@gmail.com">yaroslav.golyuk@gmail.com</a></p>
                 <p><a target="_blank" href="https://github.com/aenen/3DS-Gallery">github.com/aenen/3DS-Gallery</a></p>
+                <p><a target="_blank" href="https://github.com/z-alzayer/PixelPix3D"><img height="44" class="img-glyphicon" src="/Content/pixelPix3D_logo.png" /></a></p>
                 <span>&copy; 2017 - @DateTime.Now.Year <span class="my-heart">♥</span> Ярославчик Iнкорпорейтед</span>
                 @*<p>Icon made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>*@
             </div>

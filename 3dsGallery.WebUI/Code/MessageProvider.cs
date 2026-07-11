@@ -21,7 +21,8 @@ namespace _3dsGallery.WebUI.Code
                 "No need to take out an SD card to transfer some pics. Just Nintendo <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span> Internet Browser... and a Wi-Fi connection",
                 "Feel free to share what you draw in Colors3D, ArtAcademy, or any other apps",
                 "Got some funny shots from Tomodachi Life or ACNL? Share them here!",
-                "Commenting is coming (most likely) soon.",
+                "Commenting is here! Type something cool and make someone's day (2026-07-11)",
+                "Notifications got added... Enjoy the sweet red dot of online-dopamine now on 3DS Gallery! (2026-07-11)",
                 "A new juicy theme \"Watermelon Red\" is here. Use it for your <span class=\"kawaii\">GALLERY</span>!",
                 "Browsing from your phone? Check the new home page section \"See 3D Without a <span class=\"kawaii\"><span class=\"text-3ds-red\">3</span><span class=\"text-3ds-dark\">DS</span></span>\"!",
                 "You may see a strange/unique message here. Means it's rare",
@@ -29,6 +30,7 @@ namespace _3dsGallery.WebUI.Code
             },
             ["uncommon"] = new[]
             {
+                "Check your profile setting. You can now write something in bio, with more options to come soon.",
                 "Press that button below. I know you want to.",
                 "Private Galleries are now available to use",
                 "Press the 3D icon in the top-right corner of an image to open it in side-by-side mode. You can \"parallel-view\" to see it im 3D. Even on a 2DS.",

@@ -17,6 +17,7 @@ namespace _3dsGallery.DataLayer.DataBase
         public virtual DbSet<Style> Style { get; set; }
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<PictureComment> PictureComments { get; set; }
+        public virtual DbSet<Notification> Notification { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -50,6 +51,26 @@ namespace _3dsGallery.DataLayer.DataBase
                 .HasRequired(pc => pc.CreatedBy)
                 .WithMany(u => u.Comments)
                 .HasForeignKey(pc => pc.IdUser)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Notification>()
+                .Property(n => n.Type)
+                .IsUnicode(false)
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<Notification>()
+                .Property(n => n.Message)
+                .IsUnicode(true)
+                .HasMaxLength(250);
+
+            modelBuilder.Entity<Notification>()
+                .Property(n => n.IsRead)
+                .IsRequired();
+
+            modelBuilder.Entity<Notification>()
+                .HasRequired(n => n.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.IdUser)
                 .WillCascadeOnDelete(false);
 
         }

@@ -1,0 +1,70 @@
+﻿@model List<_3dsGallery.DataLayer.DataBase.Notification>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="section-white">
+    <div class="container body-content section-separator-bottom">
+        <div class="h2-container" style="margin-bottom: 0">
+            <h2>
+                My Notifications
+            </h2>
+        </div>
+    </div>
+</div>
+<div class="section-grey">
+    <div class="container body-content section-separator-top" style="padding-bottom: 20px">
+        <div class="row">
+            <div class="col-xs-12">
+                @if (Model.Count > 0)
+                {
+                    using (Html.BeginForm("MarkAllAsRead", "Notification", FormMethod.Post, new { style = "display: inline-block" }))
+                    {
+                        <button type="submit" class="btn btn-sm btn-info" style="margin-right: 10px">Mark All as <b>Read</b></button>
+                    }
+
+                    using (Html.BeginForm("Purge", "Notification", FormMethod.Post, new { style = "display: inline-block" }))
+                    {
+                        <button type="submit" class="btn btn-sm btn-danger">PURGE!</button>
+                    }
+
+                    <div class="row">
+                        @foreach (var notification in Model.OrderByDescending(x => x.CreationDate))
+                        {
+                        <div class="col-xs-12" style="display: table; width: 100%; margin-top: 10px;">
+                            <div style="display: table-cell; vertical-align: middle;">
+                                <div style="color: @(notification.Type == "Comment" ? "#31708f" : "#CF181F");
+                        width: 30px; height: 30px; border: 1px solid @(notification.Type == "Comment" ? "#31708f" : "#CF181F");
+                        margin: 0 15px 5px 0; border-radius: 50%; text-align: center; font-size: 24px; line-height: 30px; overflow: hidden;">
+                                    @(notification.Type == "Comment" ? "C" : "♥")
+                                </div>
+                            </div>
+
+                            <div style="display: table-cell; vertical-align: middle; width: 100%">
+                                <div>
+                                    <a href="@Url.Action("Open", "Notification", new { id = notification.IdNotification })"
+                                       style="text-decoration:none; color:inherit;">
+                                        @if (notification.IsRead)
+                                        {
+                                            @notification.Message
+                                        }
+                                        else
+                                        {
+                                            <b>@notification.Message</b>
+                                        }
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <h4>No notifications... for now!</h4>
+                }
+            </div>
+        </div>
+    </div>
+</div>

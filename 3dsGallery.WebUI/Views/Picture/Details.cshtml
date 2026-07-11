@@ -24,7 +24,25 @@
 
             <div class="col-lg-9 col-md-8 col-sm-6">
                 <div class="row">
-                    <h3 class="col-xs-12 text-@Model.Pic.ColorThemeClass" style="margin-top: 0">Comments <span id="commentsCounter">(@Model.Comments.Count)</span></h3>
+                    <div class="col-xs-12" style="margin-bottom: 10px; font-size: 16px">
+                        <b class="text-3ds-red" style="font-size: 20px">♥</b> by
+                        @{
+                            var users = Model.LikedByUsers.ToList();
+                            for (int i = 0; i < users.Count; i++)
+                            {
+                                <a target="_blank" href="~/User/@users[i]"><i>@users[i]</i></a>
+                                if (i < users.Count - 1)
+                                {
+                                    @:,
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-8 col-sm-6">
+                <div class="row">
+                    <h3 class="col-xs-12 text-@Model.Pic.ColorThemeClass" style="margin-top: 0">Comments (@Model.Comments.Count)</span></h3>
                     @if (User.Identity.IsAuthenticated)
                     {
                         <form id="formComment" action="@Url.Action("AddComment", "Picture")" method="post">

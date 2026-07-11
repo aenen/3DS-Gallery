@@ -91,7 +91,7 @@
 @section scripts {
     @RenderPage("~/Views/Shared/MainScripts.cshtml")
 
-<script>
+    <script>
         function setCookie(cname, cvalue, exdays) {
             var d = new Date();
             d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
@@ -246,7 +246,7 @@
 
 
                     $('#msg-timecapsule').html(
-                      'On this day, <b>' + data.YearsOld + ' years ago</b>, ' +
+                        'On this day, <b>' + data.YearsOld + ' year' + (data.YearsOld === 1 ? '' : 's') + ' ago</b>, ' +
                       '<b><a target="_blank" href="@Url.Content("~/User/")' + data.CreatedBy + '">' + data.CreatedBy + '</a></b> ' +
                       'added a picture to "<b><a target="_blank" href="@Url.Content("~/Gallery/")' + data.IdGallery + '">' + data.GalleryName + '</a></b>".'
                     );
@@ -268,5 +268,5 @@
             });
         });
 
-</script>
+    </script>
 }

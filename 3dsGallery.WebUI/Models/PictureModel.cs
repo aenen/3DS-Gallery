@@ -27,6 +27,7 @@ namespace _3dsGallery.WebUI.Models
         public PictureModel Pic { get; set; }
 
         public List<PictureCommentModel> Comments { get; set; }
+        public List<string> LikedByUsers { get; set; }
     }
 
     public class PictureCommentModel

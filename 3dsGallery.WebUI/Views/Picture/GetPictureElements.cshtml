@@ -83,11 +83,11 @@
                             <span class="comment-count">@itemPic.CommentCount</span>
                             if (isOld3ds)
                             {
-                                <a href="@Url.Action("Details", "Picture", new { id = itemPic.IdPicture })" class="comment-btn no-link-style"><img style="display: inline-block; margin-bottom: 5px;" src="/Content/glyphicon/comment.png" /></a>
+                                <a target="_blank" href="@Url.Action("Details", "Picture", new { id = itemPic.IdPicture })" class="comment-btn no-link-style"><img style="display: inline-block; margin-bottom: 5px;" src="/Content/glyphicon/comment.png" /></a>
                             }
                             else
                             {
-                                <a href="@Url.Action("Details", "Picture", new { id = itemPic.IdPicture })" class="comment-btn glyphicon glyphicon-comment no-link-style"></a>
+                                <a target="_blank" href="@Url.Action("Details", "Picture", new { id = itemPic.IdPicture })" class="comment-btn glyphicon glyphicon-comment no-link-style"></a>
                             }
                         }
                         <span class="rate-count">@itemPic.LikeCount</span>
