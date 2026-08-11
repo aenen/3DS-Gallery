@@ -3,15 +3,16 @@
     bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
     bool isOld3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
     bool isOwner = Model.Gallery.User.login == User.Identity.Name;
+    var cloudinary = new _3dsGallery.WebUI.Code.CloudinaryService();
+    bool isCloudinary = Model.path != null && !Model.path.Contains(".");
+    string fullUrl    = isCloudinary ? cloudinary.GetImageUrl(Model.path)          : ("/" + Model.path.Replace("\\", "/"));
+    string thumbMdUrl = isCloudinary ? cloudinary.GetThumbnailUrl(Model.path, 280) : (System.IO.File.Exists($"{Server.MapPath("~")}Picture/{Model.id}-thumb_md.JPG") ? $"/Picture/{Model.id}-thumb_md.JPG" : $"/Picture/{Model.id}.JPG");
 }
 <div class="col-lg-3 col-md-4 col-sm-6">
     <div class="thumbnail" data-id="@Model.id">
-        <div class="preview-container-md style-@Model.Gallery.Style.value">
-            <a target="_blank" href="~/@Model.path">
-                @{
-                    string preview_md = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{Model.id}-thumb_md.JPG") ? $"/Picture/{Model.id}-thumb_md.JPG" : $"/Picture/{Model.id}.JPG";
-                }
-                <img class="preview-img" src="@preview_md" />
+        <div class="preview-container-md style-@Model.Gallery.Style.value" data-pic-path="@fullUrl" data-is-3d="@(Model.type == "3D" ? "true" : "false")">
+            <a target="_blank" href="@fullUrl">
+                <img class="preview-img" src="@thumbMdUrl" />
             </a>
             @{
                 if (isOwner)

@@ -1,6 +1,7 @@
 ﻿@model _3dsGallery.DataLayer.DataBase.Gallery
 @{
     bool is3d = Model.Picture.Any(x => x.type == "3D") ? true : false;
+    var cloudinary = new _3dsGallery.WebUI.Code.CloudinaryService();
 }
 
 <div class="col-md-4">
@@ -24,16 +25,15 @@
         <div class="panel-body preview-gallery">
             @{
                 int counter = 2;
-                //var previews = Model.Picture.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).Take(counter);
                 var previews = Model.Picture.OrderByDescending(x => x.id).Take(counter);
                 foreach (var pv in previews)
                 {
+                    bool isCloudinary = pv.path != null && !pv.path.Contains(".");
+                    string fullUrl    = isCloudinary ? cloudinary.GetImageUrl(pv.path)              : ("/" + pv.path.Replace("\\", "/"));
+                    string thumbSmUrl = isCloudinary ? cloudinary.GetThumbnailUrl(pv.path, 155, 97) : (System.IO.File.Exists($"{Server.MapPath("~")}Picture/{pv.id}-thumb_sm.JPG") ? $"/Picture/{pv.id}-thumb_sm.JPG" : $"/Picture/{pv.id}.JPG");
                     <div class="preview-container-sm">
-                        <a target="_blank" href="~/@pv.path">
-                            @{
-                                string preview_sm = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{pv.id}-thumb_sm.JPG") ? $"/Picture/{pv.id}-thumb_sm.JPG" : $"/Picture/{pv.id}.JPG";
-                            }
-                            <img class="img-thumbnail preview-img " src="@preview_sm">
+                        <a target="_blank" href="@fullUrl">
+                            <img class="img-thumbnail preview-img " src="@thumbSmUrl">
                         </a>
                     </div>
                     counter--;

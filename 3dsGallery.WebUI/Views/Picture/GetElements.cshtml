@@ -2,21 +2,22 @@
 @{
     bool is3ds = Request.UserAgent.Contains("Nintendo 3DS");
     bool isOld3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
+    var cloudinary = new _3dsGallery.WebUI.Code.CloudinaryService();
 }
 
 @foreach (var itemPic in Model)
 {
     bool isOwner = itemPic.Gallery.User.login == User.Identity.Name;
+    bool isCloudinary = itemPic.path != null && !itemPic.path.Contains(".");
+    string fullUrl    = isCloudinary ? cloudinary.GetImageUrl(itemPic.path)              : ("/" + itemPic.path.Replace("\\", "/"));
+    string thumbMdUrl = isCloudinary ? cloudinary.GetThumbnailUrl(itemPic.path, 280)     : (System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.id}-thumb_md.JPG") ? $"/Picture/{itemPic.id}-thumb_md.JPG" : $"/Picture/{itemPic.id}.JPG");
 
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div>
             <div class="thumbnail" data-id="@itemPic.id">
-                <div class="preview-container-md style-@itemPic.Gallery.Style.value" data-style="@itemPic.Gallery.Style.value" data-author="@itemPic.Gallery.User.login" data-id-gallery="@itemPic.galleryId" data-pic-path="@itemPic.path">
-                    <a target="_blank" href="~/@itemPic.path">
-                        @{
-                            string preview_md = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.id}-thumb_md.JPG") ? $"/Picture/{itemPic.id}-thumb_md.JPG" : $"/Picture/{itemPic.id}.JPG";
-                        }
-                        <img class="preview-img" src="@preview_md" />
+                <div class="preview-container-md style-@itemPic.Gallery.Style.value" data-style="@itemPic.Gallery.Style.value" data-author="@itemPic.Gallery.User.login" data-id-gallery="@itemPic.galleryId" data-pic-path="@fullUrl" data-is-3d="@(itemPic.type == "3D" ? "true" : "false")">
+                    <a target="_blank" href="@fullUrl">
+                        <img class="preview-img" src="@thumbMdUrl" />
                     </a>
                     @{
                         if (isOwner)

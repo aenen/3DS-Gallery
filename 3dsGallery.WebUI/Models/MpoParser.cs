@@ -46,6 +46,16 @@
         }
 
         /// <summary>
+        /// Gets the image sources from a byte array (in-memory MPO/JPEG data).
+        /// Returns an empty enumeration for plain JPEG files.
+        /// </summary>
+        public static IEnumerable<Image> GetImageSources(byte[] data)
+        {
+            foreach (var buffer in GetImageData(data))
+                yield return Image.FromStream(new MemoryStream(buffer));
+        }
+
+        /// <summary>
         /// Gets the image data buffers (jpeg images) from the specified .mpo file.
         /// </summary>
         /// <param name="path">The path.</param>
@@ -149,6 +159,78 @@
                     }
 
                     yield break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the image data buffers (jpeg images) from an in-memory byte array.
+        /// </summary>
+        public static IEnumerable<byte[]> GetImageData(byte[] data)
+        {
+            using (var s = new MemoryStream(data))
+            using (var r = new BinaryReader(s))
+            {
+                var soi = ReadUShort(r);
+                if (soi != MARKER_SOI)
+                    yield break;
+
+                while (s.Position < s.Length)
+                {
+                    var marker = ReadUShort(r);
+                    var length = ReadUShort(r);
+
+                    if (marker == MARKER_APP2)
+                    {
+                        var identifier = Encoding.ASCII.GetString(r.ReadBytes(4));
+                        length -= 4;
+
+                        if (identifier == "MPF\0")
+                        {
+                            var startOfOffset    = s.Position;
+                            var mpEndian         = r.ReadUInt();
+                            var isLittleEndian   = mpEndian == MP_LITTLE_ENDIAN;
+                            var offsetToFirstIFD = r.ReadUInt(isLittleEndian);
+                            s.Position = startOfOffset + offsetToFirstIFD;
+
+                            var count         = ReadUShort(r, isLittleEndian);
+                            uint numberOfImages = 0;
+                            uint mpEntry        = 0;
+
+                            for (int i = 0; i < count; i++)
+                            {
+                                var tag   = r.ReadUShort(isLittleEndian);
+                                var type  = r.ReadUShort(isLittleEndian);
+                                var count2 = r.ReadUInt(isLittleEndian);
+                                switch (tag)
+                                {
+                                    case 0xB000: r.ReadBytes(4); break;
+                                    case 0xB001: numberOfImages = r.ReadUInt(isLittleEndian); break;
+                                    case 0xB002: mpEntry = r.ReadUInt(isLittleEndian); break;
+                                    default:     r.ReadUInt(isLittleEndian); break;
+                                }
+                            }
+
+                            ReadUInt(r, isLittleEndian); // offsetNext
+
+                            for (uint i = 0; i < numberOfImages; i++)
+                            {
+                                var iattr      = r.ReadUInt(isLittleEndian);
+                                var imageSize  = r.ReadUInt(isLittleEndian);
+                                var dataOffset = r.ReadUInt(isLittleEndian);
+                                r.ReadUShort(isLittleEndian);
+                                r.ReadUShort(isLittleEndian);
+
+                                long offset = i == 0 ? 0 : dataOffset + startOfOffset;
+                                long saved  = s.Position;
+                                s.Position  = offset;
+                                yield return r.ReadBytes((int)imageSize);
+                                s.Position  = saved;
+                            }
+                            yield break;
+                        }
+                    }
+                    r.ReadBytes(length - 2);
                 }
             }
         }
