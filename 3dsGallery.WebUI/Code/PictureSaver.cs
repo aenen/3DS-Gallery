@@ -55,48 +55,53 @@ namespace _3dsGallery.WebUI.Code
                 fileBytes = ms.ToArray();
             }
 
-            // Determine whether this is a 3D (MPO) file by attempting to parse its stereo frames
-            var mpoImages = MpoParser.GetImageSources(fileBytes).ToList();
-            bool is3D = mpoImages.Count >= 2;
-
             string publicId = $"Picture/{picture.id}";
-            Image imgForDisplay;
-
-            if (!is3D)
+            var mpoImages = MpoParser.GetImageSources(fileBytes).ToList();
+            try
             {
-                // 2D: upload the file as-is
-                using (var ms = new MemoryStream(fileBytes))
-                using (var tempImg = Image.FromStream(ms))
-                    imgForDisplay = new Bitmap(tempImg);
+                // Determine whether this is a 3D (MPO) file by attempting to parse its stereo frames
+                bool is3D = mpoImages.Count >= 2;
 
-                picture.type = "2D";
-                _cloudinary.Upload(ImageToJpegBytes(imgForDisplay), publicId);
-            }
-            else
-            {
-                // 3D / MPO
-                if (model.isAdvanced && model.isTo2d)
+                if (!is3D)
                 {
-                    // Save only one eye as a 2D image
-                    imgForDisplay = mpoImages.ElementAt(model.leftOrRight);
-                    picture.type  = "2D";
-                    _cloudinary.Upload(ImageToJpegBytes(imgForDisplay), publicId);
+                    // 2D: upload the file as-is
+                    using (var ms = new MemoryStream(fileBytes))
+                    using (var tempImg = Image.FromStream(ms))
+                    using (var imgForDisplay = new Bitmap(tempImg))
+                    {
+                        picture.type = "2D";
+                        _cloudinary.Upload(ImageToJpegBytes(imgForDisplay), publicId);
+                    }
                 }
                 else
                 {
-                    // Upload left eye as main, right eye as publicId+"_r"
-                    imgForDisplay = mpoImages[0];
-                    picture.type  = "3D";
-                    _cloudinary.UploadRaw(fileBytes, GetOriginalMpoPublicId(publicId), $"{picture.id}.mpo", "application/octet-stream");
-                    _cloudinary.Upload(ImageToJpegBytes(mpoImages[0]), publicId);
-                    _cloudinary.Upload(ImageToJpegBytes(mpoImages[1]), publicId + "_r");
+                    // 3D / MPO
+                    if (model.isAdvanced && model.isTo2d)
+                    {
+                        // Save only one eye as a 2D image
+                        picture.type = "2D";
+                        _cloudinary.Upload(ImageToJpegBytes(mpoImages.ElementAt(model.leftOrRight)), publicId);
+                    }
+                    else
+                    {
+                        // Upload left eye as main, right eye as publicId+"_r"
+                        picture.type = "3D";
+                        _cloudinary.UploadRaw(fileBytes, GetOriginalMpoPublicId(publicId), $"{picture.id}.mpo", "application/octet-stream");
+                        _cloudinary.Upload(ImageToJpegBytes(mpoImages[0]), publicId);
+                        _cloudinary.Upload(ImageToJpegBytes(mpoImages[1]), publicId + "_r");
+                    }
                 }
+
+                // Store the Cloudinary public_id in the path column
+                picture.path = publicId;
+
+                return picture;
             }
-
-            // Store the Cloudinary public_id in the path column
-            picture.path = publicId;
-
-            return picture;
+            finally
+            {
+                foreach (var mpoImage in mpoImages)
+                    mpoImage.Dispose();
+            }
         }
 
         // ── helpers ────────────────────────────────────────────────────────────
