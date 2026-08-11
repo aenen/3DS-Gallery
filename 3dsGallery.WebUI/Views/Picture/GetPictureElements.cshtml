@@ -8,7 +8,7 @@
 @foreach (var itemPic in Model)
 {
     bool isOwner = itemPic.CreatedBy == User.Identity.Name;
-    bool isCloudinary = itemPic.Path != null && !itemPic.Path.Contains(".");
+    bool isCloudinary = itemPic.Path != null && System.IO.Path.GetExtension(itemPic.Path) == string.Empty;
     string fullUrl    = isCloudinary ? cloudinary.GetImageUrl(itemPic.Path)          : ("/" + itemPic.Path.Replace("\\", "/"));
     string thumbMdUrl = isCloudinary ? cloudinary.GetThumbnailUrl(itemPic.Path, 280) : (System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.IdPicture}-thumb_md.JPG") ? $"/Picture/{itemPic.IdPicture}-thumb_md.JPG" : $"/Picture/{itemPic.IdPicture}.JPG");
 

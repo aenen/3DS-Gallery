@@ -30,13 +30,15 @@ namespace _3dsGallery.WebUI.Code
             var leftBytes  = _cloudinary.Download(_cloudinary.GetImageUrl(publicId));
             var rightBytes = _cloudinary.Download(_cloudinary.GetImageUrl(publicId + "_r"));
 
-            Image img1, img2;
+            // Image.FromStream requires the underlying stream to remain open for the lifetime
+            // of the Image; keep both MemoryStreams alive until MergeSideBySide completes.
             using (var ms1 = new MemoryStream(leftBytes))
-                img1 = Image.FromStream(ms1);
             using (var ms2 = new MemoryStream(rightBytes))
-                img2 = Image.FromStream(ms2);
-
-            return MergeSideBySide(img1, img2);
+            {
+                var img1 = Image.FromStream(ms1);
+                var img2 = Image.FromStream(ms2);
+                return MergeSideBySide(img1, img2);
+            }
         }
 
         public Picture AnalyzeAndSave(Picture picture, AddPictureModel model, HttpPostedFileBase file)
@@ -63,16 +65,7 @@ namespace _3dsGallery.WebUI.Code
                 using (var tempImg = Image.FromStream(ms))
                     imgForDisplay = new Bitmap(tempImg);
 
-                if (model.isAdvanced && model.isTo2d)
-                {
-                    // User explicitly wants 3D→2D; treat like a regular 2D upload
-                    picture.type = "2D";
-                }
-                else
-                {
-                    picture.type = "2D";
-                }
-
+                picture.type = "2D";
                 _cloudinary.Upload(ImageToJpegBytes(imgForDisplay), publicId);
             }
             else

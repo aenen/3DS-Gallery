@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace _3dsGallery.WebUI.Code
 {
@@ -65,7 +66,8 @@ namespace _3dsGallery.WebUI.Code
                 client.Headers.Add("Content-Type", $"multipart/form-data; boundary={boundary}");
                 var url      = $"https://api.cloudinary.com/v1_1/{_cloudName}/image/upload";
                 var response = Encoding.UTF8.GetString(client.UploadData(url, "POST", body));
-                return ExtractJsonStringValue(response, "public_id") ?? publicId;
+                var json     = JObject.Parse(response);
+                return json.Value<string>("public_id") ?? publicId;
             }
         }
 
@@ -148,14 +150,5 @@ namespace _3dsGallery.WebUI.Code
             }
         }
 
-        private static string ExtractJsonStringValue(string json, string key)
-        {
-            var search = $"\"{key}\":\"";
-            var start  = json.IndexOf(search, StringComparison.Ordinal);
-            if (start < 0) return null;
-            start += search.Length;
-            var end = json.IndexOf('"', start);
-            return end < 0 ? null : json.Substring(start, end - start);
-        }
     }
 }

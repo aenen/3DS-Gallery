@@ -4,7 +4,7 @@
     bool isOld3ds = Request.UserAgent.Contains("Nintendo 3DS") && !Request.UserAgent.Contains("New Nintendo 3DS");
     bool isOwner = Model.Gallery.User.login == User.Identity.Name;
     var cloudinary = new _3dsGallery.WebUI.Code.CloudinaryService();
-    bool isCloudinary = Model.path != null && !Model.path.Contains(".");
+    bool isCloudinary = Model.path != null && System.IO.Path.GetExtension(Model.path) == string.Empty;
     string fullUrl    = isCloudinary ? cloudinary.GetImageUrl(Model.path)          : ("/" + Model.path.Replace("\\", "/"));
     string thumbMdUrl = isCloudinary ? cloudinary.GetThumbnailUrl(Model.path, 280) : (System.IO.File.Exists($"{Server.MapPath("~")}Picture/{Model.id}-thumb_md.JPG") ? $"/Picture/{Model.id}-thumb_md.JPG" : $"/Picture/{Model.id}.JPG");
 }

@@ -285,7 +285,7 @@ namespace _3dsGallery.WebUI.Controllers
                 .FirstOrDefault();
 
             // New Cloudinary paths have no extension; legacy paths have .JPG/.MPO
-            string url = randomRow.path != null && !randomRow.path.Contains(".")
+            string url = randomRow.path != null && System.IO.Path.GetExtension(randomRow.path) == string.Empty
                 ? new CloudinaryService().GetImageUrl(randomRow.path)
                 : randomRow.path;
             return Json(url);
@@ -375,8 +375,8 @@ namespace _3dsGallery.WebUI.Controllers
             var cloudinary = new CloudinaryService();
             Picture picture = db.Picture.Include(X => X.User).FirstOrDefault(x => x.id == id);
 
-            // Delete from Cloudinary (both main image and right-eye for 3D)
-            if (!string.IsNullOrEmpty(picture.path))
+            // Delete from Cloudinary (Cloudinary paths have no file extension; legacy local paths do)
+            if (!string.IsNullOrEmpty(picture.path) && System.IO.Path.GetExtension(picture.path) == string.Empty)
             {
                 cloudinary.Delete(picture.path);
                 if (picture.type == "3D")
@@ -520,7 +520,10 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult GetPath(int id)
         {
             var pic = db.Picture.Find(id);
-            string result = new CloudinaryService().GetImageUrl(pic.path);
+            // Cloudinary paths have no extension; legacy paths keep their original URL form
+            string result = pic.path != null && System.IO.Path.GetExtension(pic.path) == string.Empty
+                ? new CloudinaryService().GetImageUrl(pic.path)
+                : $"http://3dsgallery.azurewebsites.net/{pic.path.Replace('\\', '/')}";
             return Json(result);
         }
 

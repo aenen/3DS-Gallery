@@ -28,7 +28,7 @@
                 var previews = Model.Picture.OrderByDescending(x => x.id).Take(counter);
                 foreach (var pv in previews)
                 {
-                    bool isCloudinary = pv.path != null && !pv.path.Contains(".");
+                    bool isCloudinary = pv.path != null && System.IO.Path.GetExtension(pv.path) == string.Empty;
                     string fullUrl    = isCloudinary ? cloudinary.GetImageUrl(pv.path)              : ("/" + pv.path.Replace("\\", "/"));
                     string thumbSmUrl = isCloudinary ? cloudinary.GetThumbnailUrl(pv.path, 155, 97) : (System.IO.File.Exists($"{Server.MapPath("~")}Picture/{pv.id}-thumb_sm.JPG") ? $"/Picture/{pv.id}-thumb_sm.JPG" : $"/Picture/{pv.id}.JPG");
                     <div class="preview-container-sm">
