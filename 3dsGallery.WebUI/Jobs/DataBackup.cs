@@ -7,7 +7,6 @@ using System;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace _3dsGallery.WebUI.Jobs
@@ -16,27 +15,11 @@ namespace _3dsGallery.WebUI.Jobs
     {
         public void Execute(IJobExecutionContext context)
         {
+            // File backups are no longer needed: images are stored on Cloudinary.
+            // Only the database backup script is retained.
             using (var db = new GalleryContext())
             {
-                var numberOfPicturesToUpload = Convert.ToInt32(ConfigurationManager.AppSettings["NumberOfPicturesToUpload"].ToString());
-                var pictureToProcessList = db.Picture.Where(x => !x.IsBackupCopySaved).OrderBy(x => x.CreationDate).Take(numberOfPicturesToUpload).ToList();
-                if (pictureToProcessList.Count == 0)
-                    return;
-
                 var googleDriveManager = new GoogleDriveManager();
-
-                foreach (var pictureToProcess in pictureToProcessList)
-                {
-                    var regex = new Regex($"^{pictureToProcess.id}[.-]");
-                    var picturePathList = Directory.GetFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture"))
-                                         .Where(x => regex.IsMatch(Path.GetFileName(x)))
-                                         .ToList();
-
-                    picturePathList.ForEach(x => googleDriveManager.Upload(x));
-                    pictureToProcess.IsBackupCopySaved = true;
-                    db.SaveChanges();
-                }
-
                 UploadDatabaseBackupScript(googleDriveManager);
             }
         }

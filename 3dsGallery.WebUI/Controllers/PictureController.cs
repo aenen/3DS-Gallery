@@ -78,6 +78,34 @@ namespace _3dsGallery.WebUI.Controllers
             return View(modelResult);
         }
 
+        public ActionResult OriginalMpo(int? id)
+        {
+            if (id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var picture = db.Picture.Find(id);
+            if (picture == null || picture.type != "3D")
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
+            if (picture.Gallery.IsPrivate && picture.Gallery.User.login != User.Identity.Name)
+                return RedirectToAction("Index", "Home");
+
+            if (string.IsNullOrEmpty(picture.path))
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
+            var cloudinary = new CloudinaryService();
+            try
+            {
+                var bytes = cloudinary.Download(cloudinary.GetRawUrl(PictureSaver.GetOriginalMpoPublicId(picture.path), "mpo"));
+                Response.AppendHeader("Content-Disposition", $"inline; filename=\"{picture.id}.MPO\"");
+                return File(bytes, "image/mpo");
+            }
+            catch (WebException)
+            {
+                return Redirect(cloudinary.GetImageUrl(picture.path));
+            }
+        }
+
         [Only3DS]
         [Authorize]
         [Route("AddPicture")]
@@ -147,7 +175,7 @@ namespace _3dsGallery.WebUI.Controllers
                 db.Picture.Add(picture);
                 db.SaveChanges();
 
-                picture = new PictureSaver(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture")).AnalyzeAndSave(picture, model, f);
+                picture = new PictureSaver(new CloudinaryService()).AnalyzeAndSave(picture, model, f);
 
                 db.Entry(picture).State = EntityState.Modified;
                 db.SaveChanges();
@@ -284,7 +312,8 @@ namespace _3dsGallery.WebUI.Controllers
                 .Skip(offset)
                 .FirstOrDefault();
 
-            return Json(randomRow.path);
+            string url = new CloudinaryService().GetImageUrl(randomRow.path);
+            return Json(url);
         }
 
         [HttpPost]
@@ -333,6 +362,9 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult RandomGenerateSideBySide()
         {
             int total = db.Picture.Where(x => !x.Gallery.IsPrivate && x.type == "3D").Count();
+            if (total == 0)
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
             Random rand = new Random();
             int offset = rand.Next(0, total);
 
@@ -342,7 +374,7 @@ namespace _3dsGallery.WebUI.Controllers
                 .Skip(offset)
                 .FirstOrDefault();
 
-            var bytes = new PictureSaver(AppDomain.CurrentDomain.BaseDirectory).GenerateSideBySideImage(randomRow.path);
+            var bytes = new PictureSaver(new CloudinaryService()).GenerateSideBySideImage(randomRow.path);
             return File(bytes, "image/jpeg");
         }
 
@@ -352,7 +384,7 @@ namespace _3dsGallery.WebUI.Controllers
             if (item == null || item.type != "3D")
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            var bytes = new PictureSaver(AppDomain.CurrentDomain.BaseDirectory).GenerateSideBySideImage(item.path);
+            var bytes = new PictureSaver(new CloudinaryService()).GenerateSideBySideImage(item.path);
             return File(bytes, "image/jpeg");
         }
 
@@ -365,22 +397,25 @@ namespace _3dsGallery.WebUI.Controllers
             if (!IsItMine(id))
                 return HttpNotFound();
 
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture");
+            var cloudinary = new CloudinaryService();
             Picture picture = db.Picture.Include(X => X.User).FirstOrDefault(x => x.id == id);
-            if (System.IO.File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, picture.path)))
-                System.IO.File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, picture.path));
+
+            // Delete from Cloudinary
+            if (!string.IsNullOrEmpty(picture.path))
+            {
+                cloudinary.Delete(picture.path);
+                if (picture.type == "3D")
+                {
+                    cloudinary.Delete(picture.path + "_r");
+                    cloudinary.DeleteRaw(PictureSaver.GetOriginalMpoPublicId(picture.path));
+                }
+            }
 
             Gallery gallery = picture.Gallery;
             db.Picture.Remove(picture);
             gallery.LastPicture = gallery.Picture.LastOrDefault();
             db.Entry(gallery).State = EntityState.Modified;
             db.SaveChanges();
-            if (System.IO.File.Exists(Path.Combine(path, $"{id}-thumb_sm.JPG")))
-                System.IO.File.Delete(Path.Combine(path, $"{id}-thumb_sm.JPG"));
-            if (System.IO.File.Exists(Path.Combine(path, $"{id}-thumb_md.JPG")))
-                System.IO.File.Delete(Path.Combine(path, $"{id}-thumb_md.JPG"));
-            if (System.IO.File.Exists(Path.Combine(path, $"{id}.JPG")))
-                System.IO.File.Delete(Path.Combine(path, $"{id}.JPG"));
             return Json("ok");
         }
 
@@ -513,7 +548,9 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult GetPath(int id)
         {
             var pic = db.Picture.Find(id);
-            string result = $"http://3dsgallery.azurewebsites.net/{pic.path.Replace('\\', '/')}";
+            string result = pic.type == "3D"
+                ? Url.Action("OriginalMpo", "Picture", new { id = pic.id }, Request.Url.Scheme)
+                : new CloudinaryService().GetImageUrl(pic.path);
             return Json(result);
         }
 

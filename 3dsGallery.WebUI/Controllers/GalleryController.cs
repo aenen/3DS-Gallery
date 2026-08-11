@@ -138,7 +138,7 @@ namespace _3dsGallery.WebUI.Controllers
                 db.Picture.Add(picture);
                 db.SaveChanges();
 
-                picture = new PictureSaver(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture")).AnalyzeAndSave(picture, model, f);
+                picture = new PictureSaver(new CloudinaryService()).AnalyzeAndSave(picture, model, f);
 
                 db.Entry(picture).State = EntityState.Modified;
                 db.SaveChanges();
@@ -280,18 +280,19 @@ namespace _3dsGallery.WebUI.Controllers
             if (!IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture");
+            var cloudinary = new CloudinaryService();
             Gallery gallery = db.Gallery.FirstOrDefault(x => x.id == id);
             foreach (var item in gallery.Picture.ToList())
             {
-                if (System.IO.File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, item.path)))
-                    System.IO.File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, item.path));
-                if (System.IO.File.Exists(Path.Combine(path, $"{item.id}-thumb_sm.JPG")))
-                    System.IO.File.Delete(Path.Combine(path, $"{item.id}-thumb_sm.JPG"));
-                if (System.IO.File.Exists(Path.Combine(path, $"{item.id}-thumb_md.JPG")))
-                    System.IO.File.Delete(Path.Combine(path, $"{item.id}-thumb_md.JPG"));
-                if (System.IO.File.Exists(Path.Combine(path, $"{item.id}.JPG")))
-                    System.IO.File.Delete(Path.Combine(path, $"{item.id}.JPG"));
+                if (!string.IsNullOrEmpty(item.path))
+                {
+                    cloudinary.Delete(item.path);
+                    if (item.type == "3D")
+                    {
+                        cloudinary.Delete(item.path + "_r");
+                        cloudinary.DeleteRaw(PictureSaver.GetOriginalMpoPublicId(item.path));
+                    }
+                }
                 Picture picture = db.Picture.Include(X => X.User).FirstOrDefault(x => x.id == item.id);
                 picture.User.Clear();
                 db.Picture.Remove(picture);
