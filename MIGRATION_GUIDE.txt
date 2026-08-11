@@ -71,73 +71,273 @@ If you want a complete export:
 
 
 ────────────────────────────────────────────────────────────────────────────────
-STEP 2 – UPLOAD LEGACY FILES TO CLOUDINARY
+STEP 2 – UPLOAD LEGACY FILES TO CLOUDINARY (BULK – ~4 000 PICTURES)
 ────────────────────────────────────────────────────────────────────────────────
+
+Because there are thousands of files and the Cloudinary web interface does not
+support raw MPO uploads, use the official Cloudinary CLI (cld) to perform a
+bulk upload from the command line.
 
 For each legacy picture you must upload:
 
   a) 2D pictures (type = '2D')
-     - Upload the .JPG file as an IMAGE resource with public_id = "Picture/{id}"
+    - Upload the .JPG file as an IMAGE resource with public_id = "Picture/{id}"
 
   b) 3D pictures (type = '3D')
-     - Upload the left-eye .JPG as an IMAGE resource with public_id = "Picture/{id}"
-     - Upload the right-eye image.
-       The right-eye JPEG was extracted from the MPO at upload time and is NOT
-       stored separately on disk. You must re-extract it from the .MPO file
-       (see note below) and upload it with public_id = "Picture/{id}_r"
-     - Upload the original .MPO file as a RAW resource with
-       public_id = "Picture/{id}_mpo"  (no file extension in the public_id)
+    - Upload the left-eye .JPG as an IMAGE resource with public_id = "Picture/{id}"
+    - Upload the right-eye .JPG with public_id = "Picture/{id}_r"
+      (The right-eye JPEG is NOT stored separately on disk.  It must be
+      re-extracted from the .MPO file – see "MPO SPLITTING" below.)
+    - Upload the original .MPO file as a RAW resource with
+      public_id = "Picture/{id}_mpo"  (no file extension in the public_id)
 
   NOTE on extracting eyes from an MPO file:
-    An MPO file is two concatenated JPEGs.  Use the MpoParser class logic or
-    any standard MPO splitting tool (e.g. ffmpeg, StereoPhoto Maker, or a
-    custom script that splits on the JPEG SOI marker 0xFF 0xD8 after the first
-    image) to obtain the two JPEG byte streams.
+    An MPO file is two concatenated JPEGs.  Split on the second JPEG SOI
+    marker (0xFF 0xD8) using the Python script in sub-step 2b below, or any
+    standard MPO splitting tool (e.g. StereoPhoto Maker, ffmpeg).
 
-EXAMPLE UPLOAD COMMANDS (using curl / Cloudinary REST API)
+
+SUB-STEP 2a – INSTALL AND CONFIGURE THE CLOUDINARY CLI
+-------------------------------------------------------
+
+   # Requires Python 3.8+
+   pip install cloudinary-cli
+
+   # Set credentials once (stored in ~/.cloudinary)
+   cld config --cloud_name <cloud_name> \
+               --api_key    <api_key>    \
+               --api_secret <api_secret>
+
+   # Verify:
+   cld whoami
+
+
+SUB-STEP 2b – SPLIT MPO FILES INTO LEFT / RIGHT JPEGS
+------------------------------------------------------
+
+Run the following Python script from the directory that contains the Picture/
+folder.  It reads every .MPO file, splits it into two JPEG files, and saves
+them as:
+
+   Picture/<id>_left.jpg
+   Picture/<id>_right.jpg
+
+   -----------------------------------------------------------------------
+   # split_mpo.py
+   import os, struct
+
+   PICTURE_DIR = "Picture"
+   SOI = b"\xff\xd8"
+
+   for fname in os.listdir(PICTURE_DIR):
+       if not fname.upper().endswith(".MPO"):
+           continue
+       fpath = os.path.join(PICTURE_DIR, fname)
+       pic_id = os.path.splitext(fname)[0]          # e.g. "12345"
+       with open(fpath, "rb") as f:
+           data = f.read()
+
+       # Find the second SOI marker (skip the first one at offset 0)
+       second_soi = data.index(SOI, 2)
+
+       left_bytes  = data[:second_soi]
+       right_bytes = data[second_soi:]
+
+       with open(os.path.join(PICTURE_DIR, f"{pic_id}_left.jpg"),  "wb") as f:
+           f.write(left_bytes)
+       with open(os.path.join(PICTURE_DIR, f"{pic_id}_right.jpg"), "wb") as f:
+           f.write(right_bytes)
+
+       print(f"Split {fname}: left={len(left_bytes)}B  right={len(right_bytes)}B")
+   -----------------------------------------------------------------------
+
+Run it:
+
+   python split_mpo.py
+
+
+SUB-STEP 2c – BULK UPLOAD 2D JPEGS
+------------------------------------
+
+Upload all .JPG files (2D pictures and left-eye 3D pictures) in one command.
+The --public-id-prefix flag maps the local directory structure to the Cloudinary
+folder, and --unique-filename false ensures the public_id matches the filename.
+
+   cld uploader upload_dir Picture/ \
+       --resource-type image         \
+       --upload-preset ""            \
+       --folder ""                   \
+       --public-id-prefix Picture    \
+       --unique-filename false       \
+       --use-filename true           \
+       --overwrite true              \
+       --include-hidden false        \
+       --exclude "*.MPO" --exclude "*.mpo" --exclude "*_right.jpg"
+
+This uploads:
+  - Picture/12345.JPG  → public_id = "Picture/12345"   (2D pictures)
+  - Picture/12345_left.jpg → public_id = "Picture/12345_left"  (will be renamed in 2e)
+
+NOTE: upload_dir is available in cloudinary-cli ≥ 3.0.
+     Confirm with:  cld --version
+
+
+SUB-STEP 2d – BULK UPLOAD RIGHT-EYE JPEGS WITH _r SUFFIX
 ----------------------------------------------------------
 
-Replace <cloud_name>, <api_key>, <api_secret>, and <id> with real values.
-TIMESTAMP = current Unix timestamp
-SIGNATURE = SHA1( "overwrite=true&public_id=Picture/<id>&timestamp=<TIMESTAMP><api_secret>" )
+The right-eye files must be stored with the suffix _r (e.g. "Picture/12345_r").
+Because the filenames end in _right, upload them separately with a rename step
+using the Python script below, OR upload them via the SDK in sub-step 2f.
 
-2D JPEG upload:
-    curl -X POST https://api.cloudinary.com/v1_1/<cloud_name>/image/upload \
-         -F "file=@/path/to/Picture/<id>.JPG" \
-         -F "public_id=Picture/<id>" \
-         -F "api_key=<api_key>" \
-         -F "timestamp=<TIMESTAMP>" \
-         -F "signature=<SIGNATURE>" \
-         -F "overwrite=true"
+Quickest approach – use the Cloudinary CLI upload with a Python wrapper that
+renames on the fly:
 
-Left-eye JPEG (same command as 2D, just the left image byte stream):
-    curl -X POST https://api.cloudinary.com/v1_1/<cloud_name>/image/upload \
-         -F "file=@/path/to/left_<id>.jpg" \
-         -F "public_id=Picture/<id>" \
-         ...
+   -----------------------------------------------------------------------
+   # upload_right_eyes.py
+   import os, subprocess
 
-Right-eye JPEG (public_id ends in _r):
-    curl -X POST https://api.cloudinary.com/v1_1/<cloud_name>/image/upload \
-         -F "file=@/path/to/right_<id>.jpg" \
-         -F "public_id=Picture/<id>_r" \
-         ...
+   PICTURE_DIR = "Picture"
 
-Original MPO as RAW (public_id ends in _mpo, NO extension):
-    SIGNATURE_RAW = SHA1( "overwrite=true&public_id=Picture/<id>_mpo&timestamp=<TIMESTAMP><api_secret>" )
-    curl -X POST https://api.cloudinary.com/v1_1/<cloud_name>/raw/upload \
-         -F "file=@/path/to/Picture/<id>.MPO" \
-         -F "public_id=Picture/<id>_mpo" \
-         -F "api_key=<api_key>" \
-         -F "timestamp=<TIMESTAMP>" \
-         -F "signature=<SIGNATURE_RAW>" \
-         -F "overwrite=true"
+   for fname in os.listdir(PICTURE_DIR):
+       if not fname.endswith("_right.jpg"):
+           continue
+       pic_id   = fname.replace("_right.jpg", "")   # e.g. "12345"
+       public_id = f"Picture/{pic_id}_r"
+       fpath     = os.path.join(PICTURE_DIR, fname)
+       cmd = [
+           "cld", "uploader", "upload", fpath,
+           "--resource-type", "image",
+           "--public-id",     public_id,
+           "--overwrite",     "true",
+       ]
+       print(f"Uploading {fpath} → {public_id}")
+       result = subprocess.run(cmd, capture_output=True, text=True)
+       if result.returncode != 0:
+           print(f"  ERROR: {result.stderr.strip()}")
+       else:
+           print(f"  OK")
+   -----------------------------------------------------------------------
 
-AUTOMATION TIP:
-  Write a small script (PowerShell, Python, or C#) that:
-  1. Queries the database for all legacy rows (Step 1).
-  2. Loops over each row, builds the correct public_id ("Picture/{id}").
-  3. Uploads the file(s) using the Cloudinary SDK or the REST API above.
-  4. Logs success / failure per picture id.
+   python upload_right_eyes.py
+
+If you have thousands of 3D pictures, add multiprocessing to parallelise:
+
+   -----------------------------------------------------------------------
+   # upload_right_eyes_parallel.py
+   import os, subprocess
+   from concurrent.futures import ThreadPoolExecutor, as_completed
+
+   PICTURE_DIR  = "Picture"
+   MAX_WORKERS  = 8          # adjust to taste; Cloudinary free tier allows ~10 req/s
+
+   def upload(fname):
+       pic_id    = fname.replace("_right.jpg", "")
+       public_id = f"Picture/{pic_id}_r"
+       fpath     = os.path.join(PICTURE_DIR, fname)
+       result = subprocess.run(
+           ["cld", "uploader", "upload", fpath,
+            "--resource-type", "image",
+            "--public-id",     public_id,
+            "--overwrite",     "true"],
+           capture_output=True, text=True
+       )
+       return fname, result.returncode, result.stderr.strip()
+
+   files = [f for f in os.listdir(PICTURE_DIR) if f.endswith("_right.jpg")]
+   print(f"Uploading {len(files)} right-eye images with {MAX_WORKERS} workers …")
+
+   with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+       futures = {pool.submit(upload, f): f for f in files}
+       for fut in as_completed(futures):
+           fname, rc, err = fut.result()
+           print(f"{'OK' if rc == 0 else 'ERR'} {fname}" + (f" – {err}" if err else ""))
+   -----------------------------------------------------------------------
+
+   python upload_right_eyes_parallel.py
+
+
+SUB-STEP 2e – BULK UPLOAD ORIGINAL MPO FILES AS RAW RESOURCES
+--------------------------------------------------------------
+
+MPO files must be uploaded as resource_type=raw because the Cloudinary web
+interface and image pipeline do not handle the MPO format.  The public_id must
+NOT include a file extension.
+
+   -----------------------------------------------------------------------
+   # upload_mpo_raw.py
+   import os, subprocess
+   from concurrent.futures import ThreadPoolExecutor, as_completed
+
+   PICTURE_DIR  = "Picture"
+   MAX_WORKERS  = 8
+
+   def upload_mpo(fname):
+       pic_id    = os.path.splitext(fname)[0]        # strip .MPO
+       public_id = f"Picture/{pic_id}_mpo"
+       fpath     = os.path.join(PICTURE_DIR, fname)
+       result = subprocess.run(
+           ["cld", "uploader", "upload", fpath,
+            "--resource-type", "raw",
+            "--public-id",     public_id,
+            "--overwrite",     "true"],
+           capture_output=True, text=True
+       )
+       return fname, result.returncode, result.stderr.strip()
+
+   files = [f for f in os.listdir(PICTURE_DIR) if f.upper().endswith(".MPO")]
+   print(f"Uploading {len(files)} MPO files as raw with {MAX_WORKERS} workers …")
+
+   with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+       futures = {pool.submit(upload_mpo, f): f for f in files}
+       for fut in as_completed(futures):
+           fname, rc, err = fut.result()
+           print(f"{'OK' if rc == 0 else 'ERR'} {fname}" + (f" – {err}" if err else ""))
+   -----------------------------------------------------------------------
+
+   python upload_mpo_raw.py
+
+
+SUB-STEP 2f – RENAME LEFT-EYE UPLOADS IN CLOUDINARY (3D pictures only)
+------------------------------------------------------------------------
+
+The bulk upload in 2c stored the left-eye images with public_ids like
+"Picture/12345_left".  They need to be "Picture/12345" (same as the 2D path).
+Use the Cloudinary CLI rename command:
+
+   -----------------------------------------------------------------------
+   # rename_left_eyes.py
+   import os, subprocess
+   from concurrent.futures import ThreadPoolExecutor, as_completed
+
+   PICTURE_DIR  = "Picture"
+   MAX_WORKERS  = 8
+
+   def rename(fname):
+       pic_id      = fname.replace("_left.jpg", "")
+       old_public  = f"Picture/{pic_id}_left"
+       new_public  = f"Picture/{pic_id}"
+       result = subprocess.run(
+           ["cld", "uploader", "rename", old_public, new_public,
+            "--overwrite", "true"],
+           capture_output=True, text=True
+       )
+       return fname, result.returncode, result.stderr.strip()
+
+   files = [f for f in os.listdir(PICTURE_DIR) if f.endswith("_left.jpg")]
+   print(f"Renaming {len(files)} left-eye assets …")
+
+   with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+       futures = {pool.submit(rename, f): f for f in files}
+       for fut in as_completed(futures):
+           fname, rc, err = fut.result()
+           print(f"{'OK' if rc == 0 else 'ERR'} {fname}" + (f" – {err}" if err else ""))
+   -----------------------------------------------------------------------
+
+   python rename_left_eyes.py
+
+   ALTERNATIVE: If you prefer to skip the rename step, change split_mpo.py
+   (sub-step 2b) to save the left-eye file as "{id}.jpg" (without the _left
+   suffix) and adjust the upload_dir exclude pattern in 2c accordingly.
 
 
 ────────────────────────────────────────────────────────────────────────────────
