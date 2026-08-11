@@ -35,7 +35,7 @@
         /// Gets the image sources from the specified .mpo file.
         /// </summary>
         /// <param name="path">The path to the .mpo file.</param>
-        /// <returns>Enumeration of image sources.</returns>
+        /// <returns>Enumeration of image sources. Caller must dispose each returned image.</returns>
         public static IEnumerable<Image> GetImageSources(string path)
         {
             foreach (var buffer in GetImageData(path))
@@ -53,6 +53,7 @@
         /// Gets the image sources from a byte array (in-memory MPO/JPEG data).
         /// Returns an empty enumeration for plain JPEG files.
         /// </summary>
+        /// <remarks>Caller must dispose each returned image.</remarks>
         public static IEnumerable<Image> GetImageSources(byte[] data)
         {
             foreach (var buffer in GetImageData(data))

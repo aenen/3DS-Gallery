@@ -73,21 +73,22 @@ namespace _3dsGallery.WebUI.Code
         }
 
         public string GetImageUrl(string publicId)
-            => $"https://res.cloudinary.com/{_cloudName}/image/upload/{publicId}";
+            => $"https://res.cloudinary.com/{_cloudName}/image/upload/{ValidatePublicId(publicId)}";
 
         public string GetRawUrl(string publicId, string extension)
-            => $"https://res.cloudinary.com/{_cloudName}/raw/upload/{publicId}.{extension.TrimStart('.')}";
+            => $"https://res.cloudinary.com/{_cloudName}/raw/upload/{ValidatePublicId(publicId)}.{extension.TrimStart('.')}";
 
         public string GetThumbnailUrl(string publicId, int width, int height = 0)
         {
             var transform = height > 0
                 ? $"w_{width},h_{height},c_fill"
                 : $"w_{width}";
-            return $"https://res.cloudinary.com/{_cloudName}/image/upload/{transform}/{publicId}";
+            return $"https://res.cloudinary.com/{_cloudName}/image/upload/{transform}/{ValidatePublicId(publicId)}";
         }
 
         private string Upload(string resourceType, byte[] fileBytes, string publicId, string fileName, string contentType)
         {
+            publicId = ValidatePublicId(publicId);
             var timestamp    = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
             var paramsToSign = $"overwrite=true&public_id={publicId}&timestamp={timestamp}{_apiSecret}";
             var signature    = ComputeSha1(paramsToSign);
@@ -108,7 +109,7 @@ namespace _3dsGallery.WebUI.Code
             {
                 client.Headers.Add("Content-Type", $"multipart/form-data; boundary={boundary}");
                 var url      = $"https://api.cloudinary.com/v1_1/{_cloudName}/{resourceType}/upload";
-                var response = Encoding.UTF8.GetString(client.UploadData(url, "POST", body));
+                var response = UploadData(client, url, body, publicId);
                 var json     = JObject.Parse(response);
                 return json.Value<string>("public_id") ?? publicId;
             }
@@ -119,6 +120,7 @@ namespace _3dsGallery.WebUI.Code
             if (string.IsNullOrWhiteSpace(publicId))
                 return;
 
+            publicId = ValidatePublicId(publicId);
             var timestamp    = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
             var paramsToSign = $"public_id={publicId}&timestamp={timestamp}{_apiSecret}";
             var signature    = ComputeSha1(paramsToSign);
@@ -126,13 +128,20 @@ namespace _3dsGallery.WebUI.Code
             using (var client = new WebClient())
             {
                 var url = $"https://api.cloudinary.com/v1_1/{_cloudName}/{resourceType}/destroy";
-                client.UploadValues(url, new NameValueCollection
+                try
                 {
-                    ["api_key"]   = _apiKey,
-                    ["timestamp"] = timestamp,
-                    ["signature"] = signature,
-                    ["public_id"] = publicId,
-                });
+                    client.UploadValues(url, new NameValueCollection
+                    {
+                        ["api_key"]   = _apiKey,
+                        ["timestamp"] = timestamp,
+                        ["signature"] = signature,
+                        ["public_id"] = publicId,
+                    });
+                }
+                catch (WebException ex)
+                {
+                    throw CreateCloudinaryException("delete", publicId, ex);
+                }
             }
         }
 
@@ -148,6 +157,45 @@ namespace _3dsGallery.WebUI.Code
                     sb.AppendFormat("{0:x2}", b);
                 return sb.ToString();
             }
+        }
+
+        private static string ValidatePublicId(string publicId)
+        {
+            if (string.IsNullOrWhiteSpace(publicId))
+                throw new ArgumentException("Cloudinary public_id is required.", nameof(publicId));
+
+            if (publicId.Contains("&") || publicId.Contains("="))
+                throw new ArgumentException("Cloudinary public_id contains unsupported characters.", nameof(publicId));
+
+            return publicId;
+        }
+
+        private static string UploadData(WebClient client, string url, byte[] body, string publicId)
+        {
+            try
+            {
+                return Encoding.UTF8.GetString(client.UploadData(url, "POST", body));
+            }
+            catch (WebException ex)
+            {
+                throw CreateCloudinaryException("upload", publicId, ex);
+            }
+        }
+
+        private static Exception CreateCloudinaryException(string operation, string publicId, WebException ex)
+        {
+            var responseBody = string.Empty;
+            if (ex.Response != null)
+            {
+                using (var stream = ex.Response.GetResponseStream())
+                using (var reader = stream != null ? new StreamReader(stream) : null)
+                    responseBody = reader?.ReadToEnd() ?? string.Empty;
+            }
+
+            var message = string.IsNullOrWhiteSpace(responseBody)
+                ? $"Cloudinary {operation} failed for '{publicId}'."
+                : $"Cloudinary {operation} failed for '{publicId}': {responseBody}";
+            return new InvalidOperationException(message, ex);
         }
 
         private static byte[] BuildMultipartBody(string boundary,
