@@ -13,6 +13,7 @@ namespace _3dsGallery.WebUI.Code
 {
     public class PictureSaver
     {
+        private const string OriginalMpoSuffix = "_mpo";
         private readonly ICloudinaryService _cloudinary;
 
         public PictureSaver(ICloudinaryService cloudinary)
@@ -40,6 +41,9 @@ namespace _3dsGallery.WebUI.Code
                 return MergeSideBySide(img1, img2);
             }
         }
+
+        public static string GetOriginalMpoPublicId(string publicId)
+            => publicId + OriginalMpoSuffix;
 
         public Picture AnalyzeAndSave(Picture picture, AddPictureModel model, HttpPostedFileBase file)
         {
@@ -83,6 +87,7 @@ namespace _3dsGallery.WebUI.Code
                     // Upload left eye as main, right eye as publicId+"_r"
                     imgForDisplay = mpoImages[0];
                     picture.type  = "3D";
+                    _cloudinary.UploadRaw(fileBytes, GetOriginalMpoPublicId(publicId), $"{picture.id}.mpo", "application/octet-stream");
                     _cloudinary.Upload(ImageToJpegBytes(mpoImages[0]), publicId);
                     _cloudinary.Upload(ImageToJpegBytes(mpoImages[1]), publicId + "_r");
                 }

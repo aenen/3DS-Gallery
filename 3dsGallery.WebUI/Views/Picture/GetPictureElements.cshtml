@@ -9,13 +9,17 @@
 {
     bool isOwner = itemPic.CreatedBy == User.Identity.Name;
     bool isCloudinary = itemPic.Path != null && System.IO.Path.GetExtension(itemPic.Path) == string.Empty;
-    string fullUrl    = isCloudinary ? cloudinary.GetImageUrl(itemPic.Path)          : ("/" + itemPic.Path.Replace("\\", "/"));
+    bool hasOriginalMpo = itemPic.Is3D;
+    string mpoUrl = hasOriginalMpo
+        ? (isCloudinary ? Url.Action("OriginalMpo", "Picture", new { id = itemPic.IdPicture }) : ("/" + itemPic.Path.Replace("\\", "/")))
+        : null;
+    string fullUrl    = is3ds && hasOriginalMpo ? mpoUrl : (isCloudinary ? cloudinary.GetImageUrl(itemPic.Path) : ("/" + itemPic.Path.Replace("\\", "/")));
     string thumbMdUrl = isCloudinary ? cloudinary.GetThumbnailUrl(itemPic.Path, 280) : (System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.IdPicture}-thumb_md.JPG") ? $"/Picture/{itemPic.IdPicture}-thumb_md.JPG" : $"/Picture/{itemPic.IdPicture}.JPG");
 
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div>
             <div class="thumbnail" data-id="@itemPic.IdPicture">
-                <div class="preview-container-md style-@itemPic.ColorThemeClass" data-style="@itemPic.ColorThemeClass" data-author="@itemPic.CreatedBy" data-id-gallery="@itemPic.IdGallery" data-pic-path="@fullUrl" data-is-3d="@(itemPic.Is3D ? "true" : "false")">
+                <div class="preview-container-md style-@itemPic.ColorThemeClass" data-style="@itemPic.ColorThemeClass" data-author="@itemPic.CreatedBy" data-id-gallery="@itemPic.IdGallery" data-pic-path="@fullUrl" data-mpo-path="@mpoUrl" data-is-3d="@(itemPic.Is3D ? "true" : "false")">
                     <a target="_blank" href="@fullUrl">
                         <img class="preview-img" src="@thumbMdUrl" />
                     </a>

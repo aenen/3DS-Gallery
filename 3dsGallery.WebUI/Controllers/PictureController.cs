@@ -78,6 +78,37 @@ namespace _3dsGallery.WebUI.Controllers
             return View(modelResult);
         }
 
+        public ActionResult OriginalMpo(int? id)
+        {
+            if (id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var picture = db.Picture.Find(id);
+            if (picture == null || picture.type != "3D")
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
+            if (picture.Gallery.IsPrivate && picture.Gallery.User.login != User.Identity.Name)
+                return RedirectToAction("Index", "Home");
+
+            if (string.IsNullOrEmpty(picture.path))
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
+            if (System.IO.Path.GetExtension(picture.path) != string.Empty)
+                return Redirect("/" + picture.path.Replace('\\', '/'));
+
+            var cloudinary = new CloudinaryService();
+            try
+            {
+                var bytes = cloudinary.Download(cloudinary.GetRawUrl(PictureSaver.GetOriginalMpoPublicId(picture.path), "mpo"));
+                Response.AppendHeader("Content-Disposition", $"inline; filename={picture.id}.MPO");
+                return File(bytes, "image/mpo");
+            }
+            catch (WebException)
+            {
+                return Redirect(cloudinary.GetImageUrl(picture.path));
+            }
+        }
+
         [Only3DS]
         [Authorize]
         [Route("AddPicture")]
@@ -380,7 +411,10 @@ namespace _3dsGallery.WebUI.Controllers
             {
                 cloudinary.Delete(picture.path);
                 if (picture.type == "3D")
+                {
                     cloudinary.Delete(picture.path + "_r");
+                    cloudinary.DeleteRaw(PictureSaver.GetOriginalMpoPublicId(picture.path));
+                }
             }
 
             Gallery gallery = picture.Gallery;
@@ -520,8 +554,9 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult GetPath(int id)
         {
             var pic = db.Picture.Find(id);
-            // Cloudinary paths have no extension; legacy paths keep their original URL form
-            string result = pic.path != null && System.IO.Path.GetExtension(pic.path) == string.Empty
+            string result = pic.type == "3D" && pic.path != null && System.IO.Path.GetExtension(pic.path) == string.Empty
+                ? Url.Action("OriginalMpo", "Picture", new { id = pic.id }, Request.Url.Scheme)
+                : pic.path != null && System.IO.Path.GetExtension(pic.path) == string.Empty
                 ? new CloudinaryService().GetImageUrl(pic.path)
                 : $"http://3dsgallery.azurewebsites.net/{pic.path.Replace('\\', '/')}";
             return Json(result);

@@ -288,7 +288,10 @@ namespace _3dsGallery.WebUI.Controllers
                 {
                     cloudinary.Delete(item.path);
                     if (item.type == "3D")
+                    {
                         cloudinary.Delete(item.path + "_r");
+                        cloudinary.DeleteRaw(PictureSaver.GetOriginalMpoPublicId(item.path));
+                    }
                 }
                 Picture picture = db.Picture.Include(X => X.User).FirstOrDefault(x => x.id == item.id);
                 picture.User.Clear();

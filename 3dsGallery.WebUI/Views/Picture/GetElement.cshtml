@@ -5,7 +5,10 @@
     bool isOwner = Model.Gallery.User.login == User.Identity.Name;
     var cloudinary = new _3dsGallery.WebUI.Code.CloudinaryService();
     bool isCloudinary = Model.path != null && System.IO.Path.GetExtension(Model.path) == string.Empty;
-    string fullUrl    = isCloudinary ? cloudinary.GetImageUrl(Model.path)          : ("/" + Model.path.Replace("\\", "/"));
+    bool hasOriginalMpo = Model.type == "3D";
+    string fullUrl    = is3ds && hasOriginalMpo
+        ? (isCloudinary ? Url.Action("OriginalMpo", "Picture", new { id = Model.id }) : ("/" + Model.path.Replace("\\", "/")))
+        : (isCloudinary ? cloudinary.GetImageUrl(Model.path) : ("/" + Model.path.Replace("\\", "/")));
     string thumbMdUrl = isCloudinary ? cloudinary.GetThumbnailUrl(Model.path, 280) : (System.IO.File.Exists($"{Server.MapPath("~")}Picture/{Model.id}-thumb_md.JPG") ? $"/Picture/{Model.id}-thumb_md.JPG" : $"/Picture/{Model.id}.JPG");
 }
 <div class="col-lg-3 col-md-4 col-sm-6">
