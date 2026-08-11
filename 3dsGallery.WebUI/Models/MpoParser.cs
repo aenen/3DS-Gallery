@@ -40,7 +40,11 @@
         {
             foreach (var buffer in GetImageData(path))
             {
-                yield return Image.FromStream(new MemoryStream(buffer));
+                using (var stream = new MemoryStream(buffer))
+                using (var image = Image.FromStream(stream))
+                {
+                    yield return new Bitmap(image);
+                }
             }
             yield break;
         }
@@ -52,7 +56,13 @@
         public static IEnumerable<Image> GetImageSources(byte[] data)
         {
             foreach (var buffer in GetImageData(data))
-                yield return Image.FromStream(new MemoryStream(buffer));
+            {
+                using (var stream = new MemoryStream(buffer))
+                using (var image = Image.FromStream(stream))
+                {
+                    yield return new Bitmap(image);
+                }
+            }
         }
 
         /// <summary>
@@ -199,9 +209,9 @@
 
                             for (int i = 0; i < count; i++)
                             {
-                                var tag   = r.ReadUShort(isLittleEndian);
-                                var type  = r.ReadUShort(isLittleEndian);
-                                var count2 = r.ReadUInt(isLittleEndian);
+                                var tag = r.ReadUShort(isLittleEndian);
+                                r.ReadUShort(isLittleEndian);
+                                r.ReadUInt(isLittleEndian);
                                 switch (tag)
                                 {
                                     case 0xB000: r.ReadBytes(4); break;

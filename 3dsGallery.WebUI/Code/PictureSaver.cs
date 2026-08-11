@@ -36,9 +36,11 @@ namespace _3dsGallery.WebUI.Code
             using (var ms1 = new MemoryStream(leftBytes))
             using (var ms2 = new MemoryStream(rightBytes))
             {
-                var img1 = Image.FromStream(ms1);
-                var img2 = Image.FromStream(ms2);
-                return MergeSideBySide(img1, img2);
+                using (var img1 = Image.FromStream(ms1))
+                using (var img2 = Image.FromStream(ms2))
+                {
+                    return MergeSideBySide(img1, img2);
+                }
             }
         }
 
