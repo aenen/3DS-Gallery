@@ -98,7 +98,7 @@ namespace _3dsGallery.WebUI.Controllers
             {
                 var bytes = cloudinary.Download(cloudinary.GetRawUrl(PictureSaver.GetOriginalMpoPublicId(picture.path), "mpo"));
                 Response.AppendHeader("Content-Disposition", $"inline; filename=\"{picture.id}.MPO\"");
-                return File(bytes, "image/jpeg");
+                return File(bytes, "image/mpo");
             }
             catch (WebException)
             {
