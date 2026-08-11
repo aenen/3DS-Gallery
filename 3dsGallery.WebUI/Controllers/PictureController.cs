@@ -93,9 +93,6 @@ namespace _3dsGallery.WebUI.Controllers
             if (string.IsNullOrEmpty(picture.path))
                 return new HttpStatusCodeResult(HttpStatusCode.NotFound);
 
-            if (System.IO.Path.GetExtension(picture.path) != string.Empty)
-                return Redirect("/" + picture.path.Replace('\\', '/'));
-
             var cloudinary = new CloudinaryService();
             try
             {
@@ -315,10 +312,7 @@ namespace _3dsGallery.WebUI.Controllers
                 .Skip(offset)
                 .FirstOrDefault();
 
-            // New Cloudinary paths have no extension; legacy paths have .JPG/.MPO
-            string url = randomRow.path != null && System.IO.Path.GetExtension(randomRow.path) == string.Empty
-                ? new CloudinaryService().GetImageUrl(randomRow.path)
-                : randomRow.path;
+            string url = new CloudinaryService().GetImageUrl(randomRow.path);
             return Json(url);
         }
 
@@ -406,8 +400,8 @@ namespace _3dsGallery.WebUI.Controllers
             var cloudinary = new CloudinaryService();
             Picture picture = db.Picture.Include(X => X.User).FirstOrDefault(x => x.id == id);
 
-            // Delete from Cloudinary (Cloudinary paths have no file extension; legacy local paths do)
-            if (!string.IsNullOrEmpty(picture.path) && System.IO.Path.GetExtension(picture.path) == string.Empty)
+            // Delete from Cloudinary
+            if (!string.IsNullOrEmpty(picture.path))
             {
                 cloudinary.Delete(picture.path);
                 if (picture.type == "3D")
@@ -554,11 +548,9 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult GetPath(int id)
         {
             var pic = db.Picture.Find(id);
-            string result = pic.type == "3D" && pic.path != null && System.IO.Path.GetExtension(pic.path) == string.Empty
+            string result = pic.type == "3D"
                 ? Url.Action("OriginalMpo", "Picture", new { id = pic.id }, Request.Url.Scheme)
-                : pic.path != null && System.IO.Path.GetExtension(pic.path) == string.Empty
-                ? new CloudinaryService().GetImageUrl(pic.path)
-                : $"http://3dsgallery.azurewebsites.net/{pic.path.Replace('\\', '/')}";
+                : new CloudinaryService().GetImageUrl(pic.path);
             return Json(result);
         }
 

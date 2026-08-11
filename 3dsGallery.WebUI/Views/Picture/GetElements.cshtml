@@ -8,13 +8,12 @@
 @foreach (var itemPic in Model)
 {
     bool isOwner = itemPic.Gallery.User.login == User.Identity.Name;
-    bool isCloudinary = itemPic.path != null && System.IO.Path.GetExtension(itemPic.path) == string.Empty;
     bool hasOriginalMpo = itemPic.type == "3D";
     string mpoUrl = hasOriginalMpo
-        ? (isCloudinary ? Url.Action("OriginalMpo", "Picture", new { id = itemPic.id }) : ("/" + itemPic.path.Replace("\\", "/")))
+        ? Url.Action("OriginalMpo", "Picture", new { id = itemPic.id })
         : null;
-    string fullUrl    = is3ds && hasOriginalMpo ? mpoUrl : (isCloudinary ? cloudinary.GetImageUrl(itemPic.path) : ("/" + itemPic.path.Replace("\\", "/")));
-    string thumbMdUrl = isCloudinary ? cloudinary.GetThumbnailUrl(itemPic.path, 280)     : (System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.id}-thumb_md.JPG") ? $"/Picture/{itemPic.id}-thumb_md.JPG" : $"/Picture/{itemPic.id}.JPG");
+    string fullUrl    = is3ds && hasOriginalMpo ? mpoUrl : cloudinary.GetImageUrl(itemPic.path);
+    string thumbMdUrl = cloudinary.GetThumbnailUrl(itemPic.path, 280);
 
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div>

@@ -29,12 +29,11 @@
                 var previews = Model.Picture.OrderByDescending(x => x.id).Take(counter);
                 foreach (var pv in previews)
                 {
-                    bool isCloudinary = pv.path != null && System.IO.Path.GetExtension(pv.path) == string.Empty;
                     bool hasOriginalMpo = pv.type == "3D";
                     string fullUrl    = is3ds && hasOriginalMpo
-                        ? (isCloudinary ? Url.Action("OriginalMpo", "Picture", new { id = pv.id }) : ("/" + pv.path.Replace("\\", "/")))
-                        : (isCloudinary ? cloudinary.GetImageUrl(pv.path) : ("/" + pv.path.Replace("\\", "/")));
-                    string thumbSmUrl = isCloudinary ? cloudinary.GetThumbnailUrl(pv.path, 155, 97) : (System.IO.File.Exists($"{Server.MapPath("~")}Picture/{pv.id}-thumb_sm.JPG") ? $"/Picture/{pv.id}-thumb_sm.JPG" : $"/Picture/{pv.id}.JPG");
+                        ? Url.Action("OriginalMpo", "Picture", new { id = pv.id })
+                        : cloudinary.GetImageUrl(pv.path);
+                    string thumbSmUrl = cloudinary.GetThumbnailUrl(pv.path, 155, 97);
                     <div class="preview-container-sm">
                         <a target="_blank" href="@fullUrl">
                             <img class="img-thumbnail preview-img " src="@thumbSmUrl">

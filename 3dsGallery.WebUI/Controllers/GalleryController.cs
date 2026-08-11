@@ -284,7 +284,7 @@ namespace _3dsGallery.WebUI.Controllers
             Gallery gallery = db.Gallery.FirstOrDefault(x => x.id == id);
             foreach (var item in gallery.Picture.ToList())
             {
-                if (!string.IsNullOrEmpty(item.path) && System.IO.Path.GetExtension(item.path) == string.Empty)
+                if (!string.IsNullOrEmpty(item.path))
                 {
                     cloudinary.Delete(item.path);
                     if (item.type == "3D")
