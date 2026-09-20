@@ -1,18 +1,15 @@
 # ImageKit migration guide
 
-This repository now supports mixed local/remote picture delivery and new uploads to ImageKit.
+This repository now uses ImageKit as the picture source without changing the database schema.
 
 ## What changed
 
 - New uploads persist to ImageKit instead of the local `Picture/` folder.
 - Existing rows can stay local until they are migrated.
 - Every remote `.MPO` open/download URL is resolved with `tr=orig-true` so ImageKit serves the original MPO bytes.
-- The database now stores explicit ImageKit file IDs and remote paths in a separate `PictureRemoteAsset` table for:
-  - original asset
-  - preview JPG
-  - optional `thumb_sm`
-  - optional `thumb_md`
-- `StorageProvider` and `StorageMigrationStatus` stay in `PictureRemoteAsset`, so the existing `Picture` table stays unchanged.
+- The existing `Picture.path` naming stays the source of truth.
+- ImageKit stores files under the same legacy naming structure, rooted at `ImageKitUploadFolder`.
+- 3D previews keep using `Picture/{id}.JPG`, and MPO originals always open with `tr=orig-true`.
 
 ## Do this first
 
@@ -39,20 +36,10 @@ Set these deployment settings before enabling remote uploads in production:
 
 Do **not** commit real credentials.
 
-## Database/schema deployment order
+## Deployment order
 
-1. Deploy the database migration that creates `dbo.PictureRemoteAsset` with:
-   - `StorageProvider`
-   - `StorageMigrationStatus`
-   - `OriginalRemoteFileId`
-   - `OriginalRemotePath`
-   - `PreviewRemoteFileId`
-   - `PreviewRemotePath`
-   - `ThumbnailSmallRemoteFileId`
-   - `ThumbnailSmallRemotePath`
-   - `ThumbnailMediumRemoteFileId`
-   - `ThumbnailMediumRemotePath`
-2. Deploy the application with ImageKit settings configured.
+1. Configure the ImageKit settings.
+2. Deploy the application.
 3. Verify a staging upload before migrating production history.
 
 ## Staging verification checklist
@@ -81,7 +68,6 @@ It is designed for:
 - bounded concurrency
 - JSONL journaling
 - resumable reruns
-- SQL update batch generation
 - original-byte verification by SHA-256 and byte count using raw MPO delivery
 - missing file reporting
 - cleanup of partially uploaded assets when a row fails
@@ -153,9 +139,6 @@ This writes:
 
 - `journal.jsonl`
 - `state.json`
-- one `batch_XXX.sql` file per processed batch
-
-Apply the generated SQL only after reviewing the pilot results.
 
 ## Full migration / resume
 
@@ -177,20 +160,17 @@ If a crash happens mid-run:
 - fix the underlying problem
 - rerun the same command
 
-## Applying DB updates
+## Cutover
 
-The utility generates idempotent SQL upsert statements for `dbo.PictureRemoteAsset` per batch.
+There are no database updates to apply.
 
 Recommended process:
 
 1. Run pilot.
 2. Review ImageKit files and journal.
-3. Apply the pilot SQL updates.
-4. Verify the pilot rows in the app.
-5. Run the full migration.
-6. Apply the remaining SQL updates in order.
-
-Only rows with fully uploaded and verified assets are written as `RemoteActive`.
+3. Verify the pilot rows in the app.
+4. Run the full migration.
+5. Deploy or recycle the app with the same ImageKit settings.
 
 ## Mixed-mode rollout and cutover
 
@@ -198,7 +178,7 @@ During rollout:
 
 - existing local-only rows keep working
 - newly uploaded rows use ImageKit
-- migrated rows switch to ImageKit through `PictureRemoteAsset`
+- migrated rows switch to ImageKit automatically because delivery now derives from the existing `Picture.path`
 
 Do not delete the local `Picture/` directory during the migration.
 
@@ -207,8 +187,8 @@ Do not delete the local `Picture/` directory during the migration.
 After all SQL batches are applied:
 
 1. Compare migrated row count against the manifest row count.
-2. Count `RemoteActive` rows in `dbo.PictureRemoteAsset`.
-3. Count journal `success` rows.
+2. Count journal `success` rows.
+3. Compare the ImageKit asset count against expected originals/previews/thumbs.
 4. Randomly sample public 2D rows.
 5. Randomly sample public 3D rows.
 6. Verify `GenerateSideBySide` still works for migrated 3D rows.

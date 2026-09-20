@@ -100,7 +100,7 @@ class MigrationRunnerTests(unittest.TestCase):
 
     def test_resume_skips_successful_rows(self):
         journal = Journal(self.output / "journal.jsonl")
-        journal.append({"picture_id": 1, "gallery_id": 2, "status": "success", "message": "ok", "assets": {}, "sql": None, "timestamp": "now"})
+        journal.append({"picture_id": 1, "gallery_id": 2, "status": "success", "message": "ok", "assets": {}, "timestamp": "now"})
         client = FakeStorageClient()
         runner = MigrationRunner(client, self.root, journal, self.output, True, 1, 10)
         result = runner.run([ManifestRow(1, 2, "Picture/1.MPO", "3D")])
@@ -116,17 +116,14 @@ class MigrationRunnerTests(unittest.TestCase):
         self.assertEqual(result["error"], 1)
         self.assertEqual(client.delete_calls, ["file-1"])
 
-    def test_success_writes_sql_and_verifies_raw_mpo_url(self):
+    def test_success_verifies_raw_mpo_url_without_db_updates(self):
         journal = Journal(self.output / "journal.jsonl")
         client = FakeStorageClient()
         client._original_root = self.root
         runner = MigrationRunner(client, self.root, journal, self.output, False, 1, 10)
         result = runner.run([ManifestRow(1, 2, "Picture/1.MPO", "3D")])
         self.assertEqual(result["success"], 1)
-        sql_files = list(self.output.glob("batch_*.sql"))
-        self.assertEqual(len(sql_files), 1)
-        sql_text = sql_files[0].read_text(encoding="utf-8")
-        self.assertIn("PictureRemoteAsset", sql_text)
+        self.assertEqual(list(self.output.glob("batch_*.sql")), [])
         self.assertTrue(client.download_calls[0].endswith("?tr=orig-true"))
 
     def test_duplicate_ids_in_same_batch_are_deduplicated(self):

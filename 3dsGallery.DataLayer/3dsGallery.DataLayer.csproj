@@ -57,7 +57,6 @@
     <Compile Include="DataBase\Notification.cs" />
     <Compile Include="DataBase\PictureComment.cs" />
     <Compile Include="DataBase\Picture.cs" />
-    <Compile Include="DataBase\PictureRemoteAsset.cs" />
     <Compile Include="DataBase\Style.cs" />
     <Compile Include="DataBase\User.cs" />
     <Compile Include="Migrations\201804222131291_AddLastPicture.cs" />
@@ -103,10 +102,6 @@
     <Compile Include="Migrations\202607111441499_AddUserActorToNotifications.cs" />
     <Compile Include="Migrations\202607111441499_AddUserActorToNotifications.Designer.cs">
       <DependentUpon>202607111441499_AddUserActorToNotifications.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202609201640000_AddImageKitPictureStorage.cs" />
-    <Compile Include="Migrations\202609201640000_AddImageKitPictureStorage.Designer.cs">
-      <DependentUpon>202609201640000_AddImageKitPictureStorage.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

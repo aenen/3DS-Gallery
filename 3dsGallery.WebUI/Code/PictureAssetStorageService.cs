@@ -1,6 +1,7 @@
 using _3dsGallery.DataLayer.DataBase;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace _3dsGallery.WebUI.Code
@@ -42,7 +43,7 @@ namespace _3dsGallery.WebUI.Code
         {
             _imageKitClient = imageKitClient;
             _urlResolver = urlResolver;
-            _uploadFolder = uploadFolder;
+            _uploadFolder = string.IsNullOrWhiteSpace(uploadFolder) ? "/3dsgallery/pictures" : uploadFolder;
         }
 
         public void UploadAssets(Picture picture, PictureAssetUploadRequest request)
@@ -58,94 +59,32 @@ namespace _3dsGallery.WebUI.Code
 
             var originalPath = picture.path;
             var originalType = picture.type;
-            var remoteAsset = picture.RemoteAsset;
-            var originalStorageProvider = remoteAsset != null ? remoteAsset.StorageProvider : null;
-            var originalStorageMigrationStatus = remoteAsset != null ? remoteAsset.StorageMigrationStatus : null;
-            var originalRemoteFileId = remoteAsset != null ? remoteAsset.OriginalRemoteFileId : null;
-            var originalRemotePath = remoteAsset != null ? remoteAsset.OriginalRemotePath : null;
-            var originalPreviewRemoteFileId = remoteAsset != null ? remoteAsset.PreviewRemoteFileId : null;
-            var originalPreviewRemotePath = remoteAsset != null ? remoteAsset.PreviewRemotePath : null;
-            var originalThumbnailSmallRemoteFileId = remoteAsset != null ? remoteAsset.ThumbnailSmallRemoteFileId : null;
-            var originalThumbnailSmallRemotePath = remoteAsset != null ? remoteAsset.ThumbnailSmallRemotePath : null;
-            var originalThumbnailMediumRemoteFileId = remoteAsset != null ? remoteAsset.ThumbnailMediumRemoteFileId : null;
-            var originalThumbnailMediumRemotePath = remoteAsset != null ? remoteAsset.ThumbnailMediumRemotePath : null;
             var uploadedFileIds = new List<string>();
             try
             {
-                remoteAsset = EnsureRemoteAsset(picture);
-                remoteAsset.StorageProvider = PictureStorageConstants.StorageProviderImageKit;
-                remoteAsset.StorageMigrationStatus = PictureStorageConstants.MigrationStatusRemotePending;
                 picture.path = request.LegacyPath;
                 picture.type = request.PictureType;
 
-                var originalUpload = UploadFile(request.OriginalBytes, request.OriginalFileName, GetOriginalFolder(), request.OriginalContentType);
-                ApplyOriginal(remoteAsset, originalUpload);
-                uploadedFileIds.Add(originalUpload.FileId);
+                uploadedFileIds.Add(UploadFile(request.OriginalBytes, GetRemoteOriginalPath(picture), request.OriginalContentType));
 
                 if (request.PreviewBytes != null && request.PreviewBytes.Length > 0)
                 {
-                    if (ShouldReuseOriginal(request, originalUpload))
-                    {
-                        remoteAsset.PreviewRemoteFileId = remoteAsset.OriginalRemoteFileId;
-                        remoteAsset.PreviewRemotePath = remoteAsset.OriginalRemotePath;
-                    }
-                    else
-                    {
-                        var previewUpload = UploadFile(request.PreviewBytes, request.PreviewFileName, GetPreviewFolder(), "image/jpeg");
-                        remoteAsset.PreviewRemoteFileId = previewUpload.FileId;
-                        remoteAsset.PreviewRemotePath = previewUpload.FilePath;
-                        uploadedFileIds.Add(previewUpload.FileId);
-                    }
+                    var previewPath = GetRemotePreviewPath(picture);
+                    if (!string.Equals(previewPath, GetRemoteOriginalPath(picture), StringComparison.OrdinalIgnoreCase))
+                        uploadedFileIds.Add(UploadFile(request.PreviewBytes, previewPath, "image/jpeg"));
                 }
 
                 if (request.ThumbnailSmallBytes != null && request.ThumbnailSmallBytes.Length > 0)
-                {
-                    var thumbSmallUpload = UploadFile(request.ThumbnailSmallBytes, request.ThumbnailSmallFileName, GetThumbnailSmallFolder(), "image/jpeg");
-                    remoteAsset.ThumbnailSmallRemoteFileId = thumbSmallUpload.FileId;
-                    remoteAsset.ThumbnailSmallRemotePath = thumbSmallUpload.FilePath;
-                    uploadedFileIds.Add(thumbSmallUpload.FileId);
-                }
-                else
-                {
-                    remoteAsset.ThumbnailSmallRemoteFileId = null;
-                    remoteAsset.ThumbnailSmallRemotePath = null;
-                }
+                    uploadedFileIds.Add(UploadFile(request.ThumbnailSmallBytes, GetRemoteThumbnailSmallPath(picture), "image/jpeg"));
 
                 if (request.ThumbnailMediumBytes != null && request.ThumbnailMediumBytes.Length > 0)
-                {
-                    var thumbMediumUpload = UploadFile(request.ThumbnailMediumBytes, request.ThumbnailMediumFileName, GetThumbnailMediumFolder(), "image/jpeg");
-                    remoteAsset.ThumbnailMediumRemoteFileId = thumbMediumUpload.FileId;
-                    remoteAsset.ThumbnailMediumRemotePath = thumbMediumUpload.FilePath;
-                    uploadedFileIds.Add(thumbMediumUpload.FileId);
-                }
-                else
-                {
-                    remoteAsset.ThumbnailMediumRemoteFileId = null;
-                    remoteAsset.ThumbnailMediumRemotePath = null;
-                }
-
-                remoteAsset.StorageMigrationStatus = PictureStorageConstants.MigrationStatusRemoteActive;
+                    uploadedFileIds.Add(UploadFile(request.ThumbnailMediumBytes, GetRemoteThumbnailMediumPath(picture), "image/jpeg"));
             }
             catch
             {
                 TryDeleteUploadedFiles(uploadedFileIds);
                 picture.path = originalPath;
                 picture.type = originalType;
-                if (remoteAsset != null)
-                {
-                    remoteAsset.StorageProvider = originalStorageProvider;
-                    remoteAsset.StorageMigrationStatus = originalStorageMigrationStatus;
-                    remoteAsset.OriginalRemoteFileId = originalRemoteFileId;
-                    remoteAsset.OriginalRemotePath = originalRemotePath;
-                    remoteAsset.PreviewRemoteFileId = originalPreviewRemoteFileId;
-                    remoteAsset.PreviewRemotePath = originalPreviewRemotePath;
-                    remoteAsset.ThumbnailSmallRemoteFileId = originalThumbnailSmallRemoteFileId;
-                    remoteAsset.ThumbnailSmallRemotePath = originalThumbnailSmallRemotePath;
-                    remoteAsset.ThumbnailMediumRemoteFileId = originalThumbnailMediumRemoteFileId;
-                    remoteAsset.ThumbnailMediumRemotePath = originalThumbnailMediumRemotePath;
-                    if (string.IsNullOrWhiteSpace(originalStorageProvider) && string.IsNullOrWhiteSpace(originalStorageMigrationStatus))
-                        picture.RemoteAsset = null;
-                }
                 throw;
             }
         }
@@ -154,45 +93,26 @@ namespace _3dsGallery.WebUI.Code
         {
             if (picture == null)
                 throw new ArgumentNullException("picture");
-            var remoteAsset = picture.RemoteAsset;
-            if (!_urlResolver.IsRemoteActive(picture)
-                && (remoteAsset == null || remoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending))
-                return;
             if (_imageKitClient == null)
                 throw new InvalidOperationException("ImageKit is not configured. Set ImageKitPrivateKey and ImageKitUrlEndpoint before deleting remote picture assets.");
 
-            var fileIds = new[]
-            {
-                remoteAsset != null ? remoteAsset.OriginalRemoteFileId : null,
-                remoteAsset != null ? remoteAsset.PreviewRemoteFileId : null,
-                remoteAsset != null ? remoteAsset.ThumbnailSmallRemoteFileId : null,
-                remoteAsset != null ? remoteAsset.ThumbnailMediumRemoteFileId : null
-            }
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct()
-            .ToList();
-
             var failures = new List<string>();
-            foreach (var fileId in fileIds)
+            foreach (var remotePath in GetRemotePaths(picture))
             {
                 try
                 {
-                    var result = _imageKitClient.Delete(fileId);
+                    var result = _imageKitClient.DeleteByPath(remotePath);
                     if (!result.Deleted && !result.NotFound)
-                        failures.Add(fileId);
+                        failures.Add(remotePath);
                 }
                 catch
                 {
-                    failures.Add(fileId);
+                    failures.Add(remotePath);
                 }
             }
 
             if (failures.Any())
-            {
-                remoteAsset = EnsureRemoteAsset(picture);
-                remoteAsset.StorageMigrationStatus = PictureStorageConstants.MigrationStatusDeletePending;
                 throw new InvalidOperationException("ImageKit deletion failed for one or more picture assets.");
-            }
         }
 
         public byte[] DownloadOriginalBytes(Picture picture)
@@ -204,29 +124,53 @@ namespace _3dsGallery.WebUI.Code
                 return _imageKitClient.Download(_urlResolver.GetRemoteOriginalUrl(picture));
 
             var localPath = _urlResolver.GetLocalOriginalPhysicalPath(picture);
-            if (string.IsNullOrWhiteSpace(localPath) || !System.IO.File.Exists(localPath))
+            if (string.IsNullOrWhiteSpace(localPath) || !File.Exists(localPath))
                 throw new InvalidOperationException("Original picture file was not found.");
 
-            return System.IO.File.ReadAllBytes(localPath);
+            return File.ReadAllBytes(localPath);
         }
 
-        private void ApplyOriginal(PictureRemoteAsset remoteAsset, ImageKitStoredFile originalUpload)
+        private string UploadFile(byte[] bytes, string remotePath, string contentType)
         {
-            remoteAsset.OriginalRemoteFileId = originalUpload.FileId;
-            remoteAsset.OriginalRemotePath = originalUpload.FilePath;
+            var normalizedPath = NormalizeRemotePath(remotePath);
+            var lastSlashIndex = normalizedPath.LastIndexOf('/');
+            var folder = lastSlashIndex > 0 ? normalizedPath.Substring(0, lastSlashIndex) : _uploadFolder;
+            var fileName = lastSlashIndex >= 0 ? normalizedPath.Substring(lastSlashIndex + 1) : normalizedPath;
+            return _imageKitClient.Upload(bytes, fileName, folder, contentType).FileId;
         }
 
-        private bool ShouldReuseOriginal(PictureAssetUploadRequest request, ImageKitStoredFile originalUpload)
+        private IEnumerable<string> GetRemotePaths(Picture picture)
         {
-            return string.Equals(request.PictureType, "2D", StringComparison.OrdinalIgnoreCase)
-                && request.PreviewBytes != null
-                && request.OriginalBytes.SequenceEqual(request.PreviewBytes)
-                && !string.IsNullOrWhiteSpace(originalUpload.FileId);
+            return new[]
+            {
+                GetRemoteOriginalPath(picture),
+                GetRemotePreviewPath(picture),
+                GetRemoteThumbnailSmallPath(picture),
+                GetRemoteThumbnailMediumPath(picture)
+            }
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
         }
 
-        private ImageKitStoredFile UploadFile(byte[] bytes, string fileName, string folderPath, string contentType)
+        private string GetRemoteOriginalPath(Picture picture)
         {
-            return _imageKitClient.Upload(bytes, fileName, folderPath, contentType);
+            return _urlResolver.GetRemoteOriginalPath(picture);
+        }
+
+        private string GetRemotePreviewPath(Picture picture)
+        {
+            return _urlResolver.GetRemotePreviewPath(picture);
+        }
+
+        private string GetRemoteThumbnailSmallPath(Picture picture)
+        {
+            return _urlResolver.GetRemoteThumbnailSmallPath(picture);
+        }
+
+        private string GetRemoteThumbnailMediumPath(Picture picture)
+        {
+            return _urlResolver.GetRemoteThumbnailMediumPath(picture);
         }
 
         private void TryDeleteUploadedFiles(IEnumerable<string> uploadedFileIds)
@@ -243,38 +187,15 @@ namespace _3dsGallery.WebUI.Code
             }
         }
 
-        private PictureRemoteAsset EnsureRemoteAsset(Picture picture)
+        private string NormalizeRemotePath(string remotePath)
         {
-            if (picture.RemoteAsset == null)
-            {
-                picture.RemoteAsset = new PictureRemoteAsset
-                {
-                    Picture = picture,
-                    PictureId = picture.id
-                };
-            }
+            if (string.IsNullOrWhiteSpace(remotePath))
+                return _uploadFolder;
 
-            return picture.RemoteAsset;
-        }
-
-        private string GetOriginalFolder()
-        {
-            return _uploadFolder + "/originals";
-        }
-
-        private string GetPreviewFolder()
-        {
-            return _uploadFolder + "/previews";
-        }
-
-        private string GetThumbnailSmallFolder()
-        {
-            return _uploadFolder + "/thumbs/sm";
-        }
-
-        private string GetThumbnailMediumFolder()
-        {
-            return _uploadFolder + "/thumbs/md";
+            var normalized = remotePath.Replace('\\', '/').Trim();
+            if (!normalized.StartsWith("/"))
+                normalized = "/" + normalized;
+            return normalized;
         }
 
         private static IImageKitClient TryCreateClient()

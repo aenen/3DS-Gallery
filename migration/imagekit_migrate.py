@@ -17,8 +17,6 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
 IMAGEKIT_DEFAULT_FOLDER = "/3dsgallery/pictures"
-STORAGE_PROVIDER = "ImageKit"
-STATUS_REMOTE_ACTIVE = "RemoteActive"
 JOURNAL_SUCCESS = "success"
 
 
@@ -167,12 +165,9 @@ class MigrationRunner:
                 futures = [executor.submit(self.process_row, row) for row in chunk]
                 results = [future.result() for future in futures]
 
-            sql_lines = []
             for result in results:
                 counts[result["status"]] = counts.get(result["status"], 0) + 1
                 self.journal.append(result)
-                if result.get("sql"):
-                    sql_lines.append(result["sql"])
 
             state = {
                 "chunk": chunk_index,
@@ -183,11 +178,6 @@ class MigrationRunner:
             self.output_directory.mkdir(parents=True, exist_ok=True)
             with (self.output_directory / "state.json").open("w", encoding="utf-8") as handle:
                 json.dump(state, handle, indent=2, sort_keys=True)
-
-            if sql_lines:
-                sql_file = self.output_directory / ("batch_%03d.sql" % chunk_index)
-                with sql_file.open("w", encoding="utf-8") as handle:
-                    handle.write("\n".join(sql_lines) + "\n")
 
         return counts
 
@@ -209,7 +199,7 @@ class MigrationRunner:
             original = self.storage_client.upload(
                 plan.original_path.read_bytes(),
                 plan.original_path.name,
-                IMAGEKIT_DEFAULT_FOLDER + "/originals",
+                build_remote_folder(plan.remote_legacy_path),
                 guess_content_type(plan.original_path),
             )
             uploaded.append(original["fileId"])
@@ -221,7 +211,7 @@ class MigrationRunner:
                 preview = self.storage_client.upload(
                     plan.preview_path.read_bytes(),
                     plan.preview_path.name,
-                    IMAGEKIT_DEFAULT_FOLDER + "/previews",
+                    build_remote_folder("Picture/%s.JPG" % row.picture_id),
                     "image/jpeg",
                 )
                 uploaded.append(preview["fileId"])
@@ -231,7 +221,7 @@ class MigrationRunner:
                 thumb_small = self.storage_client.upload(
                     plan.thumb_small_path.read_bytes(),
                     plan.thumb_small_path.name,
-                    IMAGEKIT_DEFAULT_FOLDER + "/thumbs/sm",
+                    build_remote_folder("Picture/%s-thumb_sm.JPG" % row.picture_id),
                     "image/jpeg",
                 )
                 uploaded.append(thumb_small["fileId"])
@@ -241,7 +231,7 @@ class MigrationRunner:
                 thumb_medium = self.storage_client.upload(
                     plan.thumb_medium_path.read_bytes(),
                     plan.thumb_medium_path.name,
-                    IMAGEKIT_DEFAULT_FOLDER + "/thumbs/md",
+                    build_remote_folder("Picture/%s-thumb_md.JPG" % row.picture_id),
                     "image/jpeg",
                 )
                 uploaded.append(thumb_medium["fileId"])
@@ -252,11 +242,9 @@ class MigrationRunner:
             if len(remote_original_bytes) != len(original_bytes) or sha256_hex(remote_original_bytes) != sha256_hex(original_bytes):
                 raise RuntimeError("verification failed for original asset")
 
-            sql = build_update_sql(row, plan, original, preview, thumb_small, thumb_medium)
             return self._entry(
                 row,
                 JOURNAL_SUCCESS,
-                sql=sql,
                 assets={
                     "original": original,
                     "preview": preview,
@@ -273,14 +261,13 @@ class MigrationRunner:
                     pass
             return self._entry(row, "error", message=str(error))
 
-    def _entry(self, row: ManifestRow, status: str, message: str, assets: Optional[Dict[str, object]] = None, sql: Optional[str] = None) -> Dict[str, object]:
+    def _entry(self, row: ManifestRow, status: str, message: str, assets: Optional[Dict[str, object]] = None) -> Dict[str, object]:
         return {
             "picture_id": row.picture_id,
             "gallery_id": row.gallery_id,
             "status": status,
             "message": message,
             "assets": assets or {},
-            "sql": sql,
             "timestamp": utc_now_iso(),
         }
 
@@ -310,50 +297,6 @@ def describe_plan(plan: AssetPlan) -> Dict[str, Optional[str]]:
         "thumb_small": str(plan.thumb_small_path) if plan.thumb_small_path else None,
         "thumb_medium": str(plan.thumb_medium_path) if plan.thumb_medium_path else None,
     }
-
-
-def build_update_sql(row: ManifestRow, plan: AssetPlan, original: Dict[str, object], preview: Dict[str, object], thumb_small: Optional[Dict[str, object]], thumb_medium: Optional[Dict[str, object]]) -> str:
-    values = {
-        "StorageProvider": STORAGE_PROVIDER,
-        "StorageMigrationStatus": STATUS_REMOTE_ACTIVE,
-        "OriginalRemoteFileId": original["fileId"],
-        "OriginalRemotePath": original["filePath"],
-        "PreviewRemoteFileId": preview["fileId"],
-        "PreviewRemotePath": preview["filePath"],
-        "ThumbnailSmallRemoteFileId": thumb_small["fileId"] if thumb_small else None,
-        "ThumbnailSmallRemotePath": thumb_small["filePath"] if thumb_small else None,
-        "ThumbnailMediumRemoteFileId": thumb_medium["fileId"] if thumb_medium else None,
-        "ThumbnailMediumRemotePath": thumb_medium["filePath"] if thumb_medium else None,
-    }
-    assignments = []
-    for key, value in values.items():
-        if value is None:
-            assignments.append("[%s] = NULL" % key)
-        else:
-            assignments.append("[%s] = '%s'" % (key, sql_escape(str(value))))
-    assignment_sql = ", ".join(assignments)
-    return (
-        "MERGE [dbo].[PictureRemoteAsset] AS target "
-        "USING (SELECT %d AS [PictureId]) AS source "
-        "ON target.[PictureId] = source.[PictureId] "
-        "WHEN MATCHED THEN UPDATE SET %s "
-        "WHEN NOT MATCHED THEN INSERT ([PictureId], [StorageProvider], [StorageMigrationStatus], [OriginalRemoteFileId], [OriginalRemotePath], [PreviewRemoteFileId], [PreviewRemotePath], [ThumbnailSmallRemoteFileId], [ThumbnailSmallRemotePath], [ThumbnailMediumRemoteFileId], [ThumbnailMediumRemotePath]) "
-        "VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s);"
-    ) % (
-        row.picture_id,
-        assignment_sql,
-        row.picture_id,
-        sql_escape(str(values["StorageProvider"])),
-        sql_escape(str(values["StorageMigrationStatus"])),
-        sql_escape(str(values["OriginalRemoteFileId"])),
-        sql_escape(str(values["OriginalRemotePath"])),
-        sql_escape(str(values["PreviewRemoteFileId"])),
-        sql_escape(str(values["PreviewRemotePath"])),
-        "NULL" if values["ThumbnailSmallRemoteFileId"] is None else "'%s'" % sql_escape(str(values["ThumbnailSmallRemoteFileId"])),
-        "NULL" if values["ThumbnailSmallRemotePath"] is None else "'%s'" % sql_escape(str(values["ThumbnailSmallRemotePath"])),
-        "NULL" if values["ThumbnailMediumRemoteFileId"] is None else "'%s'" % sql_escape(str(values["ThumbnailMediumRemoteFileId"])),
-        "NULL" if values["ThumbnailMediumRemotePath"] is None else "'%s'" % sql_escape(str(values["ThumbnailMediumRemotePath"])),
-    )
 
 
 def guess_content_type(path: Path) -> str:
@@ -401,6 +344,12 @@ def normalize_folder(folder: str) -> str:
     if not folder.startswith("/"):
         folder = "/" + folder
     return folder.rstrip("/")
+
+
+def build_remote_folder(relative_path: str) -> str:
+    normalized = (relative_path or "").replace("\\", "/").strip("/")
+    folder = normalized.rsplit("/", 1)[0] if "/" in normalized else ""
+    return normalize_folder("%s/%s" % (IMAGEKIT_DEFAULT_FOLDER, folder) if folder else IMAGEKIT_DEFAULT_FOLDER)
 
 
 def build_basic_auth(private_key: str) -> str:

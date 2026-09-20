@@ -79,6 +79,7 @@ namespace _3dsGallery.WebUI.Code
     {
         ImageKitStoredFile Upload(byte[] fileBytes, string fileName, string folderPath, string contentType);
         ImageKitDeleteResult Delete(string fileId);
+        ImageKitDeleteResult DeleteByPath(string filePath);
         byte[] Download(string absoluteUrl);
         string BuildDeliveryUrl(string filePath);
     }
@@ -161,6 +162,15 @@ namespace _3dsGallery.WebUI.Code
             }
         }
 
+        public ImageKitDeleteResult DeleteByPath(string filePath)
+        {
+            var fileId = FindFileIdByPath(filePath);
+            if (string.IsNullOrWhiteSpace(fileId))
+                return new ImageKitDeleteResult { Deleted = false, NotFound = true };
+
+            return Delete(fileId);
+        }
+
         public byte[] Download(string absoluteUrl)
         {
             if (string.IsNullOrWhiteSpace(absoluteUrl))
@@ -196,6 +206,51 @@ namespace _3dsGallery.WebUI.Code
                 normalizedPath = "/" + normalizedPath;
 
             return endpoint + normalizedPath;
+        }
+
+        private string FindFileIdByPath(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+                return null;
+
+            var normalizedPath = filePath.Replace('\\', '/');
+            if (!normalizedPath.StartsWith("/"))
+                normalizedPath = "/" + normalizedPath;
+
+            var lastSlashIndex = normalizedPath.LastIndexOf('/');
+            if (lastSlashIndex < 0 || lastSlashIndex == normalizedPath.Length - 1)
+                return null;
+
+            var folderPath = normalizedPath.Substring(0, lastSlashIndex);
+            var fileName = normalizedPath.Substring(lastSlashIndex + 1);
+            var requestUrl = string.Format(
+                CultureInfo.InvariantCulture,
+                "https://api.imagekit.io/v1/files?path={0}&name={1}",
+                Uri.EscapeDataString(folderPath),
+                Uri.EscapeDataString(fileName));
+
+            var responseText = ExecuteWithRetry("search", normalizedPath, delegate()
+            {
+                var request = CreateRequest(requestUrl, "GET", null);
+                return ReadResponse(request);
+            });
+
+            var token = JToken.Parse(responseText);
+            var files = token as JArray;
+            if (files == null)
+                files = token["files"] as JArray;
+            if (files == null)
+                return null;
+
+            foreach (var file in files.OfType<JObject>())
+            {
+                var candidatePath = ((string)file["filePath"] ?? string.Empty).Replace('\\', '/');
+                if (string.Equals(candidatePath, normalizedPath, StringComparison.OrdinalIgnoreCase))
+                    return (string)file["fileId"];
+            }
+
+            var first = files.OfType<JObject>().FirstOrDefault();
+            return first == null ? null : (string)first["fileId"];
         }
 
         private HttpWebRequest CreateRequest(string url, string method, string contentType)

@@ -168,8 +168,8 @@ namespace _3dsGallery.WebUI.Controllers
             model.SocialCredits = db.Gallery.Where(x => x.User.login == login).SelectMany(x => x.Picture).SelectMany(x => x.User).Count();
 
             model.TotalGalleryCount = db.Gallery.Where(x => x.User.login == login).Count();
-            model.TotalImageCount = db.Picture.Where(x => (x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && x.Gallery.User.login == login).Count();
-            model.TotalLikesCount = db.Picture.Where(x => (x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && x.User.Any(y => y.login == login)).Count();
+            model.TotalImageCount = db.Picture.Where(x => x.Gallery.User.login == login).Count();
+            model.TotalLikesCount = db.Picture.Where(x => x.User.Any(y => y.login == login)).Count();
 
             model.GalleryList = db.Gallery
                 .Where(x => x.User.login == login && (!x.IsPrivate || (x.IsPrivate && x.User.login == User.Identity.Name)))
@@ -181,9 +181,9 @@ namespace _3dsGallery.WebUI.Controllers
                     GalleryName = gallery.name,
                     ColorThemeClass = gallery.Style.value,
                     CreatedBy = gallery.User.login,
-                    Is3D = gallery.Picture.Any(pic => pic.type == "3D" && (pic.RemoteAsset == null || pic.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending)),
-                    PictureTotalCount = gallery.Picture.Count(pic => pic.RemoteAsset == null || pic.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending),
-                    PicturePreviewList = gallery.Picture.Where(pic => pic.RemoteAsset == null || pic.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending).OrderByDescending(x => x.id).Take(2).Select(pic => new GalleryPicturePreview
+                    Is3D = gallery.Picture.Any(pic => pic.type == "3D"),
+                    PictureTotalCount = gallery.Picture.Count(),
+                    PicturePreviewList = gallery.Picture.OrderByDescending(x => x.id).Take(2).Select(pic => new GalleryPicturePreview
                     {
                         IdPicture = pic.id,
                         Path = pic.path
@@ -191,7 +191,7 @@ namespace _3dsGallery.WebUI.Controllers
                 }).ToList();
 
             model.PictureList = db.Picture
-                .Where(x => (x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && x.Gallery.User.login == login && x.Gallery.LastPicture != null && (!x.Gallery.IsPrivate || (x.Gallery.IsPrivate && x.Gallery.User.login == User.Identity.Name)))
+                .Where(x => x.Gallery.User.login == login && x.Gallery.LastPicture != null && (!x.Gallery.IsPrivate || (x.Gallery.IsPrivate && x.Gallery.User.login == User.Identity.Name)))
                 .OrderByDescending(x => x.id)
                 .Take(pictureCount)
                 .Select(pic => new PictureModel
@@ -210,7 +210,7 @@ namespace _3dsGallery.WebUI.Controllers
                 }).ToList();
 
             model.LikeList = db.Picture
-                .Where(x => (x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && x.User.Any(y => y.login == login) && (!x.Gallery.IsPrivate || (x.Gallery.IsPrivate && x.Gallery.User.login == User.Identity.Name)))
+                .Where(x => x.User.Any(y => y.login == login) && (!x.Gallery.IsPrivate || (x.Gallery.IsPrivate && x.Gallery.User.login == User.Identity.Name)))
                 .Take(pictureCount)
                 .Select(pic => new PictureModel
                 {

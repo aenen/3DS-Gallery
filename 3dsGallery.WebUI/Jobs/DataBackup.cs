@@ -28,7 +28,7 @@ namespace _3dsGallery.WebUI.Jobs
                     return;
 
                 var pictureToProcessList = db.Picture
-                    .Where(x => !x.IsBackupCopySaved && (x.RemoteAsset == null || x.RemoteAsset.StorageProvider == PictureStorageConstants.StorageProviderLocal))
+                    .Where(x => !x.IsBackupCopySaved)
                     .OrderBy(x => x.CreationDate)
                     .Take(numberOfPicturesToUpload)
                     .ToList();

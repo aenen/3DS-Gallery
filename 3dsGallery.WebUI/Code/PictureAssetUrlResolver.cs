@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace _3dsGallery.WebUI.Code
@@ -11,39 +10,29 @@ namespace _3dsGallery.WebUI.Code
     public class PictureAssetUrlResolver
     {
         private readonly string _siteRootPath;
-        private readonly IImageKitClient _imageKitClient;
+        private readonly string _deliveryEndpoint;
+        private readonly string _uploadFolder;
 
         public PictureAssetUrlResolver(string siteRootPath)
-            : this(siteRootPath, TryCreateClient())
-        {
-        }
-
-        public PictureAssetUrlResolver(string siteRootPath, IImageKitClient imageKitClient)
         {
             _siteRootPath = siteRootPath;
-            _imageKitClient = imageKitClient;
+
+            try
+            {
+                var configuration = ImageKitConfiguration.LoadFromConfiguration();
+                _deliveryEndpoint = string.IsNullOrWhiteSpace(configuration.UrlEndpoint) ? null : configuration.UrlEndpoint.TrimEnd('/');
+                _uploadFolder = NormalizeFolder(configuration.UploadFolder);
+            }
+            catch
+            {
+                _deliveryEndpoint = null;
+                _uploadFolder = NormalizeFolder("/3dsgallery/pictures");
+            }
         }
 
         public bool IsRemoteActive(Picture picture)
         {
-            if (picture == null)
-                return false;
-            var remoteAsset = picture.RemoteAsset;
-            if (remoteAsset == null)
-                return false;
-
-            if (!string.Equals(remoteAsset.StorageProvider, PictureStorageConstants.StorageProviderImageKit, StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            if (string.IsNullOrWhiteSpace(remoteAsset.OriginalRemotePath))
-                return false;
-
-            if (string.Equals(remoteAsset.StorageMigrationStatus, PictureStorageConstants.MigrationStatusRemotePending, StringComparison.OrdinalIgnoreCase))
-                return false;
-            if (string.Equals(remoteAsset.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            return true;
+            return picture != null && !string.IsNullOrWhiteSpace(_deliveryEndpoint) && !string.IsNullOrWhiteSpace(picture.path);
         }
 
         public string GetOpenUrl(UrlHelper urlHelper, int pictureId)
@@ -62,19 +51,7 @@ namespace _3dsGallery.WebUI.Code
                 return null;
 
             if (IsRemoteActive(picture))
-            {
-                if (_imageKitClient == null)
-                    throw new InvalidOperationException("ImageKit is not configured. Set ImageKitPrivateKey and ImageKitUrlEndpoint before serving remote picture assets.");
-                var remoteAsset = picture.RemoteAsset;
-
-                if (string.Equals(size, PictureStorageConstants.PreviewSizeSmall, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(remoteAsset.ThumbnailSmallRemotePath))
-                    return _imageKitClient.BuildDeliveryUrl(remoteAsset.ThumbnailSmallRemotePath);
-                if (string.Equals(size, PictureStorageConstants.PreviewSizeMedium, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(remoteAsset.ThumbnailMediumRemotePath))
-                    return _imageKitClient.BuildDeliveryUrl(remoteAsset.ThumbnailMediumRemotePath);
-                if (!string.IsNullOrWhiteSpace(remoteAsset.PreviewRemotePath))
-                    return _imageKitClient.BuildDeliveryUrl(remoteAsset.PreviewRemotePath);
-                return GetRemoteOriginalUrl(picture);
-            }
+                return BuildRemotePreviewUrl(picture, size);
 
             return GetLocalPreviewVirtualPath(picture, size);
         }
@@ -85,26 +62,43 @@ namespace _3dsGallery.WebUI.Code
                 return null;
 
             if (IsRemoteActive(picture))
-            {
-                if (_imageKitClient == null)
-                    throw new InvalidOperationException("ImageKit is not configured. Set ImageKitPrivateKey and ImageKitUrlEndpoint before serving remote picture assets.");
-
                 return GetRemoteOriginalUrl(picture);
-            }
 
             return GetLocalOriginalVirtualPath(picture);
         }
 
         public string GetRemoteOriginalUrl(Picture picture)
         {
-            if (picture == null || picture.RemoteAsset == null || string.IsNullOrWhiteSpace(picture.RemoteAsset.OriginalRemotePath))
+            if (picture == null || string.IsNullOrWhiteSpace(picture.path) || string.IsNullOrWhiteSpace(_deliveryEndpoint))
                 return null;
 
-            if (_imageKitClient == null)
-                throw new InvalidOperationException("ImageKit is not configured. Set ImageKitPrivateKey and ImageKitUrlEndpoint before serving remote picture assets.");
+            return EnsureRawMpoUrl(BuildDeliveryUrl(GetRemoteOriginalPath(picture)));
+        }
 
-            var url = _imageKitClient.BuildDeliveryUrl(picture.RemoteAsset.OriginalRemotePath);
-            return EnsureRawMpoUrl(url);
+        public string GetRemoteOriginalPath(Picture picture)
+        {
+            return picture == null ? null : BuildRemoteStoredPath(picture.path);
+        }
+
+        public string GetRemotePreviewPath(Picture picture)
+        {
+            if (picture == null)
+                return null;
+
+            if (string.Equals(picture.type, "3D", StringComparison.OrdinalIgnoreCase))
+                return BuildRemoteStoredPath(string.Format("Picture/{0}.JPG", picture.id));
+
+            return BuildRemoteOriginalPath(picture);
+        }
+
+        public string GetRemoteThumbnailSmallPath(Picture picture)
+        {
+            return picture == null ? null : BuildRemoteStoredPath(string.Format("Picture/{0}-thumb_sm.JPG", picture.id));
+        }
+
+        public string GetRemoteThumbnailMediumPath(Picture picture)
+        {
+            return picture == null ? null : BuildRemoteStoredPath(string.Format("Picture/{0}-thumb_md.JPG", picture.id));
         }
 
         public string GetLocalOriginalPhysicalPath(Picture picture)
@@ -178,6 +172,37 @@ namespace _3dsGallery.WebUI.Code
             return baseUrl + (rebuilt.Any() ? "?" + string.Join("&", rebuilt) : string.Empty) + fragment;
         }
 
+        private string BuildRemotePreviewUrl(Picture picture, string size)
+        {
+            var remotePath = GetRemotePreviewPath(picture);
+            return BuildDeliveryUrl(remotePath);
+        }
+
+        private string BuildDeliveryUrl(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || string.IsNullOrWhiteSpace(_deliveryEndpoint))
+                return null;
+
+            var normalizedPath = filePath.Replace('\\', '/');
+            if (!normalizedPath.StartsWith("/"))
+                normalizedPath = "/" + normalizedPath;
+            return _deliveryEndpoint + normalizedPath;
+        }
+
+        private string BuildRemoteStoredPath(string relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath))
+                return null;
+
+            var normalizedRelativePath = relativePath.Replace('\\', '/').TrimStart('/');
+            return _uploadFolder + "/" + normalizedRelativePath;
+        }
+
+        private string BuildRemoteOriginalPath(Picture picture)
+        {
+            return GetRemoteOriginalPath(picture);
+        }
+
         private string GetLocalPreviewVirtualPath(Picture picture, string size)
         {
             if (picture == null)
@@ -225,16 +250,12 @@ namespace _3dsGallery.WebUI.Code
             return !string.IsNullOrWhiteSpace(physicalPath) && File.Exists(physicalPath);
         }
 
-        private static IImageKitClient TryCreateClient()
+        private static string NormalizeFolder(string folderPath)
         {
-            try
-            {
-                return new ImageKitClient();
-            }
-            catch
-            {
-                return null;
-            }
+            var normalized = string.IsNullOrWhiteSpace(folderPath) ? "/3dsgallery/pictures" : folderPath.Replace('\\', '/').Trim();
+            if (!normalized.StartsWith("/"))
+                normalized = "/" + normalized;
+            return normalized.TrimEnd('/');
         }
     }
 }

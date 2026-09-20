@@ -37,8 +37,6 @@ namespace _3dsGallery.DataLayer.DataBase
 
         public virtual Gallery Gallery { get; set; }
 
-        public virtual PictureRemoteAsset RemoteAsset { get; set; }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<User> User { get; set; }
 

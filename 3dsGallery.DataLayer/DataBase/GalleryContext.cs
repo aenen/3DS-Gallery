@@ -14,7 +14,6 @@ namespace _3dsGallery.DataLayer.DataBase
 
         public virtual DbSet<Gallery> Gallery { get; set; }
         public virtual DbSet<Picture> Picture { get; set; }
-        public virtual DbSet<PictureRemoteAsset> PictureRemoteAsset { get; set; }
         public virtual DbSet<Style> Style { get; set; }
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<PictureComment> PictureComments { get; set; }
@@ -36,11 +35,6 @@ namespace _3dsGallery.DataLayer.DataBase
                 .HasMany(e => e.User)
                 .WithMany(e => e.Picture)
                 .Map(m => m.ToTable("Picture_User").MapLeftKey("pictureId").MapRightKey("userId"));
-
-            modelBuilder.Entity<Picture>()
-                .HasOptional(e => e.RemoteAsset)
-                .WithRequired(e => e.Picture)
-                .WillCascadeOnDelete(true);
 
             modelBuilder.Entity<User>()
                 .HasMany(e => e.Gallery)

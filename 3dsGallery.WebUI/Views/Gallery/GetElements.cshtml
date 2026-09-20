@@ -2,7 +2,7 @@
 
 @foreach (var itemGal in Model)
 {
-    bool is3d = itemGal.Picture.Any(x => x.type == "3D" && (x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != _3dsGallery.WebUI.Code.PictureStorageConstants.MigrationStatusDeletePending)) ? true : false;
+    bool is3d = itemGal.Picture.Any(x => x.type == "3D") ? true : false;
     <div class="col-md-4">
         <div class="panel panel-@itemGal.Style.value">
             <div class="panel-heading">
@@ -11,7 +11,7 @@
                 {
                         <span class="badge">3D</span>
                     }
-                    <span class="badge">@itemGal.Picture.Count(x => x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != _3dsGallery.WebUI.Code.PictureStorageConstants.MigrationStatusDeletePending)</span>
+                    <span class="badge">@itemGal.Picture.Count()</span>
                 </div>
                 <div class="one-line">
                     @if (itemGal.User.login == User.Identity.Name)
@@ -24,7 +24,7 @@
             <div class="panel-body preview-gallery">
                 @{
                     int counter = 2;
-                    var previews = itemGal.Picture.Where(x => x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != _3dsGallery.WebUI.Code.PictureStorageConstants.MigrationStatusDeletePending).OrderByDescending(x => x.id).Take(counter);
+                    var previews = itemGal.Picture.OrderByDescending(x => x.id).Take(counter);
                     foreach (var pv in previews)
                     {
                         <div class="preview-container-sm">
