@@ -237,24 +237,24 @@ namespace _3dsGallery.WebUI.Code
                 {
                     _imageKitClient.Delete(fileId);
                 }
-
-                private PictureRemoteAsset EnsureRemoteAsset(Picture picture)
-                {
-                    if (picture.RemoteAsset == null)
-                    {
-                        picture.RemoteAsset = new PictureRemoteAsset
-                        {
-                            Picture = picture,
-                            PictureId = picture.id
-                        };
-                    }
-
-                    return picture.RemoteAsset;
-                }
                 catch
                 {
                 }
             }
+        }
+
+        private PictureRemoteAsset EnsureRemoteAsset(Picture picture)
+        {
+            if (picture.RemoteAsset == null)
+            {
+                picture.RemoteAsset = new PictureRemoteAsset
+                {
+                    Picture = picture,
+                    PictureId = picture.id
+                };
+            }
+
+            return picture.RemoteAsset;
         }
 
         private string GetOriginalFolder()
