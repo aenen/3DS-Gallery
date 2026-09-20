@@ -43,7 +43,7 @@ namespace _3dsGallery.WebUI.Code
         {
             _imageKitClient = imageKitClient;
             _urlResolver = urlResolver;
-            _uploadFolder = string.IsNullOrWhiteSpace(uploadFolder) ? "/3dsgallery/pictures" : uploadFolder;
+            _uploadFolder = string.IsNullOrWhiteSpace(uploadFolder) ? "/3dsgallery" : uploadFolder;
         }
 
         public void UploadAssets(Picture picture, PictureAssetUploadRequest request)
@@ -218,7 +218,7 @@ namespace _3dsGallery.WebUI.Code
             }
             catch
             {
-                return "/3dsgallery/pictures";
+                return "/3dsgallery";
             }
         }
     }

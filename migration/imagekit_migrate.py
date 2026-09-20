@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
-IMAGEKIT_DEFAULT_FOLDER = "/3dsgallery/pictures"
+IMAGEKIT_DEFAULT_FOLDER = "/3dsgallery"
 JOURNAL_SUCCESS = "success"
 
 

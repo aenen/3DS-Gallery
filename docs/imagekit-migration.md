@@ -30,7 +30,7 @@ Set these deployment settings before enabling remote uploads in production:
 - `ImageKitPublicKey`
 - `ImageKitPrivateKey`
 - `ImageKitUrlEndpoint` (example: `https://ik.imagekit.io/your_imagekit_id`)
-- `ImageKitUploadFolder` (default in code: `/3dsgallery/pictures`)
+- `ImageKitUploadFolder` (default in code: `/3dsgallery`)
 - `ImageKitTimeoutSeconds` (default `30`)
 - `ImageKitMaxRetries` (default `3`)
 
@@ -86,16 +86,16 @@ The script works in either of these cases:
 
 The remote ImageKit naming stays aligned with the app:
 
-- local `Picture/76.MPO` -> remote `/3dsgallery/pictures/Picture/76.MPO`
-- local `Picture/76.JPG` -> remote `/3dsgallery/pictures/Picture/76.JPG`
-- local `Picture/129-thumb_sm.JPG` -> remote `/3dsgallery/pictures/Picture/129-thumb_sm.JPG`
+- local `Picture/76.MPO` -> remote `/3dsgallery/Picture/76.MPO`
+- local `Picture/76.JPG` -> remote `/3dsgallery/Picture/76.JPG`
+- local `Picture/129-thumb_sm.JPG` -> remote `/3dsgallery/Picture/129-thumb_sm.JPG`
 
 ### Dry run from local PowerShell
 
 ```powershell
 $env:ImageKitPrivateKey = '***'
 $env:ImageKitUrlEndpoint = 'https://ik.imagekit.io/your_imagekit_id'
-$env:ImageKitUploadFolder = '/3dsgallery/pictures'
+$env:ImageKitUploadFolder = '/3dsgallery'
 
 powershell -ExecutionPolicy Bypass -File .\migration\imagekit_migrate.ps1 -DryRun
 ```
@@ -105,7 +105,7 @@ powershell -ExecutionPolicy Bypass -File .\migration\imagekit_migrate.ps1 -DryRu
 ```powershell
 $env:ImageKitPrivateKey = '***'
 $env:ImageKitUrlEndpoint = 'https://ik.imagekit.io/your_imagekit_id'
-$env:ImageKitUploadFolder = '/3dsgallery/pictures'
+$env:ImageKitUploadFolder = '/3dsgallery'
 
 powershell -ExecutionPolicy Bypass -File .\migration\imagekit_migrate.ps1
 ```
@@ -189,7 +189,7 @@ Migrate a small pilot batch first.
 ```bash
 export ImageKitPrivateKey='***'
 export ImageKitUrlEndpoint='https://ik.imagekit.io/your_imagekit_id'
-export ImageKitUploadFolder='/3dsgallery/pictures'
+export ImageKitUploadFolder='/3dsgallery'
 
 python3 /absolute/path/to/repo/migration/imagekit_migrate.py \
   --manifest /absolute/path/to/picture-manifest.csv \

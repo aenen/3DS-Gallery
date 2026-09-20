@@ -9,6 +9,7 @@ from imagekit_migrate import (
     ManifestRow,
     MigrationRunner,
     build_asset_plan,
+    build_remote_folder,
     ensure_raw_mpo_url,
 )
 
@@ -43,6 +44,9 @@ class FakeStorageClient:
 
 
 class UrlTests(unittest.TestCase):
+    def test_remote_folder_uses_flatter_default_root(self):
+        self.assertEqual(build_remote_folder("Picture/1.MPO"), "/3dsgallery/Picture")
+
     def test_mpo_url_adds_orig_true(self):
         self.assertEqual(
             ensure_raw_mpo_url("https://ik.example.test/path/1.MPO"),

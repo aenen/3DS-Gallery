@@ -26,7 +26,7 @@ namespace _3dsGallery.WebUI.Code
             catch
             {
                 _deliveryEndpoint = null;
-                _uploadFolder = NormalizeFolder("/3dsgallery/pictures");
+                _uploadFolder = NormalizeFolder("/3dsgallery");
             }
         }
 
@@ -252,7 +252,7 @@ namespace _3dsGallery.WebUI.Code
 
         private static string NormalizeFolder(string folderPath)
         {
-            var normalized = string.IsNullOrWhiteSpace(folderPath) ? "/3dsgallery/pictures" : folderPath.Replace('\\', '/').Trim();
+            var normalized = string.IsNullOrWhiteSpace(folderPath) ? "/3dsgallery" : folderPath.Replace('\\', '/').Trim();
             if (!normalized.StartsWith("/"))
                 normalized = "/" + normalized;
             return normalized.TrimEnd('/');

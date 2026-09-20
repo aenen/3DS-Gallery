@@ -3,7 +3,7 @@ param(
     [string]$OutputDir = ".\migration-output",
     [string]$ImageKitPrivateKey = $env:ImageKitPrivateKey,
     [string]$ImageKitUrlEndpoint = $env:ImageKitUrlEndpoint,
-    [string]$ImageKitUploadFolder = $(if ($env:ImageKitUploadFolder) { $env:ImageKitUploadFolder } else { "/3dsgallery/pictures" }),
+    [string]$ImageKitUploadFolder = $(if ($env:ImageKitUploadFolder) { $env:ImageKitUploadFolder } else { "/3dsgallery" }),
     [int]$TimeoutSeconds = 30,
     [int]$MaxRetries = 3,
     [switch]$DryRun,
@@ -15,7 +15,7 @@ $ErrorActionPreference = "Stop"
 
 function Normalize-Folder([string]$Folder) {
     if ([string]::IsNullOrWhiteSpace($Folder)) {
-        return "/3dsgallery/pictures"
+        return "/3dsgallery"
     }
 
     $normalized = $Folder.Replace('\\', '/').Trim()

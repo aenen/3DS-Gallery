@@ -31,7 +31,7 @@ namespace _3dsGallery.WebUI.Code
                 PublicKey = ReadSetting("ImageKitPublicKey"),
                 PrivateKey = ReadSetting("ImageKitPrivateKey"),
                 UrlEndpoint = ReadSetting("ImageKitUrlEndpoint"),
-                UploadFolder = ReadSetting("ImageKitUploadFolder") ?? "/3dsgallery/pictures",
+                UploadFolder = ReadSetting("ImageKitUploadFolder") ?? "/3dsgallery",
                 TimeoutSeconds = timeout < 1 ? 30 : timeout,
                 MaxRetries = retries < 1 ? 1 : retries
             };
