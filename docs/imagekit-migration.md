@@ -57,7 +57,71 @@ Before production migration, manually verify in staging:
 9. Delete the picture and confirm ImageKit assets are removed.
 10. Repeat on an actual Nintendo 3DS if available.
 
-## Migration utility
+## Simple local PowerShell migration
+
+If you plan to:
+
+1. copy the production `Picture` directory to your local PC
+2. open PowerShell in the folder that contains that `Picture` directory
+3. upload everything to ImageKit while keeping the same names
+
+then use the simpler script:
+
+- `migration/imagekit_migrate.ps1`
+
+It:
+
+- uploads directly from a local `Picture` directory
+- keeps the existing file names
+- writes a `journal.jsonl` file so reruns can skip already-successful files
+- writes a `state.json` summary
+- supports `-DryRun`
+
+### Folder layout expected by the PowerShell script
+
+The script works in either of these cases:
+
+- your current folder contains a `Picture` directory
+- your current folder is the `Picture` directory itself
+
+The remote ImageKit naming stays aligned with the app:
+
+- local `Picture/76.MPO` -> remote `/3dsgallery/pictures/Picture/76.MPO`
+- local `Picture/76.JPG` -> remote `/3dsgallery/pictures/Picture/76.JPG`
+- local `Picture/129-thumb_sm.JPG` -> remote `/3dsgallery/pictures/Picture/129-thumb_sm.JPG`
+
+### Dry run from local PowerShell
+
+```powershell
+$env:ImageKitPrivateKey = '***'
+$env:ImageKitUrlEndpoint = 'https://ik.imagekit.io/your_imagekit_id'
+$env:ImageKitUploadFolder = '/3dsgallery/pictures'
+
+powershell -ExecutionPolicy Bypass -File .\migration\imagekit_migrate.ps1 -DryRun
+```
+
+### Actual upload from local PowerShell
+
+```powershell
+$env:ImageKitPrivateKey = '***'
+$env:ImageKitUrlEndpoint = 'https://ik.imagekit.io/your_imagekit_id'
+$env:ImageKitUploadFolder = '/3dsgallery/pictures'
+
+powershell -ExecutionPolicy Bypass -File .\migration\imagekit_migrate.ps1
+```
+
+Optional parameters:
+
+- `-PictureRoot C:\path\to\Picture`
+- `-OutputDir .\migration-output`
+- `-Force` to re-upload even if the journal says a file already succeeded
+
+After the run, review:
+
+- `migration-output\journal.jsonl`
+- `migration-output\state.json`
+
+## Advanced migration utility (optional)
 
 The repository includes `migration/imagekit_migrate.py`.
 
@@ -99,7 +163,7 @@ ORDER BY id;
 
 The `path` values must match the production `Picture/` directory layout.
 
-## Dry run
+## Python dry run
 
 Run the dry run first to inventory missing/corrupt inputs before uploading anything:
 
@@ -118,7 +182,7 @@ Review:
 - `migration-output/journal.jsonl`
 - `migration-output/state.json`
 
-## Pilot migration
+## Python pilot migration
 
 Migrate a small pilot batch first.
 
@@ -140,7 +204,7 @@ This writes:
 - `journal.jsonl`
 - `state.json`
 
-## Full migration / resume
+## Python full migration / resume
 
 Resume by rerunning the same command against the same output directory. Rows already marked `success` in the journal are skipped.
 
@@ -166,11 +230,12 @@ There are no database updates to apply.
 
 Recommended process:
 
-1. Run pilot.
-2. Review ImageKit files and journal.
-3. Verify the pilot rows in the app.
-4. Run the full migration.
-5. Deploy or recycle the app with the same ImageKit settings.
+1. Run the PowerShell script with `-DryRun`.
+2. Run a small real upload first.
+3. Review ImageKit files and the journal.
+4. Verify the pilot rows in the app.
+5. Run the remaining upload.
+6. Deploy or recycle the app with the same ImageKit settings.
 
 ## Mixed-mode rollout and cutover
 
