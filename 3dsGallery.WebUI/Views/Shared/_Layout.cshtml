@@ -139,7 +139,7 @@
                 type: "POST",
                 url: "@Url.Action("Random","Picture")",
                 success: function (data) {
-                    newTab.location.href = '/' + data;
+                    newTab.location.href = data;
                 },
                 error: function () {
                     newTab.close(); // Close the tab if error

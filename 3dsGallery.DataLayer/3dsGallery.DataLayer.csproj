@@ -103,6 +103,10 @@
     <Compile Include="Migrations\202607111441499_AddUserActorToNotifications.Designer.cs">
       <DependentUpon>202607111441499_AddUserActorToNotifications.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202609201640000_AddImageKitPictureStorage.cs" />
+    <Compile Include="Migrations\202609201640000_AddImageKitPictureStorage.Designer.cs">
+      <DependentUpon>202609201640000_AddImageKitPictureStorage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools\IEnumerableExtensions.cs" />

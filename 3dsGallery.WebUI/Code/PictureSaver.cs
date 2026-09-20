@@ -1,8 +1,7 @@
-﻿using _3dsGallery.DataLayer.DataBase;
+using _3dsGallery.DataLayer.DataBase;
 using _3dsGallery.DataLayer.Tools;
 using _3dsGallery.WebUI.Models;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -13,109 +12,194 @@ namespace _3dsGallery.WebUI.Code
 {
     public class PictureSaver
     {
-        private readonly string picture_folder;
+        private readonly string _siteRootPath;
+        private readonly IPictureAssetStorageService _storageService;
 
-        public PictureSaver(string picture_folder)
+        public PictureSaver(string siteRootPath)
+            : this(siteRootPath, new PictureAssetStorageService(siteRootPath))
         {
-            this.picture_folder = picture_folder;
         }
 
-        // This method merges two images side-by-side and returns the result as a byte array
-        public byte[] GenerateSideBySideImage(string filePath)
+        public PictureSaver(string siteRootPath, IPictureAssetStorageService storageService)
         {
-            var images = MpoParser.GetImageSources(Path.Combine(picture_folder, filePath)).ToList();
-            if (images == null || images.Count < 2)
-                throw new InvalidOperationException("Need at least two images to merge.");
+            _siteRootPath = siteRootPath;
+            _storageService = storageService;
+        }
 
-            var img1 = images[0];
-            var img2 = images[1];
+        public byte[] GenerateSideBySideImage(Picture picture)
+        {
+            if (picture == null)
+                throw new ArgumentNullException("picture");
 
-            int targetHeight = Math.Min(img1.Height, img2.Height);
-            float scale1 = (float)targetHeight / img1.Height;
-            float scale2 = (float)targetHeight / img2.Height;
-
-            int width1 = (int)(img1.Width * scale1);
-            int width2 = (int)(img2.Width * scale2);
-
-            using (var merged = new Bitmap(width1 + width2, targetHeight))
-            using (var g = Graphics.FromImage(merged))
+            var sourceBytes = _storageService.DownloadOriginalBytes(picture);
+            var images = MpoParser.GetImageSources(sourceBytes).ToList();
+            try
             {
-                g.DrawImage(img1, new Rectangle(0, 0, width1, targetHeight));
-                g.DrawImage(img2, new Rectangle(width1, 0, width2, targetHeight));
+                if (images.Count < 2)
+                    throw new InvalidOperationException("Need at least two images to merge.");
 
-                using (var ms = new MemoryStream())
-                {
-                    merged.Save(ms, ImageFormat.Jpeg);
-                    return ms.ToArray();
-                }
+                return MergeSideBySide(images[0], images[1]);
             }
-
+            finally
+            {
+                foreach (var image in images)
+                    image.Dispose();
+            }
         }
-
 
         public Picture AnalyzeAndSave(Picture picture, AddPictureModel model, HttpPostedFileBase file)
         {
-            // зберігаю зображення
-            string picture_name = picture.id.ToString() + Path.GetExtension(file.FileName);
-            string picture_folder_name = Path.Combine(picture_folder, picture_name);
-            file.SaveAs(picture_folder_name);
+            if (file == null)
+                throw new ArgumentNullException("file");
 
-            picture.path = Path.Combine("Picture", picture_name); // записую відносний шлях в обєкт бази даних
-
-            // отримую всі зображення з файлу
-            var images = MpoParser.GetImageSources(picture_folder_name);
-            Image img_for_thumb;
-            if (!images.Any()) // якщо 2D
+            using (var ms = new MemoryStream())
             {
-                using (var fs = new FileStream(picture_folder_name, FileMode.Open, FileAccess.Read))
-                using (var tempImg = Image.FromStream(fs))
-                {
-                    img_for_thumb = new Bitmap(tempImg);
-                }
-                picture.type = "2D";
+                file.InputStream.CopyTo(ms);
+                return AnalyzeAndSave(picture, model, file.FileName, ms.ToArray());
             }
-            else // якщо 3D
+        }
+
+        public Picture AnalyzeAndSave(Picture picture, AddPictureModel model, string fileName, byte[] fileBytes)
+        {
+            if (picture == null)
+                throw new ArgumentNullException("picture");
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new ArgumentException("fileName");
+            if (fileBytes == null || fileBytes.Length == 0)
+                throw new ArgumentException("fileBytes");
+
+            var mpoImages = MpoParser.GetImageSources(fileBytes).ToList();
+            Image imageForPreview = null;
+            Image previewImageToPersist = null;
+            Image thumbSmall = null;
+            Image thumbMedium = null;
+
+            try
             {
-                if (model.isAdvanced && model.isTo2d) // якщо юзер хоче зберегти 3D зображення в 2D
+                var request = new PictureAssetUploadRequest();
+                var fileExtension = Path.GetExtension(fileName);
+                if (string.IsNullOrWhiteSpace(fileExtension))
+                    fileExtension = ".JPG";
+
+                if (!mpoImages.Any())
                 {
-                    img_for_thumb = images.ElementAt(model.leftOrRight);
-                    picture_name = Path.ChangeExtension(picture_name, ".JPG");
                     picture.type = "2D";
-                    System.IO.File.Delete(picture_folder_name); // видаляю непотрібний файл
+                    request.LegacyPath = string.Format("Picture/{0}.JPG", picture.id);
+                    request.PictureType = picture.type;
+                    request.OriginalFileName = picture.id + ".JPG";
+                    request.OriginalContentType = "image/jpeg";
+                    request.OriginalBytes = fileBytes;
+                    request.PreviewFileName = request.OriginalFileName;
+                    request.PreviewBytes = fileBytes;
+
+                    using (var stream = new MemoryStream(fileBytes))
+                    using (var original = Image.FromStream(stream))
+                    {
+                        imageForPreview = new Bitmap(original);
+                        FillThumbnailAssets(request, picture.id, imageForPreview, fileBytes.LongLength, ref thumbSmall, ref thumbMedium);
+                    }
+                }
+                else if (model != null && model.isAdvanced && model.isTo2d)
+                {
+                    var eyeIndex = model.leftOrRight;
+                    if (eyeIndex < 0 || eyeIndex > 1)
+                        throw new InvalidOperationException("You must choose which of the images (left or right) should be saved in 2D.");
+
+                    previewImageToPersist = new Bitmap(mpoImages.ElementAt(eyeIndex));
+                    picture.type = "2D";
+                    request.LegacyPath = string.Format("Picture/{0}.JPG", picture.id);
+                    request.PictureType = picture.type;
+                    request.OriginalFileName = picture.id + ".JPG";
+                    request.OriginalContentType = "image/jpeg";
+                    request.OriginalBytes = ImageToJpegBytes(previewImageToPersist);
+                    request.PreviewFileName = request.OriginalFileName;
+                    request.PreviewBytes = request.OriginalBytes;
+
+                    imageForPreview = new Bitmap(previewImageToPersist);
+                    FillThumbnailAssets(request, picture.id, imageForPreview, request.OriginalBytes.LongLength, ref thumbSmall, ref thumbMedium);
                 }
                 else
                 {
-                    img_for_thumb = images.ElementAt(0); // беру перше зображення (з лівої камери)
-
-                    // змінюю формат оригіналу на .mpo (на сервер заавжди приходить зображення формату JPG)
-                    picture_name = Path.ChangeExtension(picture_name, ".MPO");
-                    file.SaveAs(Path.Combine(picture_folder, picture_name));
                     picture.type = "3D";
+                    previewImageToPersist = new Bitmap(mpoImages[0]);
+                    imageForPreview = new Bitmap(previewImageToPersist);
+
+                    request.LegacyPath = string.Format("Picture/{0}.MPO", picture.id);
+                    request.PictureType = picture.type;
+                    request.OriginalFileName = picture.id + ".MPO";
+                    request.OriginalContentType = "image/mpo";
+                    request.OriginalBytes = fileBytes;
+                    request.PreviewFileName = picture.id + ".JPG";
+                    request.PreviewBytes = ImageToJpegBytes(previewImageToPersist);
+
+                    FillThumbnailAssets(request, picture.id, imageForPreview, request.PreviewBytes.LongLength, ref thumbSmall, ref thumbMedium);
                 }
-                img_for_thumb.Save(Path.ChangeExtension(picture_folder_name, ".JPG")); // зберігаю зображення, з якого буду робити прев'ю
-                picture.path = Path.Combine("Picture", picture_name);
-            }
 
-            var original_length = PictureTools.GetByteSize(img_for_thumb).LongLength;
-            // створюю прев'ю
-            var thumb_sm = PictureTools.MakeThumbnail(img_for_thumb, 155, 97);
-            var thumb_sm_length = PictureTools.GetByteSize(thumb_sm).LongLength;
-            if (original_length > thumb_sm_length)
+                _storageService.UploadAssets(picture, request);
+                return picture;
+            }
+            finally
             {
-                thumb_sm.Save($"{picture_folder}/{picture.id}-thumb_sm.JPG");
-            }
+                foreach (var image in mpoImages)
+                    image.Dispose();
 
-            var thumb_md = PictureTools.MakeThumbnail(img_for_thumb, 280, 999);
-            var thumb_md_length = PictureTools.GetByteSize(thumb_md).LongLength;
-            if (original_length > thumb_md_length)
+                if (imageForPreview != null)
+                    imageForPreview.Dispose();
+                if (previewImageToPersist != null)
+                    previewImageToPersist.Dispose();
+                if (thumbSmall != null)
+                    thumbSmall.Dispose();
+                if (thumbMedium != null)
+                    thumbMedium.Dispose();
+            }
+        }
+
+        private static void FillThumbnailAssets(PictureAssetUploadRequest request, int pictureId, Image imageForPreview, long originalLength, ref Image thumbSmall, ref Image thumbMedium)
+        {
+            thumbSmall = PictureTools.MakeThumbnail(imageForPreview, 155, 97);
+            var thumbSmallBytes = PictureTools.GetByteSize(thumbSmall);
+            if (thumbSmallBytes.LongLength < originalLength)
             {
-                thumb_md.Save($"{picture_folder}/{picture.id}-thumb_md.JPG");
-                if (Path.GetExtension(picture.path) == ".MPO")
-                    System.IO.File.Delete(picture_folder_name); // видаляю непотрібний файл
+                request.ThumbnailSmallFileName = pictureId + "-thumb_sm.JPG";
+                request.ThumbnailSmallBytes = thumbSmallBytes;
             }
 
-            return picture;
+            thumbMedium = PictureTools.MakeThumbnail(imageForPreview, 280, 999);
+            var thumbMediumBytes = PictureTools.GetByteSize(thumbMedium);
+            if (thumbMediumBytes.LongLength < originalLength)
+            {
+                request.ThumbnailMediumFileName = pictureId + "-thumb_md.JPG";
+                request.ThumbnailMediumBytes = thumbMediumBytes;
+            }
+        }
 
+        private static byte[] MergeSideBySide(Image leftImage, Image rightImage)
+        {
+            int targetHeight = Math.Min(leftImage.Height, rightImage.Height);
+            float scaleLeft = (float)targetHeight / leftImage.Height;
+            float scaleRight = (float)targetHeight / rightImage.Height;
+
+            int leftWidth = (int)(leftImage.Width * scaleLeft);
+            int rightWidth = (int)(rightImage.Width * scaleRight);
+
+            using (var merged = new Bitmap(leftWidth + rightWidth, targetHeight))
+            using (var graphics = Graphics.FromImage(merged))
+            using (var ms = new MemoryStream())
+            {
+                graphics.DrawImage(leftImage, new Rectangle(0, 0, leftWidth, targetHeight));
+                graphics.DrawImage(rightImage, new Rectangle(leftWidth, 0, rightWidth, targetHeight));
+                merged.Save(ms, ImageFormat.Jpeg);
+                return ms.ToArray();
+            }
+        }
+
+        private static byte[] ImageToJpegBytes(Image image)
+        {
+            using (var ms = new MemoryStream())
+            {
+                image.Save(ms, ImageFormat.Jpeg);
+                return ms.ToArray();
+            }
         }
     }
 }
