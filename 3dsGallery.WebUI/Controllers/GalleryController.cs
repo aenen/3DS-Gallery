@@ -120,13 +120,15 @@ namespace _3dsGallery.WebUI.Controllers
                     ModelState.AddModelError(string.Empty, $"File '{f.FileName}' extension must be '.mpo' or '.jpg'.");
             }
 
-            if (model.isAdvanced && model.isTo2d && model.leftOrRight < 0 && model.leftOrRight > 1)
+            if (model.isAdvanced && model.isTo2d && (model.leftOrRight < 0 || model.leftOrRight > 1))
                 ModelState.AddModelError(string.Empty, "You must choose which of the images (left or right) should be saved in 2D.");
 
             if (!ModelState.IsValid)
                 return View(model);
 
             Picture lastPicture = null;
+            var pictureSaver = CreatePictureSaver();
+            var uploadErrors = new List<string>();
             foreach (var f in files)
             {
                 Picture picture = new Picture
@@ -138,11 +140,20 @@ namespace _3dsGallery.WebUI.Controllers
                 db.Picture.Add(picture);
                 db.SaveChanges();
 
-                picture = new PictureSaver(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture")).AnalyzeAndSave(picture, model, f);
+                try
+                {
+                    picture = pictureSaver.AnalyzeAndSave(picture, model, f);
 
-                db.Entry(picture).State = EntityState.Modified;
-                db.SaveChanges();
-                lastPicture = picture;
+                    db.Entry(picture).State = EntityState.Modified;
+                    db.SaveChanges();
+                    lastPicture = picture;
+                }
+                catch (Exception ex)
+                {
+                    db.Entry(picture).State = EntityState.Deleted;
+                    db.SaveChanges();
+                    uploadErrors.Add(string.Format("File '{0}' failed to upload: {1}", f.FileName, ex.Message));
+                }
             }
 
             if (lastPicture != null)
@@ -150,6 +161,17 @@ namespace _3dsGallery.WebUI.Controllers
                 lastPicture.Gallery.LastPicture = lastPicture;
                 db.Entry(lastPicture.Gallery).State = EntityState.Modified;
                 db.SaveChanges();
+            }
+
+            if (uploadErrors.Any())
+            {
+                foreach (var error in uploadErrors)
+                    ModelState.AddModelError(string.Empty, error);
+
+                if (lastPicture != null)
+                    ModelState.AddModelError(string.Empty, string.Format("{0} picture(s) uploaded successfully before the failure.", files.Count - uploadErrors.Count));
+
+                return View(model);
             }
 
             if (action == "Upload & Add More")
@@ -280,18 +302,30 @@ namespace _3dsGallery.WebUI.Controllers
             if (!IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture");
             Gallery gallery = db.Gallery.FirstOrDefault(x => x.id == id);
-            foreach (var item in gallery.Picture.ToList())
+            var pictures = gallery.Picture.ToList();
+            foreach (var item in pictures)
             {
-                if (System.IO.File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, item.path)))
-                    System.IO.File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, item.path));
-                if (System.IO.File.Exists(Path.Combine(path, $"{item.id}-thumb_sm.JPG")))
-                    System.IO.File.Delete(Path.Combine(path, $"{item.id}-thumb_sm.JPG"));
-                if (System.IO.File.Exists(Path.Combine(path, $"{item.id}-thumb_md.JPG")))
-                    System.IO.File.Delete(Path.Combine(path, $"{item.id}-thumb_md.JPG"));
-                if (System.IO.File.Exists(Path.Combine(path, $"{item.id}.JPG")))
-                    System.IO.File.Delete(Path.Combine(path, $"{item.id}.JPG"));
+                db.Entry(item).State = EntityState.Modified;
+            }
+            gallery.LastPicture = null;
+            db.Entry(gallery).State = EntityState.Modified;
+            db.SaveChanges();
+
+            foreach (var item in pictures)
+            {
+                try
+                {
+                    new PictureAssetStorageService(AppDomain.CurrentDomain.BaseDirectory).DeleteAssets(item);
+                }
+                catch
+                {
+                    db.Entry(item).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return new HttpStatusCodeResult(HttpStatusCode.BadGateway, "One or more picture assets could not be deleted from ImageKit. Please retry.");
+                }
+
+                DeleteLocalFiles(item);
                 Picture picture = db.Picture.Include(X => X.User).FirstOrDefault(x => x.id == item.id);
                 picture.User.Clear();
                 db.Picture.Remove(picture);
@@ -306,6 +340,31 @@ namespace _3dsGallery.WebUI.Controllers
         {
             var user = new GalleryContext().User.Where(x => x.login == User.Identity.Name).FirstOrDefault();
             return user.Gallery.Any(x => x.id == id);
+        }
+
+        private void DeleteLocalFiles(Picture picture)
+        {
+            var resolver = new PictureAssetUrlResolver(AppDomain.CurrentDomain.BaseDirectory);
+            var originalPath = resolver.GetLocalOriginalPhysicalPath(picture);
+            if (!string.IsNullOrWhiteSpace(originalPath) && System.IO.File.Exists(originalPath))
+                System.IO.File.Delete(originalPath);
+
+            var previewPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture", picture.id + ".JPG");
+            if (System.IO.File.Exists(previewPath))
+                System.IO.File.Delete(previewPath);
+
+            var thumbSmallPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture", picture.id + "-thumb_sm.JPG");
+            if (System.IO.File.Exists(thumbSmallPath))
+                System.IO.File.Delete(thumbSmallPath);
+
+            var thumbMediumPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture", picture.id + "-thumb_md.JPG");
+            if (System.IO.File.Exists(thumbMediumPath))
+                System.IO.File.Delete(thumbMediumPath);
+        }
+
+        private PictureSaver CreatePictureSaver()
+        {
+            return new PictureSaver(AppDomain.CurrentDomain.BaseDirectory, new PictureAssetStorageService(AppDomain.CurrentDomain.BaseDirectory));
         }
 
         protected override void Dispose(bool disposing)

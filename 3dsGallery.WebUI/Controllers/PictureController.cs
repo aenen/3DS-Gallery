@@ -43,7 +43,6 @@ namespace _3dsGallery.WebUI.Controllers
             var pic = db.Picture.Find(id);
             if (pic == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-
             if (pic.Gallery.IsPrivate && pic.Gallery.User.login != User.Identity.Name)
                 return RedirectToAction("Index", "Home");
 
@@ -129,13 +128,15 @@ namespace _3dsGallery.WebUI.Controllers
                     ModelState.AddModelError(string.Empty, $"File '{f.FileName}' extension must be '.mpo' or '.jpg'.");
             }
 
-            if (model.isAdvanced && model.isTo2d && model.leftOrRight < 0 && model.leftOrRight > 1)
+            if (model.isAdvanced && model.isTo2d && (model.leftOrRight < 0 || model.leftOrRight > 1))
                 ModelState.AddModelError(string.Empty, "You must choose which of the images (left or right) should be saved in 2D.");
 
             if (!ModelState.IsValid)
                 return View(model);
 
             Picture lastPicture = null;
+            var pictureSaver = CreatePictureSaver();
+            var uploadErrors = new List<string>();
             foreach (var f in files)
             {
                 Picture picture = new Picture
@@ -147,11 +148,20 @@ namespace _3dsGallery.WebUI.Controllers
                 db.Picture.Add(picture);
                 db.SaveChanges();
 
-                picture = new PictureSaver(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture")).AnalyzeAndSave(picture, model, f);
+                try
+                {
+                    picture = pictureSaver.AnalyzeAndSave(picture, model, f);
 
-                db.Entry(picture).State = EntityState.Modified;
-                db.SaveChanges();
-                lastPicture = picture;
+                    db.Entry(picture).State = EntityState.Modified;
+                    db.SaveChanges();
+                    lastPicture = picture;
+                }
+                catch (Exception ex)
+                {
+                    db.Entry(picture).State = EntityState.Deleted;
+                    db.SaveChanges();
+                    uploadErrors.Add(string.Format("File '{0}' failed to upload: {1}", f.FileName, ex.Message));
+                }
             }
 
             if (lastPicture != null)
@@ -159,6 +169,19 @@ namespace _3dsGallery.WebUI.Controllers
                 lastPicture.Gallery.LastPicture = lastPicture;
                 db.Entry(lastPicture.Gallery).State = EntityState.Modified;
                 db.SaveChanges();
+            }
+
+            if (uploadErrors.Any())
+            {
+                foreach (var error in uploadErrors)
+                    ModelState.AddModelError(string.Empty, error);
+
+                if (lastPicture != null)
+                {
+                    ModelState.AddModelError(string.Empty, string.Format("{0} picture(s) uploaded successfully before the failure.", files.Count - uploadErrors.Count));
+                }
+
+                return View(model);
             }
 
             if (action == "Upload & Add More")
@@ -275,6 +298,9 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult Random()
         {
             int total = db.Picture.Where(x => !x.Gallery.IsPrivate).Count();
+            if (total == 0)
+                return Json(string.Empty);
+
             Random rand = new Random();
             int offset = rand.Next(0, total);
 
@@ -284,7 +310,10 @@ namespace _3dsGallery.WebUI.Controllers
                 .Skip(offset)
                 .FirstOrDefault();
 
-            return Json(randomRow.path);
+            if (randomRow == null)
+                return Json(string.Empty);
+
+            return Json(Url.Action("OpenOriginal", "Picture", new { id = randomRow.id }));
         }
 
         [HttpPost]
@@ -333,6 +362,9 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult RandomGenerateSideBySide()
         {
             int total = db.Picture.Where(x => !x.Gallery.IsPrivate && x.type == "3D").Count();
+            if (total == 0)
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
             Random rand = new Random();
             int offset = rand.Next(0, total);
 
@@ -342,7 +374,10 @@ namespace _3dsGallery.WebUI.Controllers
                 .Skip(offset)
                 .FirstOrDefault();
 
-            var bytes = new PictureSaver(AppDomain.CurrentDomain.BaseDirectory).GenerateSideBySideImage(randomRow.path);
+            if (randomRow == null)
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
+            var bytes = CreatePictureSaver().GenerateSideBySideImage(randomRow);
             return File(bytes, "image/jpeg");
         }
 
@@ -352,7 +387,7 @@ namespace _3dsGallery.WebUI.Controllers
             if (item == null || item.type != "3D")
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            var bytes = new PictureSaver(AppDomain.CurrentDomain.BaseDirectory).GenerateSideBySideImage(item.path);
+            var bytes = CreatePictureSaver().GenerateSideBySideImage(item);
             return File(bytes, "image/jpeg");
         }
 
@@ -365,23 +400,29 @@ namespace _3dsGallery.WebUI.Controllers
             if (!IsItMine(id))
                 return HttpNotFound();
 
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture");
             Picture picture = db.Picture.Include(X => X.User).FirstOrDefault(x => x.id == id);
-            if (System.IO.File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, picture.path)))
-                System.IO.File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, picture.path));
+            if (picture == null)
+                return HttpNotFound();
 
             Gallery gallery = picture.Gallery;
-            db.Picture.Remove(picture);
-            gallery.LastPicture = gallery.Picture.LastOrDefault();
+            gallery.LastPicture = gallery.Picture.Where(x => x.id != picture.id).OrderBy(x => x.id).LastOrDefault();
             db.Entry(gallery).State = EntityState.Modified;
             db.SaveChanges();
-            if (System.IO.File.Exists(Path.Combine(path, $"{id}-thumb_sm.JPG")))
-                System.IO.File.Delete(Path.Combine(path, $"{id}-thumb_sm.JPG"));
-            if (System.IO.File.Exists(Path.Combine(path, $"{id}-thumb_md.JPG")))
-                System.IO.File.Delete(Path.Combine(path, $"{id}-thumb_md.JPG"));
-            if (System.IO.File.Exists(Path.Combine(path, $"{id}.JPG")))
-                System.IO.File.Delete(Path.Combine(path, $"{id}.JPG"));
-            return Json("ok");
+
+            try
+            {
+                CreatePictureStorageService().DeleteAssets(picture);
+                DeleteLocalFiles(picture);
+                db.Picture.Remove(picture);
+                db.SaveChanges();
+                return Json("ok");
+            }
+            catch
+            {
+                db.Entry(picture).State = EntityState.Modified;
+                db.SaveChanges();
+                return new HttpStatusCodeResult(HttpStatusCode.BadGateway, "Picture deletion is pending cleanup. Please retry.");
+            }
         }
 
         [Authorize]
@@ -513,8 +554,35 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult GetPath(int id)
         {
             var pic = db.Picture.Find(id);
-            string result = $"http://3dsgallery.azurewebsites.net/{pic.path.Replace('\\', '/')}";
+            if (pic == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            string result = Url.Action("OpenOriginal", "Picture", new { id = pic.id }, Request.Url == null ? null : Request.Url.Scheme);
             return Json(result);
+        }
+
+        [Route("Pictures/{id}/Open")]
+        public ActionResult OpenOriginal(int id)
+        {
+            var picture = FindPictureWithOwner(id);
+            if (picture == null)
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
+            if (picture.Gallery.IsPrivate && picture.Gallery.User.login != User.Identity.Name)
+                return RedirectToAction("Index", "Home");
+            return RedirectToResolvedAsset(picture, true, null);
+        }
+
+        [Route("Pictures/{id}/Preview")]
+        public ActionResult Preview(int id, string size = PictureStorageConstants.PreviewSizeMedium)
+        {
+            var picture = FindPictureWithOwner(id);
+            if (picture == null)
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
+            if (picture.Gallery.IsPrivate && picture.Gallery.User.login != User.Identity.Name)
+                return RedirectToAction("Index", "Home");
+            return RedirectToResolvedAsset(picture, false, size);
         }
 
         bool IsItMine(int? id)
@@ -551,6 +619,65 @@ namespace _3dsGallery.WebUI.Controllers
                 return $"{hours}hr";
             else
                 return $"{minutes}min";
+        }
+
+        private ActionResult RedirectToResolvedAsset(Picture picture, bool original, string size)
+        {
+            var resolver = CreatePictureUrlResolver();
+            var resolvedUrl = original
+                ? resolver.ResolveOriginalRedirectUrl(picture)
+                : resolver.ResolvePreviewRedirectUrl(picture, size);
+
+            if (string.IsNullOrWhiteSpace(resolvedUrl))
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
+            if (resolvedUrl.StartsWith("~/"))
+                return Redirect(Url.Content(resolvedUrl));
+
+            return Redirect(resolvedUrl);
+        }
+
+        private PictureSaver CreatePictureSaver()
+        {
+            return new PictureSaver(AppDomain.CurrentDomain.BaseDirectory, CreatePictureStorageService());
+        }
+
+        private IPictureAssetStorageService CreatePictureStorageService()
+        {
+            return new PictureAssetStorageService(new ImageKitClient(), CreatePictureUrlResolver(), ImageKitConfiguration.LoadFromConfiguration().UploadFolder);
+        }
+
+        private PictureAssetUrlResolver CreatePictureUrlResolver()
+        {
+            return new PictureAssetUrlResolver(AppDomain.CurrentDomain.BaseDirectory);
+        }
+
+        private Picture FindPictureWithOwner(int id)
+        {
+            return db.Picture
+                .Include(x => x.Gallery)
+                .Include(x => x.Gallery.User)
+                .FirstOrDefault(x => x.id == id);
+        }
+
+        private void DeleteLocalFiles(Picture picture)
+        {
+            var resolver = CreatePictureUrlResolver();
+            var originalPath = resolver.GetLocalOriginalPhysicalPath(picture);
+            if (!string.IsNullOrWhiteSpace(originalPath) && System.IO.File.Exists(originalPath))
+                System.IO.File.Delete(originalPath);
+
+            var previewPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture", picture.id + ".JPG");
+            if (System.IO.File.Exists(previewPath))
+                System.IO.File.Delete(previewPath);
+
+            var thumbSmallPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture", picture.id + "-thumb_sm.JPG");
+            if (System.IO.File.Exists(thumbSmallPath))
+                System.IO.File.Delete(thumbSmallPath);
+
+            var thumbMediumPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture", picture.id + "-thumb_md.JPG");
+            if (System.IO.File.Exists(thumbMediumPath))
+                System.IO.File.Delete(thumbMediumPath);
         }
 
     }

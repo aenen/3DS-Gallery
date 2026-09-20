@@ -182,7 +182,7 @@ namespace _3dsGallery.WebUI.Controllers
                     ColorThemeClass = gallery.Style.value,
                     CreatedBy = gallery.User.login,
                     Is3D = gallery.Picture.Any(pic => pic.type == "3D"),
-                    PictureTotalCount = gallery.Picture.Count,
+                    PictureTotalCount = gallery.Picture.Count(),
                     PicturePreviewList = gallery.Picture.OrderByDescending(x => x.id).Take(2).Select(pic => new GalleryPicturePreview
                     {
                         IdPicture = pic.id,

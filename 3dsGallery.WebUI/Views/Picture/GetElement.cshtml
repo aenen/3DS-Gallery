@@ -6,12 +6,9 @@
 }
 <div class="col-lg-3 col-md-4 col-sm-6">
     <div class="thumbnail" data-id="@Model.id">
-        <div class="preview-container-md style-@Model.Gallery.Style.value">
-            <a target="_blank" href="~/@Model.path">
-                @{
-                    string preview_md = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{Model.id}-thumb_md.JPG") ? $"/Picture/{Model.id}-thumb_md.JPG" : $"/Picture/{Model.id}.JPG";
-                }
-                <img class="preview-img" src="@preview_md" />
+        <div class="preview-container-md style-@Model.Gallery.Style.value" data-pic-path="@Url.Action("Preview", "Picture", new { id = Model.id, size = "full" })" data-mpo-path="@(Model.type == "3D" ? Url.Action("OpenOriginal", "Picture", new { id = Model.id }) : string.Empty)" data-is-3d="@(Model.type == "3D" ? "true" : "false")">
+            <a target="_blank" href="@Url.Action("OpenOriginal", "Picture", new { id = Model.id })">
+                <img class="preview-img" src="@Url.Action("Preview", "Picture", new { id = Model.id, size = "md" })" />
             </a>
             @{
                 if (isOwner)
