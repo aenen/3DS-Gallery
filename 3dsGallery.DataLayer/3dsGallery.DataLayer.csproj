@@ -57,6 +57,7 @@
     <Compile Include="DataBase\Notification.cs" />
     <Compile Include="DataBase\PictureComment.cs" />
     <Compile Include="DataBase\Picture.cs" />
+    <Compile Include="DataBase\PictureRemoteAsset.cs" />
     <Compile Include="DataBase\Style.cs" />
     <Compile Include="DataBase\User.cs" />
     <Compile Include="Migrations\201804222131291_AddLastPicture.cs" />

@@ -316,7 +316,6 @@ def build_update_sql(row: ManifestRow, plan: AssetPlan, original: Dict[str, obje
     values = {
         "StorageProvider": STORAGE_PROVIDER,
         "StorageMigrationStatus": STATUS_REMOTE_ACTIVE,
-        "path": plan.remote_legacy_path,
         "OriginalRemoteFileId": original["fileId"],
         "OriginalRemotePath": original["filePath"],
         "PreviewRemoteFileId": preview["fileId"],
@@ -332,7 +331,29 @@ def build_update_sql(row: ManifestRow, plan: AssetPlan, original: Dict[str, obje
             assignments.append("[%s] = NULL" % key)
         else:
             assignments.append("[%s] = '%s'" % (key, sql_escape(str(value))))
-    return "UPDATE [dbo].[Picture] SET %s WHERE [id] = %d;" % (", ".join(assignments), row.picture_id)
+    assignment_sql = ", ".join(assignments)
+    return (
+        "MERGE [dbo].[PictureRemoteAsset] AS target "
+        "USING (SELECT %d AS [PictureId]) AS source "
+        "ON target.[PictureId] = source.[PictureId] "
+        "WHEN MATCHED THEN UPDATE SET %s "
+        "WHEN NOT MATCHED THEN INSERT ([PictureId], [StorageProvider], [StorageMigrationStatus], [OriginalRemoteFileId], [OriginalRemotePath], [PreviewRemoteFileId], [PreviewRemotePath], [ThumbnailSmallRemoteFileId], [ThumbnailSmallRemotePath], [ThumbnailMediumRemoteFileId], [ThumbnailMediumRemotePath]) "
+        "VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s);"
+    ) % (
+        row.picture_id,
+        assignment_sql,
+        row.picture_id,
+        sql_escape(str(values["StorageProvider"])),
+        sql_escape(str(values["StorageMigrationStatus"])),
+        sql_escape(str(values["OriginalRemoteFileId"])),
+        sql_escape(str(values["OriginalRemotePath"])),
+        sql_escape(str(values["PreviewRemoteFileId"])),
+        sql_escape(str(values["PreviewRemotePath"])),
+        "NULL" if values["ThumbnailSmallRemoteFileId"] is None else "'%s'" % sql_escape(str(values["ThumbnailSmallRemoteFileId"])),
+        "NULL" if values["ThumbnailSmallRemotePath"] is None else "'%s'" % sql_escape(str(values["ThumbnailSmallRemotePath"])),
+        "NULL" if values["ThumbnailMediumRemoteFileId"] is None else "'%s'" % sql_escape(str(values["ThumbnailMediumRemoteFileId"])),
+        "NULL" if values["ThumbnailMediumRemotePath"] is None else "'%s'" % sql_escape(str(values["ThumbnailMediumRemotePath"])),
+    )
 
 
 def guess_content_type(path: Path) -> str:

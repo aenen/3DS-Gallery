@@ -126,7 +126,7 @@ class MigrationRunnerTests(unittest.TestCase):
         sql_files = list(self.output.glob("batch_*.sql"))
         self.assertEqual(len(sql_files), 1)
         sql_text = sql_files[0].read_text(encoding="utf-8")
-        self.assertIn("StorageMigrationStatus", sql_text)
+        self.assertIn("PictureRemoteAsset", sql_text)
         self.assertTrue(client.download_calls[0].endswith("?tr=orig-true"))
 
     def test_duplicate_ids_in_same_batch_are_deduplicated(self):

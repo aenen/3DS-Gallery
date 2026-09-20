@@ -135,9 +135,7 @@ namespace _3dsGallery.WebUI.Controllers
                 {
                     description = model.description,
                     Gallery = model.Gallery,
-                    CreationDate = DateTime.Now,
-                    StorageProvider = PictureStorageConstants.StorageProviderLocal,
-                    StorageMigrationStatus = PictureStorageConstants.MigrationStatusLocalOnly
+                    CreationDate = DateTime.Now
                 };
                 db.Picture.Add(picture);
                 db.SaveChanges();
@@ -145,6 +143,8 @@ namespace _3dsGallery.WebUI.Controllers
                 try
                 {
                     picture = pictureSaver.AnalyzeAndSave(picture, model, f);
+                    if (picture.RemoteAsset != null && db.Entry(picture.RemoteAsset).State == EntityState.Detached)
+                        db.PictureRemoteAsset.Add(picture.RemoteAsset);
 
                     db.Entry(picture).State = EntityState.Modified;
                     db.SaveChanges();
@@ -308,7 +308,9 @@ namespace _3dsGallery.WebUI.Controllers
             var pictures = gallery.Picture.ToList();
             foreach (var item in pictures)
             {
-                item.StorageMigrationStatus = PictureStorageConstants.MigrationStatusDeletePending;
+                EnsureRemoteAsset(item).StorageMigrationStatus = PictureStorageConstants.MigrationStatusDeletePending;
+                if (item.RemoteAsset != null && db.Entry(item.RemoteAsset).State == EntityState.Detached)
+                    db.PictureRemoteAsset.Add(item.RemoteAsset);
                 db.Entry(item).State = EntityState.Modified;
             }
             gallery.LastPicture = null;
@@ -367,7 +369,21 @@ namespace _3dsGallery.WebUI.Controllers
 
         private PictureSaver CreatePictureSaver()
         {
-            return new PictureSaver(AppDomain.CurrentDomain.BaseDirectory);
+            return new PictureSaver(AppDomain.CurrentDomain.BaseDirectory, new PictureAssetStorageService(AppDomain.CurrentDomain.BaseDirectory));
+        }
+
+        private static PictureRemoteAsset EnsureRemoteAsset(Picture picture)
+        {
+            if (picture.RemoteAsset == null)
+            {
+                picture.RemoteAsset = new PictureRemoteAsset
+                {
+                    PictureId = picture.id,
+                    Picture = picture
+                };
+            }
+
+            return picture.RemoteAsset;
         }
 
         protected override void Dispose(bool disposing)

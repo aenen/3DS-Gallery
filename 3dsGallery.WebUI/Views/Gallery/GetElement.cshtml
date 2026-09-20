@@ -1,6 +1,6 @@
 ﻿@model _3dsGallery.DataLayer.DataBase.Gallery
 @{
-    bool is3d = Model.Picture.Any(x => x.type == "3D" && (x.StorageMigrationStatus == null || x.StorageMigrationStatus != _3dsGallery.WebUI.Code.PictureStorageConstants.MigrationStatusDeletePending)) ? true : false;
+    bool is3d = Model.Picture.Any(x => x.type == "3D" && (x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != _3dsGallery.WebUI.Code.PictureStorageConstants.MigrationStatusDeletePending)) ? true : false;
 }
 
 <div class="col-md-4">
@@ -11,7 +11,7 @@
                 {
                     <span class="badge">3D</span>
                 }
-                <span class="badge">@Model.Picture.Count(x => x.StorageMigrationStatus == null || x.StorageMigrationStatus != _3dsGallery.WebUI.Code.PictureStorageConstants.MigrationStatusDeletePending)</span>
+                <span class="badge">@Model.Picture.Count(x => x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != _3dsGallery.WebUI.Code.PictureStorageConstants.MigrationStatusDeletePending)</span>
             </div>
             <div class="one-line">
                 @if (Model.User.login == User.Identity.Name)
@@ -25,7 +25,7 @@
             @{
                 int counter = 2;
                 //var previews = Model.Picture.OrderByDescending(x => x.User.Count).ThenByDescending(x => x.id).Take(counter);
-                var previews = Model.Picture.Where(x => x.StorageMigrationStatus == null || x.StorageMigrationStatus != _3dsGallery.WebUI.Code.PictureStorageConstants.MigrationStatusDeletePending).OrderByDescending(x => x.id).Take(counter);
+                var previews = Model.Picture.Where(x => x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != _3dsGallery.WebUI.Code.PictureStorageConstants.MigrationStatusDeletePending).OrderByDescending(x => x.id).Take(counter);
                 foreach (var pv in previews)
                 {
                     <div class="preview-container-sm">

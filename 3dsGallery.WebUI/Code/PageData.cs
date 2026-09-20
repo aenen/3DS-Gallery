@@ -31,7 +31,7 @@ namespace _3dsGallery.WebUI.Code
         {
             var picturesList = db.Picture
                 .Include(p => p.Gallery)
-                .Where(x => x.StorageMigrationStatus == null || x.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending);
+                .Where(x => x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending);
             var userdb = db.User.FirstOrDefault(x => x.login == user);
 
             if (gallery != null)
@@ -87,7 +87,7 @@ namespace _3dsGallery.WebUI.Code
                 galleriesList = galleriesList.Where(x => x.User.login == user);
 
             galleriesList = galleriesList.Where(x => !x.IsPrivate || (x.IsPrivate && x.User.login == LoggedUserName));
-            galleriesList = galleriesList.Where(x => x.LastPicture == null || x.LastPicture.StorageMigrationStatus == null || x.LastPicture.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending);
+            galleriesList = galleriesList.Where(x => x.LastPicture == null || x.LastPicture.RemoteAsset == null || x.LastPicture.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending);
 
             switch (Filter)
             {

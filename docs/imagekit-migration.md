@@ -7,12 +7,12 @@ This repository now supports mixed local/remote picture delivery and new uploads
 - New uploads persist to ImageKit instead of the local `Picture/` folder.
 - Existing rows can stay local until they are migrated.
 - Every remote `.MPO` open/download URL is resolved with `tr=orig-true` so ImageKit serves the original MPO bytes.
-- The database now stores explicit ImageKit file IDs and remote paths for:
+- The database now stores explicit ImageKit file IDs and remote paths in a separate `PictureRemoteAsset` table for:
   - original asset
   - preview JPG
   - optional `thumb_sm`
   - optional `thumb_md`
-- `StorageProvider` and `StorageMigrationStatus` keep rollout state explicit.
+- `StorageProvider` and `StorageMigrationStatus` stay in `PictureRemoteAsset`, so the existing `Picture` table stays unchanged.
 
 ## Do this first
 
@@ -41,7 +41,7 @@ Do **not** commit real credentials.
 
 ## Database/schema deployment order
 
-1. Deploy the database migration that adds:
+1. Deploy the database migration that creates `dbo.PictureRemoteAsset` with:
    - `StorageProvider`
    - `StorageMigrationStatus`
    - `OriginalRemoteFileId`
@@ -52,7 +52,6 @@ Do **not** commit real credentials.
    - `ThumbnailSmallRemotePath`
    - `ThumbnailMediumRemoteFileId`
    - `ThumbnailMediumRemotePath`
-   - widened `Picture.path`
 2. Deploy the application with ImageKit settings configured.
 3. Verify a staging upload before migrating production history.
 
@@ -180,7 +179,7 @@ If a crash happens mid-run:
 
 ## Applying DB updates
 
-The utility generates idempotent SQL update statements per batch.
+The utility generates idempotent SQL upsert statements for `dbo.PictureRemoteAsset` per batch.
 
 Recommended process:
 
@@ -199,7 +198,7 @@ During rollout:
 
 - existing local-only rows keep working
 - newly uploaded rows use ImageKit
-- migrated rows switch to ImageKit through stored metadata
+- migrated rows switch to ImageKit through `PictureRemoteAsset`
 
 Do not delete the local `Picture/` directory during the migration.
 
@@ -208,7 +207,7 @@ Do not delete the local `Picture/` directory during the migration.
 After all SQL batches are applied:
 
 1. Compare migrated row count against the manifest row count.
-2. Count `RemoteActive` rows in `dbo.Picture`.
+2. Count `RemoteActive` rows in `dbo.PictureRemoteAsset`.
 3. Count journal `success` rows.
 4. Randomly sample public 2D rows.
 5. Randomly sample public 3D rows.

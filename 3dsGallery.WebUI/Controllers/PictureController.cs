@@ -43,7 +43,7 @@ namespace _3dsGallery.WebUI.Controllers
             var pic = db.Picture.Find(id);
             if (pic == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            if (string.Equals(pic.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase))
+            if (pic.RemoteAsset != null && string.Equals(pic.RemoteAsset.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase))
                 return new HttpStatusCodeResult(HttpStatusCode.NotFound);
 
             if (pic.Gallery.IsPrivate && pic.Gallery.User.login != User.Identity.Name)
@@ -146,9 +146,7 @@ namespace _3dsGallery.WebUI.Controllers
                 {
                     description = model.description,
                     galleryId = model.galleryId,
-                    CreationDate = DateTime.Now,
-                    StorageProvider = PictureStorageConstants.StorageProviderLocal,
-                    StorageMigrationStatus = PictureStorageConstants.MigrationStatusLocalOnly
+                    CreationDate = DateTime.Now
                 };
                 db.Picture.Add(picture);
                 db.SaveChanges();
@@ -156,6 +154,8 @@ namespace _3dsGallery.WebUI.Controllers
                 try
                 {
                     picture = pictureSaver.AnalyzeAndSave(picture, model, f);
+                    if (picture.RemoteAsset != null && db.Entry(picture.RemoteAsset).State == EntityState.Detached)
+                        db.PictureRemoteAsset.Add(picture.RemoteAsset);
 
                     db.Entry(picture).State = EntityState.Modified;
                     db.SaveChanges();
@@ -302,7 +302,7 @@ namespace _3dsGallery.WebUI.Controllers
         [HttpPost]
         public ActionResult Random()
         {
-            int total = db.Picture.Where(x => (x.StorageMigrationStatus == null || x.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && !x.Gallery.IsPrivate).Count();
+            int total = db.Picture.Where(x => (x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && !x.Gallery.IsPrivate).Count();
             if (total == 0)
                 return Json(string.Empty);
 
@@ -310,7 +310,7 @@ namespace _3dsGallery.WebUI.Controllers
             int offset = rand.Next(0, total);
 
             var randomRow = db.Picture
-                .Where(x => (x.StorageMigrationStatus == null || x.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && !x.Gallery.IsPrivate)
+                .Where(x => (x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && !x.Gallery.IsPrivate)
                 .OrderBy(x => x.id)
                 .Skip(offset)
                 .FirstOrDefault();
@@ -330,7 +330,7 @@ namespace _3dsGallery.WebUI.Controllers
             result.RefreshTimeInfo = TimeUntilTomorrow(utcNow);
 
             var timeCapsulesQuery = db.Picture
-                .Where(x => (x.StorageMigrationStatus == null || x.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending)
+                .Where(x => (x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending)
                     && !x.Gallery.IsPrivate
                     && x.CreationDate.HasValue
                     && x.CreationDate.Value.Month == utcNow.Month
@@ -367,7 +367,7 @@ namespace _3dsGallery.WebUI.Controllers
 
         public ActionResult RandomGenerateSideBySide()
         {
-            int total = db.Picture.Where(x => (x.StorageMigrationStatus == null || x.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && !x.Gallery.IsPrivate && x.type == "3D").Count();
+            int total = db.Picture.Where(x => (x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && !x.Gallery.IsPrivate && x.type == "3D").Count();
             if (total == 0)
                 return new HttpStatusCodeResult(HttpStatusCode.NotFound);
 
@@ -375,7 +375,7 @@ namespace _3dsGallery.WebUI.Controllers
             int offset = rand.Next(0, total);
 
             var randomRow = db.Picture
-                .Where(x => (x.StorageMigrationStatus == null || x.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && !x.Gallery.IsPrivate && x.type == "3D")
+                .Where(x => (x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending) && !x.Gallery.IsPrivate && x.type == "3D")
                 .OrderBy(x => x.id)
                 .Skip(offset)
                 .FirstOrDefault();
@@ -390,7 +390,7 @@ namespace _3dsGallery.WebUI.Controllers
         public ActionResult GenerateSideBySide(int? id)
         {
             Picture item = db.Picture.Find(id);
-            if (item == null || item.type != "3D" || string.Equals(item.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase))
+            if (item == null || item.type != "3D" || (item.RemoteAsset != null && string.Equals(item.RemoteAsset.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase)))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var bytes = CreatePictureSaver().GenerateSideBySideImage(item);
@@ -406,12 +406,12 @@ namespace _3dsGallery.WebUI.Controllers
             if (!IsItMine(id))
                 return HttpNotFound();
 
-            Picture picture = db.Picture.Include(X => X.User).FirstOrDefault(x => x.id == id);
+            Picture picture = db.Picture.Include(X => X.User).Include(x => x.RemoteAsset).FirstOrDefault(x => x.id == id);
             if (picture == null)
                 return HttpNotFound();
 
             Gallery gallery = picture.Gallery;
-            picture.StorageMigrationStatus = PictureStorageConstants.MigrationStatusDeletePending;
+            EnsureRemoteAsset(picture).StorageMigrationStatus = PictureStorageConstants.MigrationStatusDeletePending;
             gallery.LastPicture = gallery.Picture.Where(x => x.id != picture.id).OrderBy(x => x.id).LastOrDefault();
             db.Entry(gallery).State = EntityState.Modified;
             db.SaveChanges();
@@ -510,7 +510,7 @@ namespace _3dsGallery.WebUI.Controllers
 
             var picModel = db.Picture
                 .Where(x => !x.Gallery.IsPrivate && x.id == id)
-                .Where(x => x.StorageMigrationStatus == null || x.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending)
+                .Where(x => x.RemoteAsset == null || x.RemoteAsset.StorageMigrationStatus != PictureStorageConstants.MigrationStatusDeletePending)
                 .Take(1)
                 .Select(pic => new PictureModel
                 {
@@ -578,7 +578,7 @@ namespace _3dsGallery.WebUI.Controllers
 
             if (picture.Gallery.IsPrivate && picture.Gallery.User.login != User.Identity.Name)
                 return RedirectToAction("Index", "Home");
-            if (string.Equals(picture.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase))
+            if (picture.RemoteAsset != null && string.Equals(picture.RemoteAsset.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase))
                 return new HttpStatusCodeResult(HttpStatusCode.NotFound);
 
             return RedirectToResolvedAsset(picture, true, null);
@@ -593,7 +593,7 @@ namespace _3dsGallery.WebUI.Controllers
 
             if (picture.Gallery.IsPrivate && picture.Gallery.User.login != User.Identity.Name)
                 return RedirectToAction("Index", "Home");
-            if (string.Equals(picture.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase))
+            if (picture.RemoteAsset != null && string.Equals(picture.RemoteAsset.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase))
                 return new HttpStatusCodeResult(HttpStatusCode.NotFound);
 
             return RedirectToResolvedAsset(picture, false, size);
@@ -671,7 +671,22 @@ namespace _3dsGallery.WebUI.Controllers
             return db.Picture
                 .Include(x => x.Gallery)
                 .Include(x => x.Gallery.User)
+                .Include(x => x.RemoteAsset)
                 .FirstOrDefault(x => x.id == id);
+        }
+
+        private static PictureRemoteAsset EnsureRemoteAsset(Picture picture)
+        {
+            if (picture.RemoteAsset == null)
+            {
+                picture.RemoteAsset = new PictureRemoteAsset
+                {
+                    PictureId = picture.id,
+                    Picture = picture
+                };
+            }
+
+            return picture.RemoteAsset;
         }
 
         private void DeleteLocalFiles(Picture picture)

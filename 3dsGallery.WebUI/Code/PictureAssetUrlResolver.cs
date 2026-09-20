@@ -28,16 +28,19 @@ namespace _3dsGallery.WebUI.Code
         {
             if (picture == null)
                 return false;
-
-            if (!string.Equals(picture.StorageProvider, PictureStorageConstants.StorageProviderImageKit, StringComparison.OrdinalIgnoreCase))
+            var remoteAsset = picture.RemoteAsset;
+            if (remoteAsset == null)
                 return false;
 
-            if (string.IsNullOrWhiteSpace(picture.OriginalRemotePath))
+            if (!string.Equals(remoteAsset.StorageProvider, PictureStorageConstants.StorageProviderImageKit, StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            if (string.Equals(picture.StorageMigrationStatus, PictureStorageConstants.MigrationStatusRemotePending, StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(remoteAsset.OriginalRemotePath))
                 return false;
-            if (string.Equals(picture.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase))
+
+            if (string.Equals(remoteAsset.StorageMigrationStatus, PictureStorageConstants.MigrationStatusRemotePending, StringComparison.OrdinalIgnoreCase))
+                return false;
+            if (string.Equals(remoteAsset.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase))
                 return false;
 
             return true;
@@ -62,13 +65,14 @@ namespace _3dsGallery.WebUI.Code
             {
                 if (_imageKitClient == null)
                     throw new InvalidOperationException("ImageKit is not configured. Set ImageKitPrivateKey and ImageKitUrlEndpoint before serving remote picture assets.");
+                var remoteAsset = picture.RemoteAsset;
 
-                if (string.Equals(size, PictureStorageConstants.PreviewSizeSmall, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(picture.ThumbnailSmallRemotePath))
-                    return _imageKitClient.BuildDeliveryUrl(picture.ThumbnailSmallRemotePath);
-                if (string.Equals(size, PictureStorageConstants.PreviewSizeMedium, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(picture.ThumbnailMediumRemotePath))
-                    return _imageKitClient.BuildDeliveryUrl(picture.ThumbnailMediumRemotePath);
-                if (!string.IsNullOrWhiteSpace(picture.PreviewRemotePath))
-                    return _imageKitClient.BuildDeliveryUrl(picture.PreviewRemotePath);
+                if (string.Equals(size, PictureStorageConstants.PreviewSizeSmall, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(remoteAsset.ThumbnailSmallRemotePath))
+                    return _imageKitClient.BuildDeliveryUrl(remoteAsset.ThumbnailSmallRemotePath);
+                if (string.Equals(size, PictureStorageConstants.PreviewSizeMedium, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(remoteAsset.ThumbnailMediumRemotePath))
+                    return _imageKitClient.BuildDeliveryUrl(remoteAsset.ThumbnailMediumRemotePath);
+                if (!string.IsNullOrWhiteSpace(remoteAsset.PreviewRemotePath))
+                    return _imageKitClient.BuildDeliveryUrl(remoteAsset.PreviewRemotePath);
                 return GetRemoteOriginalUrl(picture);
             }
 
@@ -93,13 +97,13 @@ namespace _3dsGallery.WebUI.Code
 
         public string GetRemoteOriginalUrl(Picture picture)
         {
-            if (picture == null || string.IsNullOrWhiteSpace(picture.OriginalRemotePath))
+            if (picture == null || picture.RemoteAsset == null || string.IsNullOrWhiteSpace(picture.RemoteAsset.OriginalRemotePath))
                 return null;
 
             if (_imageKitClient == null)
                 throw new InvalidOperationException("ImageKit is not configured. Set ImageKitPrivateKey and ImageKitUrlEndpoint before serving remote picture assets.");
 
-            var url = _imageKitClient.BuildDeliveryUrl(picture.OriginalRemotePath);
+            var url = _imageKitClient.BuildDeliveryUrl(picture.RemoteAsset.OriginalRemotePath);
             return EnsureRawMpoUrl(url);
         }
 
