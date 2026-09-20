@@ -61,6 +61,12 @@ class UrlTests(unittest.TestCase):
             "https://ik.example.test/path/1.JPG?tr=w-100",
         )
 
+    def test_mpo_url_deduplicates_transformations(self):
+        self.assertEqual(
+            ensure_raw_mpo_url("https://ik.example.test/path/1.mpo?tr=w-300,w-300,orig-true"),
+            "https://ik.example.test/path/1.mpo?tr=w-300%2Corig-true",
+        )
+
 
 class MigrationRunnerTests(unittest.TestCase):
     def setUp(self):
@@ -122,6 +128,16 @@ class MigrationRunnerTests(unittest.TestCase):
         sql_text = sql_files[0].read_text(encoding="utf-8")
         self.assertIn("StorageMigrationStatus", sql_text)
         self.assertTrue(client.download_calls[0].endswith("?tr=orig-true"))
+
+    def test_duplicate_ids_in_same_batch_are_deduplicated(self):
+        journal = Journal(self.output / "journal.jsonl")
+        client = FakeStorageClient()
+        runner = MigrationRunner(client, self.root, journal, self.output, True, 4, 10)
+        result = runner.run([
+            ManifestRow(1, 2, "Picture/1.MPO", "3D"),
+            ManifestRow(1, 2, "Picture/1.MPO", "3D"),
+        ])
+        self.assertEqual(result["dry_run"], 1)
 
 
 if __name__ == "__main__":

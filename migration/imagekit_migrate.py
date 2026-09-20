@@ -162,6 +162,7 @@ class MigrationRunner:
     def run(self, manifest_rows: List[ManifestRow]) -> Dict[str, int]:
         counts = {"success": 0, "skipped": 0, "missing": 0, "error": 0, "dry_run": 0}
         for chunk_index, chunk in enumerate(chunked(manifest_rows, self.batch_size), start=1):
+            chunk = dedupe_manifest_rows(chunk)
             with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
                 futures = [executor.submit(self.process_row, row) for row in chunk]
                 results = [future.result() for future in futures]
@@ -434,6 +435,17 @@ def read_manifest(path: Path) -> List[ManifestRow]:
 def chunked(rows: List[ManifestRow], size: int) -> Iterable[List[ManifestRow]]:
     for index in range(0, len(rows), size):
         yield rows[index:index + size]
+
+
+def dedupe_manifest_rows(rows: List[ManifestRow]) -> List[ManifestRow]:
+    unique_rows = []
+    seen_ids = set()
+    for row in rows:
+        if row.picture_id in seen_ids:
+            continue
+        seen_ids.add(row.picture_id)
+        unique_rows.append(row)
+    return unique_rows
 
 
 def utc_now_iso() -> str:

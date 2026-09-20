@@ -56,6 +56,10 @@ namespace _3dsGallery.WebUI.Code
             if (_imageKitClient == null)
                 throw new InvalidOperationException("ImageKit is not configured. Set ImageKitPrivateKey and ImageKitUrlEndpoint before uploading pictures.");
 
+            var originalStorageProvider = picture.StorageProvider;
+            var originalStorageMigrationStatus = picture.StorageMigrationStatus;
+            var originalPath = picture.path;
+            var originalType = picture.type;
             var uploadedFileIds = new List<string>();
             try
             {
@@ -115,7 +119,18 @@ namespace _3dsGallery.WebUI.Code
             catch
             {
                 TryDeleteUploadedFiles(uploadedFileIds);
-                picture.StorageMigrationStatus = PictureStorageConstants.MigrationStatusLocalOnly;
+                picture.StorageProvider = originalStorageProvider;
+                picture.StorageMigrationStatus = originalStorageMigrationStatus;
+                picture.path = originalPath;
+                picture.type = originalType;
+                picture.OriginalRemoteFileId = null;
+                picture.OriginalRemotePath = null;
+                picture.PreviewRemoteFileId = null;
+                picture.PreviewRemotePath = null;
+                picture.ThumbnailSmallRemoteFileId = null;
+                picture.ThumbnailSmallRemotePath = null;
+                picture.ThumbnailMediumRemoteFileId = null;
+                picture.ThumbnailMediumRemotePath = null;
                 throw;
             }
         }

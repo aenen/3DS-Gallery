@@ -564,7 +564,7 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("Pictures/{id}/Open")]
         public ActionResult OpenOriginal(int id)
         {
-            var picture = db.Picture.Find(id);
+            var picture = FindPictureWithOwner(id);
             if (picture == null)
                 return new HttpStatusCodeResult(HttpStatusCode.NotFound);
 
@@ -577,7 +577,7 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("Pictures/{id}/Preview")]
         public ActionResult Preview(int id, string size = PictureStorageConstants.PreviewSizeMedium)
         {
-            var picture = db.Picture.Find(id);
+            var picture = FindPictureWithOwner(id);
             if (picture == null)
                 return new HttpStatusCodeResult(HttpStatusCode.NotFound);
 
@@ -652,6 +652,14 @@ namespace _3dsGallery.WebUI.Controllers
         private PictureAssetUrlResolver CreatePictureUrlResolver()
         {
             return new PictureAssetUrlResolver(AppDomain.CurrentDomain.BaseDirectory);
+        }
+
+        private Picture FindPictureWithOwner(int id)
+        {
+            return db.Picture
+                .Include(x => x.Gallery)
+                .Include(x => x.Gallery.User)
+                .FirstOrDefault(x => x.id == id);
         }
 
         private void DeleteLocalFiles(Picture picture)

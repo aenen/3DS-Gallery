@@ -158,11 +158,11 @@ namespace _3dsGallery.WebUI.Code
 
             if (!transformations.Any(x => string.Equals(x, "orig-true", StringComparison.OrdinalIgnoreCase)))
                 transformations.Insert(0, "orig-true");
-            else
-                transformations = transformations
-                    .GroupBy(x => x, StringComparer.OrdinalIgnoreCase)
-                    .Select(x => x.First())
-                    .ToList();
+
+            transformations = transformations
+                .GroupBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .Select(x => x.First())
+                .ToList();
 
             var rebuilt = new List<string>();
             if (transformations.Any())

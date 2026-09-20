@@ -127,7 +127,7 @@ namespace _3dsGallery.WebUI.Controllers
                 return View(model);
 
             Picture lastPicture = null;
-            var pictureSaver = new PictureSaver(AppDomain.CurrentDomain.BaseDirectory);
+            var pictureSaver = CreatePictureSaver();
             var uploadErrors = new List<string>();
             foreach (var f in files)
             {
@@ -353,6 +353,11 @@ namespace _3dsGallery.WebUI.Controllers
             var thumbMediumPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture", picture.id + "-thumb_md.JPG");
             if (System.IO.File.Exists(thumbMediumPath))
                 System.IO.File.Delete(thumbMediumPath);
+        }
+
+        private PictureSaver CreatePictureSaver()
+        {
+            return new PictureSaver(AppDomain.CurrentDomain.BaseDirectory);
         }
 
         protected override void Dispose(bool disposing)
