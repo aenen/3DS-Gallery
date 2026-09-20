@@ -305,7 +305,17 @@ namespace _3dsGallery.WebUI.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             Gallery gallery = db.Gallery.FirstOrDefault(x => x.id == id);
-            foreach (var item in gallery.Picture.ToList())
+            var pictures = gallery.Picture.ToList();
+            foreach (var item in pictures)
+            {
+                item.StorageMigrationStatus = PictureStorageConstants.MigrationStatusDeletePending;
+                db.Entry(item).State = EntityState.Modified;
+            }
+            gallery.LastPicture = null;
+            db.Entry(gallery).State = EntityState.Modified;
+            db.SaveChanges();
+
+            foreach (var item in pictures)
             {
                 try
                 {

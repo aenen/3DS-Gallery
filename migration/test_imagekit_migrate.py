@@ -139,6 +139,16 @@ class MigrationRunnerTests(unittest.TestCase):
         ])
         self.assertEqual(result["dry_run"], 1)
 
+    def test_duplicate_ids_across_batches_are_deduplicated(self):
+        journal = Journal(self.output / "journal.jsonl")
+        client = FakeStorageClient()
+        runner = MigrationRunner(client, self.root, journal, self.output, True, 2, 1)
+        result = runner.run([
+            ManifestRow(1, 2, "Picture/1.MPO", "3D"),
+            ManifestRow(1, 2, "Picture/1.MPO", "3D"),
+        ])
+        self.assertEqual(result["dry_run"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

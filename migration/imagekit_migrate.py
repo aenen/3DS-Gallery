@@ -161,8 +161,8 @@ class MigrationRunner:
 
     def run(self, manifest_rows: List[ManifestRow]) -> Dict[str, int]:
         counts = {"success": 0, "skipped": 0, "missing": 0, "error": 0, "dry_run": 0}
+        manifest_rows = dedupe_manifest_rows(manifest_rows)
         for chunk_index, chunk in enumerate(chunked(manifest_rows, self.batch_size), start=1):
-            chunk = dedupe_manifest_rows(chunk)
             with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
                 futures = [executor.submit(self.process_row, row) for row in chunk]
                 results = [future.result() for future in futures]

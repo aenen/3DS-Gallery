@@ -37,6 +37,8 @@ namespace _3dsGallery.WebUI.Code
 
             if (string.Equals(picture.StorageMigrationStatus, PictureStorageConstants.MigrationStatusRemotePending, StringComparison.OrdinalIgnoreCase))
                 return false;
+            if (string.Equals(picture.StorageMigrationStatus, PictureStorageConstants.MigrationStatusDeletePending, StringComparison.OrdinalIgnoreCase))
+                return false;
 
             return true;
         }
