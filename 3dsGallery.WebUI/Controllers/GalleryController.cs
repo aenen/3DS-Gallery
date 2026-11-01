@@ -78,6 +78,7 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("{id}/AddPicture")]
         public ActionResult AddPicture(short? id)
         {
+                return RedirectToAction("Index", "Home");
             if (id == null || !IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
@@ -92,6 +93,7 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("{id}/AddPicture")]
         public ActionResult AddPicture(AddPictureModel model, short id, IEnumerable<HttpPostedFileBase> file, string action)
         {
+                return RedirectToAction("Index", "Home");
             if (!IsItMine(id))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
