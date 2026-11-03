@@ -184,9 +184,10 @@ $(".preview-container-md .menu").not("[data-init]").each(function () {
         var author = $parent.attr("data-author");
         var galleryId = $parent.attr("data-id-gallery");
         var picPath = $parent.attr("data-pic-path");
-
-        var lowerPath = picPath.toLowerCase();
-        var isMpo = lowerPath.indexOf(".mpo") === lowerPath.length - 4;
+        var mpoPath = $parent.attr("data-mpo-path");
+        var is3d = $parent.attr("data-is-3d") === "true";
+        var picId = $parent.closest(".thumbnail").attr("data-id");
+        var hasMpo = !!mpoPath;
 
         var html = '<div class="menu-items">\
             <div class="item">\
@@ -202,7 +203,7 @@ $(".preview-container-md .menu").not("[data-init]").each(function () {
 
         if (!@is3ds) {
             html += '<div class="item download-jpg">Download as .<b>JPG</b></div>';
-            if (isMpo) {
+            if (hasMpo) {
                 html += '<div class="item download-mpo">Download as .<b class="text-3ds-red">M</b><b class="text-3ds-dark">PO</b></div>';
             }
         }
@@ -215,10 +216,9 @@ $(".preview-container-md .menu").not("[data-init]").each(function () {
 
         if (!@is3ds) {
             $menuItems.find(".download-jpg").click(function () {
-                var downloadPath = isMpo ? picPath.replace(/\.mpo$/i, ".jpg") : picPath;
                 var link = document.createElement("a");
-                link.href = "@Url.Content("~")" + downloadPath;
-                link.download = downloadPath.substring(downloadPath.lastIndexOf("/") + 1);
+                link.href = picPath;
+                link.download = picId + ".jpg";
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -226,8 +226,8 @@ $(".preview-container-md .menu").not("[data-init]").each(function () {
 
             $menuItems.find(".download-mpo").click(function () {
                 var link = document.createElement("a");
-                link.href = "@Url.Content("~")" + picPath;
-                link.download = picPath.substring(picPath.lastIndexOf("/") + 1);
+                link.href = mpoPath;
+                link.download = picId + ".mpo";
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);

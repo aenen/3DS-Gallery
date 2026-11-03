@@ -1,4 +1,7 @@
 ﻿@model IEnumerable<_3dsGallery.WebUI.Models.GalleryModel>
+@{
+    var cloudinary = new _3dsGallery.WebUI.Code.CloudinaryService();
+}
 
 @foreach (var gallery in Model)
 {
@@ -26,11 +29,8 @@
                     foreach (var picturePreview in gallery.PicturePreviewList)
                     {
                         <div class="preview-container-sm">
-                            <a target="_blank" href="~/@picturePreview.Path">
-                                @{
-                                    string preview_sm = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{picturePreview.IdPicture}-thumb_sm.JPG") ? $"/Picture/{picturePreview.IdPicture}-thumb_sm.JPG" : $"/Picture/{picturePreview.IdPicture}.JPG";
-                                }
-                                <img class="img-thumbnail preview-img " src="@preview_sm">
+                            <a target="_blank" href="@cloudinary.GetImageUrl(picturePreview.Path)">
+                                <img class="img-thumbnail preview-img " src="@cloudinary.GetThumbnailUrl(picturePreview.Path, 155, 97)">
                             </a>
                         </div>
                         counter--;

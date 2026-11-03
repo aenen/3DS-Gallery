@@ -13,27 +13,106 @@ namespace _3dsGallery.WebUI.Code
 {
     public class PictureSaver
     {
-        private readonly string picture_folder;
+        private const string OriginalMpoSuffix = "_mpo";
+        private readonly ICloudinaryService _cloudinary;
 
-        public PictureSaver(string picture_folder)
+        public PictureSaver(ICloudinaryService cloudinary)
         {
-            this.picture_folder = picture_folder;
+            _cloudinary = cloudinary;
         }
 
-        // This method merges two images side-by-side and returns the result as a byte array
-        public byte[] GenerateSideBySideImage(string filePath)
+        /// <summary>
+        /// Downloads the left-eye and right-eye images for a 3D picture from Cloudinary
+        /// (stored as public_id and public_id+"_r"), merges them side-by-side and returns
+        /// the result as a JPEG byte array.
+        /// </summary>
+        public byte[] GenerateSideBySideImage(string publicId)
         {
-            var images = MpoParser.GetImageSources(Path.Combine(picture_folder, filePath)).ToList();
-            if (images == null || images.Count < 2)
-                throw new InvalidOperationException("Need at least two images to merge.");
+            var leftBytes  = _cloudinary.Download(_cloudinary.GetImageUrl(publicId));
+            var rightBytes = _cloudinary.Download(_cloudinary.GetImageUrl(publicId + "_r"));
 
-            var img1 = images[0];
-            var img2 = images[1];
+            // Image.FromStream requires the underlying stream to remain open for the lifetime
+            // of the Image; keep both MemoryStreams alive until MergeSideBySide completes.
+            using (var ms1 = new MemoryStream(leftBytes))
+            using (var ms2 = new MemoryStream(rightBytes))
+            {
+                using (var img1 = Image.FromStream(ms1))
+                using (var img2 = Image.FromStream(ms2))
+                {
+                    return MergeSideBySide(img1, img2);
+                }
+            }
+        }
 
+        public static string GetOriginalMpoPublicId(string publicId)
+            => publicId + OriginalMpoSuffix;
+
+        public Picture AnalyzeAndSave(Picture picture, AddPictureModel model, HttpPostedFileBase file)
+        {
+            // Read uploaded file into memory so we can work with it without touching disk
+            byte[] fileBytes;
+            using (var ms = new MemoryStream())
+            {
+                file.InputStream.CopyTo(ms);
+                fileBytes = ms.ToArray();
+            }
+
+            string publicId = $"Picture/{picture.id}";
+            var mpoImages = MpoParser.GetImageSources(fileBytes).ToList();
+            try
+            {
+                // Determine whether this is a 3D (MPO) file by attempting to parse its stereo frames
+                bool is3D = mpoImages.Count >= 2;
+
+                if (!is3D)
+                {
+                    // 2D: upload the file as-is
+                    using (var ms = new MemoryStream(fileBytes))
+                    using (var tempImg = Image.FromStream(ms))
+                    using (var imgForDisplay = new Bitmap(tempImg))
+                    {
+                        picture.type = "2D";
+                        _cloudinary.Upload(ImageToJpegBytes(imgForDisplay), publicId);
+                    }
+                }
+                else
+                {
+                    // 3D / MPO
+                    if (model.isAdvanced && model.isTo2d)
+                    {
+                        // Save only one eye as a 2D image
+                        picture.type = "2D";
+                        _cloudinary.Upload(ImageToJpegBytes(mpoImages.ElementAt(model.leftOrRight)), publicId);
+                    }
+                    else
+                    {
+                        // Upload left eye as main, right eye as publicId+"_r"
+                        picture.type = "3D";
+                        _cloudinary.UploadRaw(fileBytes, GetOriginalMpoPublicId(publicId), $"{picture.id}.mpo", "application/octet-stream");
+                        _cloudinary.Upload(ImageToJpegBytes(mpoImages[0]), publicId);
+                        _cloudinary.Upload(ImageToJpegBytes(mpoImages[1]), publicId + "_r");
+                    }
+                }
+
+                // Store the Cloudinary public_id in the path column
+                picture.path = publicId;
+
+                return picture;
+            }
+            finally
+            {
+                foreach (var mpoImage in mpoImages)
+                    mpoImage.Dispose();
+            }
+        }
+
+        // ── helpers ────────────────────────────────────────────────────────────
+
+        private static byte[] MergeSideBySide(Image img1, Image img2)
+        {
             int targetHeight = Math.Min(img1.Height, img2.Height);
             float scale1 = (float)targetHeight / img1.Height;
             float scale2 = (float)targetHeight / img2.Height;
-
             int width1 = (int)(img1.Width * scale1);
             int width2 = (int)(img2.Width * scale2);
 
@@ -49,73 +128,15 @@ namespace _3dsGallery.WebUI.Code
                     return ms.ToArray();
                 }
             }
-
         }
 
-
-        public Picture AnalyzeAndSave(Picture picture, AddPictureModel model, HttpPostedFileBase file)
+        private static byte[] ImageToJpegBytes(Image image)
         {
-            // зберігаю зображення
-            string picture_name = picture.id.ToString() + Path.GetExtension(file.FileName);
-            string picture_folder_name = Path.Combine(picture_folder, picture_name);
-            file.SaveAs(picture_folder_name);
-
-            picture.path = Path.Combine("Picture", picture_name); // записую відносний шлях в обєкт бази даних
-
-            // отримую всі зображення з файлу
-            var images = MpoParser.GetImageSources(picture_folder_name);
-            Image img_for_thumb;
-            if (!images.Any()) // якщо 2D
+            using (var ms = new MemoryStream())
             {
-                using (var fs = new FileStream(picture_folder_name, FileMode.Open, FileAccess.Read))
-                using (var tempImg = Image.FromStream(fs))
-                {
-                    img_for_thumb = new Bitmap(tempImg);
-                }
-                picture.type = "2D";
+                image.Save(ms, ImageFormat.Jpeg);
+                return ms.ToArray();
             }
-            else // якщо 3D
-            {
-                if (model.isAdvanced && model.isTo2d) // якщо юзер хоче зберегти 3D зображення в 2D
-                {
-                    img_for_thumb = images.ElementAt(model.leftOrRight);
-                    picture_name = Path.ChangeExtension(picture_name, ".JPG");
-                    picture.type = "2D";
-                    System.IO.File.Delete(picture_folder_name); // видаляю непотрібний файл
-                }
-                else
-                {
-                    img_for_thumb = images.ElementAt(0); // беру перше зображення (з лівої камери)
-
-                    // змінюю формат оригіналу на .mpo (на сервер заавжди приходить зображення формату JPG)
-                    picture_name = Path.ChangeExtension(picture_name, ".MPO");
-                    file.SaveAs(Path.Combine(picture_folder, picture_name));
-                    picture.type = "3D";
-                }
-                img_for_thumb.Save(Path.ChangeExtension(picture_folder_name, ".JPG")); // зберігаю зображення, з якого буду робити прев'ю
-                picture.path = Path.Combine("Picture", picture_name);
-            }
-
-            var original_length = PictureTools.GetByteSize(img_for_thumb).LongLength;
-            // створюю прев'ю
-            var thumb_sm = PictureTools.MakeThumbnail(img_for_thumb, 155, 97);
-            var thumb_sm_length = PictureTools.GetByteSize(thumb_sm).LongLength;
-            if (original_length > thumb_sm_length)
-            {
-                thumb_sm.Save($"{picture_folder}/{picture.id}-thumb_sm.JPG");
-            }
-
-            var thumb_md = PictureTools.MakeThumbnail(img_for_thumb, 280, 999);
-            var thumb_md_length = PictureTools.GetByteSize(thumb_md).LongLength;
-            if (original_length > thumb_md_length)
-            {
-                thumb_md.Save($"{picture_folder}/{picture.id}-thumb_md.JPG");
-                if (Path.GetExtension(picture.path) == ".MPO")
-                    System.IO.File.Delete(picture_folder_name); // видаляю непотрібний файл
-            }
-
-            return picture;
-
         }
     }
 }
