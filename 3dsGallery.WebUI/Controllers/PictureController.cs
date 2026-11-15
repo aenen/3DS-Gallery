@@ -82,7 +82,6 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("AddPicture")]
         public ActionResult AddPicture()
         {
-                return RedirectToAction("Index", "Home");
             var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
             if (user == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -99,7 +98,6 @@ namespace _3dsGallery.WebUI.Controllers
         [Route("AddPicture")]
         public ActionResult AddPicture(AddPictureModel model, IEnumerable<HttpPostedFileBase> file, string action)
         {
-                return RedirectToAction("Index", "Home");
             var user = db.User.FirstOrDefault(x => x.login == User.Identity.Name);
             if (user == null || !IsItMineGallery(model.galleryId))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
