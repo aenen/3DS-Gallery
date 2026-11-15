@@ -90,9 +90,9 @@ namespace _3dsGallery.WebUI.Code
                 switch (size)
                 {
                     case PictureStorageConstants.PreviewSizeMedium:
-                        return BuildRemoteStoredPath(string.Format("Picture/{0}.JPG?tr=w-266,h-160", picture.id));
+                        return BuildRemoteStoredPath(string.Format("Picture/{0}.{1}?tr=w-266,h-160", picture.id, picture.type == "3D"? "MPO" : "JPG"));
                     case PictureStorageConstants.PreviewSizeSmall:
-                        return BuildRemoteStoredPath(string.Format("Picture/{0}.JPG?tr=w-145,h-87", picture.id));
+                        return BuildRemoteStoredPath(string.Format("Picture/{0}.{1}?tr=w-145,h-87", picture.id, picture.type == "3D" ? "MPO" : "JPG"));
                 }
             }
 
