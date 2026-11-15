@@ -111,7 +111,7 @@ namespace _3dsGallery.WebUI.Code
 
             var boundary = "----ImageKitBoundary" + Guid.NewGuid().ToString("N");
             var requestBody = BuildMultipartBody(boundary, fileBytes, fileName, folderPath, contentType);
-            var responseText = ExecuteWithRetry("upload", fileName, delegate()
+            var responseText = ExecuteWithRetry("upload", fileName, delegate ()
             {
                 var request = CreateRequest("https://upload.imagekit.io/api/v1/files/upload", "POST", "multipart/form-data; boundary=" + boundary);
                 using (var stream = request.GetRequestStream())
@@ -144,7 +144,7 @@ namespace _3dsGallery.WebUI.Code
 
             try
             {
-                ExecuteWithRetry("delete", fileId, delegate()
+                ExecuteWithRetry("delete", fileId, delegate ()
                 {
                     var request = CreateRequest("https://api.imagekit.io/v1/files/" + Uri.EscapeDataString(fileId), "DELETE", null);
                     return ReadResponse(request);
@@ -176,7 +176,7 @@ namespace _3dsGallery.WebUI.Code
             if (string.IsNullOrWhiteSpace(absoluteUrl))
                 throw new ArgumentException("ImageKit download requires a URL.", "absoluteUrl");
 
-            return ExecuteWithRetry("download", absoluteUrl, delegate()
+            return ExecuteWithRetry("download", absoluteUrl, delegate ()
             {
                 var request = (HttpWebRequest)WebRequest.Create(absoluteUrl);
                 request.Method = "GET";
@@ -229,7 +229,7 @@ namespace _3dsGallery.WebUI.Code
                 Uri.EscapeDataString(folderPath),
                 Uri.EscapeDataString(fileName));
 
-            var responseText = ExecuteWithRetry("search", normalizedPath, delegate()
+            var responseText = ExecuteWithRetry("search", normalizedPath, delegate ()
             {
                 var request = CreateRequest(requestUrl, "GET", null);
                 return ReadResponse(request);
@@ -255,6 +255,9 @@ namespace _3dsGallery.WebUI.Code
 
         private HttpWebRequest CreateRequest(string url, string method, string contentType)
         {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 |
+                SecurityProtocolType.Tls11 |
+                SecurityProtocolType.Tls;
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = method;
             request.Timeout = _configuration.TimeoutSeconds * 1000;

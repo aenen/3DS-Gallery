@@ -80,10 +80,21 @@ namespace _3dsGallery.WebUI.Code
             return picture == null ? null : BuildRemoteStoredPath(picture.path);
         }
 
-        public string GetRemotePreviewPath(Picture picture)
+        public string GetRemotePreviewPath(Picture picture, string size = null)
         {
             if (picture == null)
                 return null;
+
+            if(size != null)
+            {
+                switch (size)
+                {
+                    case PictureStorageConstants.PreviewSizeMedium:
+                        return BuildRemoteStoredPath(string.Format("Picture/{0}.JPG?tr=w-266,h-160", picture.id));
+                    case PictureStorageConstants.PreviewSizeSmall:
+                        return BuildRemoteStoredPath(string.Format("Picture/{0}.JPG?tr=w-145,h-87", picture.id));
+                }
+            }
 
             if (string.Equals(picture.type, "3D", StringComparison.OrdinalIgnoreCase))
                 return BuildRemoteStoredPath(string.Format("Picture/{0}.JPG", picture.id));
@@ -174,7 +185,7 @@ namespace _3dsGallery.WebUI.Code
 
         private string BuildRemotePreviewUrl(Picture picture, string size)
         {
-            var remotePath = GetRemotePreviewPath(picture);
+            var remotePath = GetRemotePreviewPath(picture, size);
             return BuildDeliveryUrl(remotePath);
         }
 
