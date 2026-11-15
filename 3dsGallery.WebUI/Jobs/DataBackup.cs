@@ -9,6 +9,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace _3dsGallery.WebUI.Jobs
 {
@@ -19,26 +20,38 @@ namespace _3dsGallery.WebUI.Jobs
             using (var db = new GalleryContext())
             {
                 var numberOfPicturesToUpload = Convert.ToInt32(ConfigurationManager.AppSettings["NumberOfPicturesToUpload"].ToString());
-                var pictureToProcessList = db.Picture.Where(x => !x.IsBackupCopySaved).OrderBy(x => x.CreationDate).Take(numberOfPicturesToUpload).ToList();
-                if (pictureToProcessList.Count == 0)
+                var googleDriveManager = new GoogleDriveManager();
+                UploadDatabaseBackupScript(googleDriveManager);
+
+                var pictureDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture");
+                if (!Directory.Exists(pictureDirectory))
                     return;
 
-                var googleDriveManager = new GoogleDriveManager();
+                var pictureToProcessList = db.Picture
+                    .Where(x => !x.IsBackupCopySaved)
+                    .OrderBy(x => x.CreationDate)
+                    .Take(numberOfPicturesToUpload)
+                    .ToList();
 
                 foreach (var pictureToProcess in pictureToProcessList)
                 {
-                    var regex = new Regex($"^{pictureToProcess.id}[.-]");
-                    var picturePathList = Directory.GetFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Picture"))
-                                         .Where(x => regex.IsMatch(Path.GetFileName(x)))
-                                         .ToList();
+                    var picturePathList = GetLocalAssetPaths(pictureDirectory, pictureToProcess.id);
+                    if (picturePathList.Count == 0)
+                        continue;
 
                     picturePathList.ForEach(x => googleDriveManager.Upload(x));
                     pictureToProcess.IsBackupCopySaved = true;
                     db.SaveChanges();
                 }
-
-                UploadDatabaseBackupScript(googleDriveManager);
             }
+        }
+
+        private static List<string> GetLocalAssetPaths(string pictureDirectory, int pictureId)
+        {
+            var regex = new Regex(string.Format("^{0}[.-]", pictureId));
+            return Directory.GetFiles(pictureDirectory)
+                .Where(x => regex.IsMatch(Path.GetFileName(x)))
+                .ToList();
         }
 
         private void UploadDatabaseBackupScript(GoogleDriveManager googleDriveManager)

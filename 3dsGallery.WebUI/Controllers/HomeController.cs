@@ -21,7 +21,8 @@ namespace _3dsGallery.WebUI.Controllers
 
             var model = new HomePageModel();
             var homePageGalleryList = db.Gallery
-                .Where(x => x.LastPicture != null && (!x.IsPrivate || (x.IsPrivate && x.User.login == User.Identity.Name)))
+                .Where(x => x.LastPicture != null
+                    && (!x.IsPrivate || (x.IsPrivate && x.User.login == User.Identity.Name)))
                 .OrderByDescending(x => x.LastPicture.id)
                 .Take(galleryCount);
             var homePagePictureList = db.Picture
@@ -36,7 +37,7 @@ namespace _3dsGallery.WebUI.Controllers
                 ColorThemeClass = gallery.Style.value,
                 CreatedBy = gallery.User.login,
                 Is3D = gallery.Picture.Any(pic => pic.type == "3D"),
-                PictureTotalCount = gallery.Picture.Count,
+                PictureTotalCount = gallery.Picture.Count(),
                 PicturePreviewList = gallery.Picture.OrderByDescending(x => x.id).Take(2).Select(pic => new GalleryPicturePreview
                 {
                     IdPicture = pic.id,
@@ -60,8 +61,8 @@ namespace _3dsGallery.WebUI.Controllers
             }).ToList();
 
             model.TotalGalleryCount = db.Gallery.Where(x=>!x.IsPrivate).Count();
-            model.TotalImageCount = db.Picture.Where(x=>!x.Gallery.IsPrivate).Count();
-            model.Total3DImageCount = db.Picture.Where(x=>!x.Gallery.IsPrivate && x.type == "3D").Count();
+            model.TotalImageCount = db.Picture.Where(x => !x.Gallery.IsPrivate).Count();
+            model.Total3DImageCount = db.Picture.Where(x => !x.Gallery.IsPrivate && x.type == "3D").Count();
 
             int totalStyleCount = db.Style.Count();
             Random rand = new Random();

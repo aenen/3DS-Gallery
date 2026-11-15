@@ -11,12 +11,9 @@
     <div class="col-lg-3 col-md-4 col-sm-6">
         <div>
             <div class="thumbnail" data-id="@itemPic.IdPicture">
-                <div class="preview-container-md style-@itemPic.ColorThemeClass" data-style="@itemPic.ColorThemeClass" data-author="@itemPic.CreatedBy" data-id-gallery="@itemPic.IdGallery" data-pic-path="@itemPic.Path">
-                    <a target="_blank" href="~/@itemPic.Path">
-                        @{
-                            string preview_md = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{itemPic.IdPicture}-thumb_md.JPG") ? $"/Picture/{itemPic.IdPicture}-thumb_md.JPG" : $"/Picture/{itemPic.IdPicture}.JPG";
-                        }
-                        <img class="preview-img" src="@preview_md" />
+                <div class="preview-container-md style-@itemPic.ColorThemeClass" data-style="@itemPic.ColorThemeClass" data-author="@itemPic.CreatedBy" data-id-gallery="@itemPic.IdGallery" data-pic-path="@Url.Action("Preview", "Picture", new { id = itemPic.IdPicture, size = "full" })" data-mpo-path="@(itemPic.Is3D ? Url.Action("OpenOriginal", "Picture", new { id = itemPic.IdPicture }) : string.Empty)" data-is-3d="@(itemPic.Is3D ? "true" : "false")">
+                    <a target="_blank" href="@Url.Action("OpenOriginal", "Picture", new { id = itemPic.IdPicture })">
+                        <img class="preview-img" src="@Url.Action("Preview", "Picture", new { id = itemPic.IdPicture, size = "md" })" />
                     </a>
                     @{
                         if (isOwner)

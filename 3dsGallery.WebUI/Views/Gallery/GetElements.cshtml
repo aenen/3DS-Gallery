@@ -11,7 +11,7 @@
                 {
                         <span class="badge">3D</span>
                     }
-                    <span class="badge">@itemGal.Picture.Count</span>
+                    <span class="badge">@itemGal.Picture.Count()</span>
                 </div>
                 <div class="one-line">
                     @if (itemGal.User.login == User.Identity.Name)
@@ -28,11 +28,8 @@
                     foreach (var pv in previews)
                     {
                         <div class="preview-container-sm">
-                            <a target="_blank" href="~/@pv.path">
-                                @{
-                                    string preview_sm = System.IO.File.Exists($"{Server.MapPath("~")}Picture/{pv.id}-thumb_sm.JPG") ? $"/Picture/{pv.id}-thumb_sm.JPG" : $"/Picture/{pv.id}.JPG";
-                                }
-                                <img class="img-thumbnail preview-img " src="@preview_sm">
+                            <a target="_blank" href="@Url.Action("OpenOriginal", "Picture", new { id = pv.id })">
+                                <img class="img-thumbnail preview-img " src="@Url.Action("Preview", "Picture", new { id = pv.id, size = "sm" })">
                             </a>
                         </div>
                                         counter--;
